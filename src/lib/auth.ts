@@ -9,9 +9,11 @@ export type AuthUser = {
 export type AuthSession = {
   user: AuthUser
   createdAt: number
+  expiresAt: number
 }
 
 const STORAGE_KEY = 'lia.auth.session.v1'
+const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30 // 30 dias
 
 type AuthListener = (session: AuthSession | null) => void
 
@@ -36,10 +38,13 @@ function safeParseSession(raw: string | null): AuthSession | null {
     if (typeof u.displayName !== 'string') return null
     if (typeof obj.createdAt !== 'number' || !Number.isFinite(obj.createdAt))
       return null
+    if (typeof obj.expiresAt !== 'number' || !Number.isFinite(obj.expiresAt))
+      return null
 
     return {
       user: { id: u.id, email: u.email, displayName: u.displayName },
       createdAt: obj.createdAt,
+      expiresAt: obj.expiresAt,
     }
   } catch {
     // ignore
@@ -49,7 +54,14 @@ function safeParseSession(raw: string | null): AuthSession | null {
 
 export function getSession(): AuthSession | null {
   try {
-    return safeParseSession(localStorage.getItem(STORAGE_KEY))
+    const session = safeParseSession(localStorage.getItem(STORAGE_KEY))
+    if (!session) return null
+    if (session.expiresAt <= Date.now()) {
+      // Expirada → limpa e força login, notificando subscribers.
+      setSession(null)
+      return null
+    }
+    return session
   } catch {
     return memorySession
   }
@@ -86,10 +98,12 @@ export async function signInLocal(options?: {
 }): Promise<AuthSession> {
   const email = options?.email?.trim() || 'lia@local'
   const displayName = options?.displayName?.trim() || 'LIA'
+  const now = Date.now()
 
   const session: AuthSession = {
     user: { id: stableUserId(), email, displayName },
-    createdAt: Date.now(),
+    createdAt: now,
+    expiresAt: now + SESSION_TTL_MS,
   }
 
   setSession(session)

@@ -36,6 +36,19 @@ describe('auth (local)', () => {
     await signOut()
     expect(getSession()).toBeNull()
   })
+
+  it('getSession retorna null quando sessão está expirada', async () => {
+    // sessão expirada manualmente no storage
+    localStorage.setItem(
+      'lia.auth.session.v1',
+      JSON.stringify({
+        user: { id: 'lia', email: 'lia@local', displayName: 'LIA' },
+        createdAt: Date.now() - 1000,
+        expiresAt: Date.now() - 1,
+      }),
+    )
+    expect(getSession()).toBeNull()
+  })
 })
 
 

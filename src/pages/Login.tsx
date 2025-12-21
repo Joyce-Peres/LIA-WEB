@@ -1,12 +1,17 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { signInLocal } from '@/lib/auth'
+import { getSession, signInLocal } from '@/lib/auth'
 import { useNavigate } from 'react-router-dom'
 
 export function LoginPage() {
   const navigate = useNavigate()
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    const session = getSession()
+    if (session) navigate('/dashboard', { replace: true })
+  }, [navigate])
 
   async function handleLoginWithGoogle() {
     setError(null)

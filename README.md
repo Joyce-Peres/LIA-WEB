@@ -70,7 +70,6 @@ O aplicativo estará disponível em `http://localhost:5173`
 
 > Nota: este repositório está em fase inicial (setup). As funcionalidades abaixo serão entregues ao longo das próximas stories/épicos.
 
-- ⏳ Autenticação com Google via Supabase
 - ✅ Autenticação local (sem serviços externos)
 - ⏳ Reconhecimento de gestos em tempo real
 - ⏳ Sistema gamificado (XP, badges, streaks)

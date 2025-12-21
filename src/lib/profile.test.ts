@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest'
 
-import { ensureProfile, getProfile } from './profile'
+import { ensureProfile, getProfile, updateProfile } from './profile'
 
 function installLocalStorage() {
   const store = new Map<string, string>()
@@ -44,6 +44,13 @@ describe('profile', () => {
   it('getProfile retorna null para JSON inválido', () => {
     localStorage.setItem('lia.profile.v1.lia', '{bad json')
     expect(getProfile('lia')).toBeNull()
+  })
+
+  it('updateProfile persiste alterações no storage', () => {
+    ensureProfile('lia')
+    const next = updateProfile('lia', (p) => ({ ...p, totalXp: p.totalXp + 10 }))
+    expect(next.totalXp).toBe(10)
+    expect(getProfile('lia')?.totalXp).toBe(10)
   })
 })
 
