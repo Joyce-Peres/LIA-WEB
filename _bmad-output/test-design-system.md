@@ -14,19 +14,19 @@
 **Architecture Overview:**
 - **Type:** Progressive Web App (PWA) with Backend-as-a-Service (BaaS)
 - **AI Processing:** 100% edge computing (browser-based)
-- **Backend:** Supabase (PostgreSQL, Auth, Storage)
+- **Backend:** None (MVP local-only; browser storage)
 - **Frontend:** React 18 + TypeScript + Vite
 - **ML Stack:** TensorFlow.js + MediaPipe Hands
 
 **Testability Assessment Summary:**
-- **Controllability:** ⚠️ CONCERNS (MediaPipe/TF.js require real hardware, Supabase mocking needed)
-- **Observability:** ✅ PASS (Repository pattern enables logging, browser DevTools available)
+- **Controllability:** ⚠️ CONCERNS (MediaPipe/TF.js require real hardware; storage local precisa de estratégia de reset/isolamento)
+- **Observability:** ✅ PASS (logs no cliente + browser DevTools)
 - **Reliability:** ⚠️ CONCERNS (Browser-based ML introduces flakiness, requires deterministic test data)
 
 **Critical Testability Concerns:**
 1. MediaPipe Hands requires real camera/webcam (cannot be mocked easily)
 2. TensorFlow.js model inference is non-deterministic (floating-point precision)
-3. Supabase integration requires test database or mocking strategy
+3. Persistência local exige estratégia de isolamento/limpeza de storage entre testes (localStorage/IndexedDB)
 4. Performance testing (NF1: <50ms inference) requires real hardware profiling
 
 ---
@@ -38,7 +38,7 @@
 **Assessment:** System state can be controlled for most components, but AI pipeline presents challenges.
 
 **Strengths:**
-- ✅ **Repository Pattern:** Supabase calls encapsulated in `/lib/supabase.ts` → easily mockable
+- ✅ **Camada local encapsulada:** Sessão/persistência em utilitários em `/src/lib/*` → facilmente mockável
 - ✅ **Functional Pipeline:** AI pipeline uses pure functions (normalize → buffer → predict) → testable in isolation
 - ✅ **Custom Hooks:** `useCamera`, `useHandPose` isolated → can be tested with dependency injection
 - ✅ **Event-Driven:** Custom events (`gestureRecognized`) enable decoupled testing
@@ -50,30 +50,29 @@
 - ⚠️ **TensorFlow.js Model:** Model loading and inference require actual model files → test environment must include `/public/models`
   - **Mitigation:** Use lightweight test model or mock inference results for unit tests
   - **Recommendation:** Separate model loading from inference logic for testability
-- ⚠️ **Supabase Integration:** Requires test database or comprehensive mocking
-  - **Mitigation:** Use Supabase Local Dev or test project for integration tests
-  - **Recommendation:** Implement repository pattern with interface for easy mocking
+- ⚠️ **Backend remoto (opcional/futuro):** Se um BaaS for adotado futuramente, testes de integração exigirão ambiente dedicado ou mocks
+  - **Mitigation:** manter camada de persistência com interface para mocking
+  - **Recommendation:** tratar integração remota como opcional e isolada do core
 
 **Recommendations:**
 1. Create test fixtures: Pre-recorded video frames for MediaPipe testing
 2. Implement dependency injection for `useHandPose` (accept MediaPipe/TF.js instances)
-3. Use Supabase Local Dev or test project for integration tests
+3. Padronizar helpers para reset de storage (localStorage/IndexedDB) em testes
 4. Mock `getUserMedia` API in Playwright tests
 
 ### Observability: ✅ PASS
 
 **Assessment:** System state can be inspected and validated effectively.
 
-**Strengths:**
 - ✅ **Browser DevTools:** Full access to console, network, performance profiling
-- ✅ **Repository Pattern:** All Supabase calls logged → easy to trace data flow
+- ✅ **Logs no cliente:** Estado e persistência local podem ser inspecionados via DevTools
 - ✅ **Functional Pipeline:** Pure functions enable step-by-step inspection
 - ✅ **Custom Events:** `gestureRecognized` events can be monitored in tests
 - ✅ **InferenceLog Interface:** Architecture defines logging structure for performance metrics
 
 **Validation Capabilities:**
 - ✅ **State Inspection:** React DevTools for component state, Redux DevTools for global state
-- ✅ **Network Monitoring:** Playwright network interception for Supabase API calls
+- ✅ **Network Monitoring:** Playwright pode validar ausência de chamadas externas indesejadas
 - ✅ **Performance Metrics:** Browser Performance API for inference timing
 - ✅ **Error Tracking:** Console errors, network failures, model loading errors
 
@@ -88,9 +87,9 @@
 
 **Strengths:**
 - ✅ **Stateless Components:** React components are stateless by design → parallel-safe
-- ✅ **Repository Pattern:** Supabase calls are stateless (no shared state) → parallel-safe
+- ✅ **Persistência controlável:** Storage local pode ser resetado por teste → parallel-safe
 - ✅ **Functional Pipeline:** Pure functions are deterministic (given same input, same output)
-- ✅ **Test Isolation:** Each test can use isolated Supabase test data
+- ✅ **Test Isolation:** Cada teste pode usar storage isolado (contexto/limpeza)
 
 **Concerns:**
 - ⚠️ **TensorFlow.js Inference:** Floating-point operations are non-deterministic across devices
@@ -514,9 +513,9 @@ test('user can practice gesture and see feedback', async ({ page }) => {
 
 ### Low Concerns (Monitor)
 
-1. **Supabase Integration Testing**
-   - **Impact:** Requires test database or comprehensive mocking
-   - **Mitigation:** Use Supabase Local Dev or test project
+1. **Testes de integração (backend opcional/futuro)**
+   - **Impact:** Se integrar um BaaS no futuro, será necessário ambiente dedicado ou mocks
+   - **Mitigation:** manter persistência remota isolada atrás de interface e usar mocks nos testes
    - **Owner:** Dev Team
 
 ---

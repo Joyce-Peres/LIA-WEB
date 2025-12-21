@@ -15,7 +15,7 @@ This document provides the complete epic and story breakdown for LIA Web, decomp
 ### Functional Requirements
 
 **F1 - Sistema de Autenticação e Perfil**
-- F1.1: Login com conta Google via Supabase Auth
+- F1.1: Login local (sem serviços externos), com sessão persistida no navegador
 - F1.2: Perfil do usuário exibindo: nome, foto, XP total, sequência atual (streak)
 - F1.3: Persistência do progresso entre sessões
 
@@ -41,7 +41,7 @@ This document provides the complete epic and story breakdown for LIA Web, decomp
 **F5 - Sistema de Progresso e Persistência**
 - F5.1: Registro automático de lições concluídas e melhor pontuação
 - F5.2: Cálculo de Experiência (XP) e atualização de nível
-- F5.3: Sincronização contínua e segura com o banco de dados Supabase
+- F5.3: Persistência local do progresso no navegador (sem sincronização remota no MVP)
 
 **F6 - Modo Tradutor (Feature Futura)**
 - F6.1: Modo contínuo que traduz sequências de sinais (dactilologia) para texto
@@ -60,7 +60,7 @@ This document provides the complete epic and story breakdown for LIA Web, decomp
 **Critérios de Aceitação de Negócio:**
 - CA1: 90% dos usuários-teste conseguem completar a lição "Letra A" sem instruções externas
 - CA2: O tempo médio de feedback é inferior a 70ms em 95% das execuções (métricas do navegador)
-- CA3: Não suportar modo offline (requer conexão para autenticação e sincronização; processamento de vídeo permanece 100% local)
+- CA3: MVP sem dependência de serviços externos: autenticação e persistência funcionam localmente no navegador; processamento de vídeo permanece 100% local
 
 ### Additional Requirements
 
@@ -69,8 +69,9 @@ This document provides the complete epic and story breakdown for LIA Web, decomp
 **Stack Tecnológica:**
 - Frontend: React 18 + TypeScript + Vite + Tailwind CSS
 - Machine Learning: TensorFlow.js (@tensorflow/tfjs) + MediaPipe Hands (@mediapipe/hands)
-- Backend: Supabase (PostgreSQL com RLS, Auth, Storage) - não desenvolver backend customizado
-- Hospedagem: Vercel (Frontend estático)
+- Backend (MVP): Sem backend (armazenamento local no navegador)
+- Backend (futuro/opcional): BaaS (ex.: Supabase) ou alternativa equivalente, somente se necessário
+- Hospedagem (opcional): qualquer host de arquivos estáticos (ou apenas uso local durante o MVP)
 
 **Estrutura de Diretórios:**
 - /public/models - Modelo TF.js convertido (.json, .bin)
@@ -78,22 +79,19 @@ This document provides the complete epic and story breakdown for LIA Web, decomp
 - /src/components/game - CameraFrame, GestureOverlay, ScoreBoard
 - /src/hooks - useCamera, useHandPose, useAuth
 - /src/services/ai - Lógica pura de IA: normalização, buffer, inferência
-- /src/lib/supabase.ts - Cliente configurado do Supabase
+- /src/lib/auth.ts - Autenticação local (sessão no navegador)
 - /src/types/index.ts - Tipos TypeScript
 - /src/pages - Login, Dashboard, LessonRoom, Profile
 
 **Padrões de Design:**
 - Estado: Context API + useReducer para estado global
 - Hooks Customizados: useCamera, useHandPose para lógica complexa
-- Repository Pattern: Chamadas ao Supabase encapsuladas em /lib/supabase.ts
+- Camada de persistência local: utilitários em `/src/lib/*` para sessão/armazenamento sem acoplar a UI ao storage
 - Eventos Customizados: Comunicação desacoplada entre UI e pipeline de IA
 - Pipeline Funcional: Transformações puras (normalize → buffer → predict → debounce)
 
-**Configuração do Supabase:**
-- Tabelas: profiles, modules, lessons, user_progress
-- RLS (Row Level Security) habilitado
-- Autenticação Google via Supabase Auth
-- Storage para vídeos/imagens de referência
+**Configuração de Backend (Opcional/Futuro):**
+- Se adotado, documentar e integrar um BaaS (ex.: Supabase) apenas após o MVP local estar estável
 
 **Especificações do Pipeline de IA:**
 - Formato de entrada: [1, 30, 126] (batch, timesteps, features)
@@ -104,12 +102,12 @@ This document provides the complete epic and story breakdown for LIA Web, decomp
 - Debounce: Mesma predição por 5 frames consecutivos
 
 **Deploy e DevOps:**
-- Ambiente dev: localhost:5173 (Vite) + Supabase Dev
-- Ambiente prod: Vercel (deploy automático via Git)
-- Variáveis de ambiente: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_APP_VERSION
+- Ambiente dev: localhost:5173 (Vite) — modo local, sem backend
+- Ambiente prod (opcional): deploy estático (ex.: GitHub Pages/Netlify/Vercel), sem dependência obrigatória
+- Variáveis de ambiente: VITE_APP_VERSION
 
 **Decisões Arquiteturais:**
-- NÃO implementar modo offline (requer conexão ativa)
+- MVP sem dependência de serviços externos (offline possível para auth/persistência local)
 - Processamento 100% local (edge computing)
 - Sem backend Node.js customizado
 
@@ -123,7 +121,7 @@ This document provides the complete epic and story breakdown for LIA Web, decomp
 
 ### FR Coverage Map
 
-F1.1: Epic 1 - Login com Google via Supabase Auth
+F1.1: Epic 1 - Login local (sem serviços externos)
 F1.2: Epic 1 - Perfil do usuário exibindo nome, foto, XP total, streak
 F1.3: Epic 1 - Persistência do progresso entre sessões
 F2.1: Epic 3 - Estrutura hierárquica módulos/lições
@@ -141,7 +139,7 @@ F4.3: Epic 5 - Concessão de insígnias (badges) visíveis no perfil
 F4.4: Epic 4 - Feedback visual imediato com overlay na câmera (Verde/Acerto, Vermelho/Erro, Amarelo/Processando)
 F5.1: Epic 5 - Registro automático de lições concluídas e melhor pontuação
 F5.2: Epic 5 - Cálculo de Experiência (XP) e atualização de nível
-F5.3: Epic 5 - Sincronização contínua e segura com banco de dados Supabase
+F5.3: Epic 1/Epic 5 - Persistência local do progresso no navegador (sem sincronização remota no MVP)
 F6.1: Epic 7 - Modo contínuo que traduz sequências de sinais (dactilologia) para texto
 F6.2: Epic 7 - Detecção de pausas para delimitar palavras
 
@@ -196,35 +194,31 @@ So that I have a solid foundation for building the LIA Web application.
 **And** Basic Vite configuration should be in place
 **And** TypeScript configuration should be properly set up
 
-### Story 1.2: Configuração do Supabase e Autenticação Google
+### Story 1.2: Autenticação local (sem serviços externos)
 
 As a developer,
-I want to configure Supabase project with Google authentication and create the profiles table,
-So that users can authenticate and their profile data can be stored securely.
-
-**Acceptance Criteria:**
-
-**Given** I have a Supabase project created
-**When** I configure Google OAuth authentication
-**Then** Google authentication should be enabled in Supabase Auth settings
-**And** The profiles table should be created with schema: id (uuid, FK to auth.users), email, display_name, total_xp (default 0), current_streak (default 0), avatar_url, created_at
-**And** Row Level Security (RLS) should be enabled on profiles table
-**And** Policies should be created: "Usuários podem ver todos os perfis" (SELECT) and "Usuários podem editar apenas seu perfil" (UPDATE)
-**And** Environment variables VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY should be configured
-
-### Story 1.3: Implementação de Login com Google
-
-As a user,
-I want to log in with my Google account,
-So that I can access the LIA Web platform and have my progress saved.
+I want to implement autenticação local (sem serviços externos),
+So that o MVP funcione sem depender de plataformas pagas e sem risco de custos.
 
 **Acceptance Criteria:**
 
 **Given** I am on the login page
-**When** I click "Login with Google"
-**Then** I should be redirected to Google OAuth consent screen
-**And** After granting permissions, I should be redirected back to the application
-**And** My user session should be established
+**When** I click the login button
+**Then** a local session should be created and persisted in the browser
+**And** I should be redirected to the dashboard
+**And** I should be able to sign out, which clears the local session
+
+### Story 1.3: Login (modo local)
+
+As a user,
+I want to log in using local-only mode,
+So that I can access the LIA Web MVP without any external service setup.
+
+**Acceptance Criteria:**
+
+**Given** I am on the login page
+**When** I click "Entrar (modo local)"
+**Then** my local session should be established
 **And** I should be redirected to the dashboard
 **And** If authentication fails, an appropriate error message should be displayed
 
@@ -238,11 +232,11 @@ So that I can see my progress and achievements.
 
 **Given** I am logged in
 **When** I navigate to my profile page
-**Then** I should see my display name from Google account
-**And** I should see my profile photo from Google account
+**Then** I should see my display name as **"LIA"**
+**And** I should see an avatar (generated locally)
 **And** I should see my total XP (initially 0)
 **And** I should see my current streak (initially 0)
-**And** The data should be loaded from the profiles table in Supabase
+**And** The data should be loaded from local storage in the browser
 **And** If the profile doesn't exist, it should be created automatically on first login
 
 ### Story 1.5: Persistência de Sessão e Progresso
@@ -255,11 +249,11 @@ So that I don't lose my learning progress when I return to the platform.
 
 **Given** I have logged in previously
 **When** I return to the application
-**Then** My session should be automatically restored if still valid
-**And** My progress data should be loaded from Supabase
+**Then** My local session should be automatically restored if still valid
+**And** My local progress data should be loaded from browser storage
 **And** I should be redirected to the dashboard if session is valid
-**And** If session is expired, I should be redirected to login page
-**And** Progress data should be synchronized with Supabase on each session
+**And** If session is cleared, I should be redirected to login page
+**And** Progress data should be persisted locally without any network dependency
 
 ---
 

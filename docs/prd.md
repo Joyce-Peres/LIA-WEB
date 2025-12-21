@@ -14,7 +14,7 @@ Persona Secundária (Revisor): Usuários surdos ou fluentes em Libras que valida
 
 ## 3. Requisitos Funcionais (Para Fragmentação/Sharding)
 F1 - Sistema de Autenticação e Perfil
-F1.1: Login com conta Google via Supabase Auth.
+F1.1: Login local (sem serviços externos), com sessão persistida no navegador.
 
 F1.2: Perfil do usuário exibindo: nome, foto, XP total, sequência atual (streak).
 
@@ -54,7 +54,7 @@ F5.1: Registro automático de lições concluídas e melhor pontuação.
 
 F5.2: Cálculo de Experiência (XP) e atualização de nível.
 
-F5.3: Sincronização contínua e segura com o banco de dados Supabase.
+F5.3: Persistência local do progresso no navegador (sem sincronização remota no MVP).
 
 F6 - Modo Tradutor (Feature Futura)
 F6.1: Modo contínuo que traduz sequências de sinais (dactilologia) para texto.
@@ -76,7 +76,7 @@ CA1: 90% dos usuários-teste conseguem completar a lição "Letra A" sem instru�
 
 CA2: O tempo médio de feedback é inferior a 70ms em 95% das execuções (métricas do navegador).
 
-CA3: **Não suportar modo offline** (requer conexão para autenticação e sincronização). O processamento de vídeo permanece 100% local.
+CA3: **MVP sem dependência de serviços externos**: autenticação e persistência funcionam localmente no navegador. O processamento de vídeo permanece 100% local.
 
 ## 5. Stack Tecnológica e Decisões de Arquitetura
 Decisões Concretas (Sem Ambiguidades):
@@ -85,9 +85,10 @@ Frontend: React 18 + TypeScript + Vite + Tailwind CSS.
 
 Machine Learning no Cliente: TensorFlow.js (@tensorflow/tfjs) + MediaPipe Hands (@mediapipe/hands).
 
-Backend & Database: Supabase (PostgreSQL com RLS, Auth, Storage). Não desenvolver backend customizado.
+Backend & Database (MVP): Sem backend (armazenamento local no navegador).  
+Backend & Database (futuro/opcional): Supabase (PostgreSQL com RLS, Auth, Storage) ou alternativa equivalente.
 
-Hospedagem: Vercel (Frontend estático).
+Hospedagem (opcional): Frontend estático em qualquer host de arquivos estáticos (ou apenas uso local durante o MVP).
 
 Estrutura de Diretórios Prescritiva:
 
@@ -99,7 +100,7 @@ Estrutura de Diretórios Prescritiva:
     /components/game      # CameraFrame, GestureOverlay, ScoreBoard
     /hooks                # useCamera, useHandPose, useAuth
     /services/ai          # Lógica pura de IA: normalização, buffer, inferência
-    /lib/supabase.ts      # Cliente configurado do Supabase
+    /lib/auth.ts          # Autenticação local (sessão no navegador)
     /types/index.ts       # Tipos TypeScript (User, Landmark, Prediction)
     /pages/               # Login, Dashboard, LessonRoom, Profile
 ```
@@ -134,11 +135,11 @@ Threshold de confiança: Considerar válido apenas se confidence > 0.85.
 Debounce: Exigir que a mesma predição se repita por pelo menos 5 frames consecutivos antes de atualizar a UI e conceder pontos. Isso evita oscilações.
 
 ## 7. Próximos Passos para o Agente (Action Plan)
-Instrução para o Cursor/BMAD: "Use este PRD como fonte única da verdade. Ao gerar código, priorize a estrutura de arquivos da Seção 5 e a lógica de IA da Seção 6. Não crie backend Node.js customizado; use exclusivamente o SDK do Supabase."
+Instrução para o Cursor/BMAD: "Use este PRD como fonte única da verdade. Ao gerar código, priorize a estrutura de arquivos da Seção 5 e a lógica de IA da Seção 6. Não crie backend Node.js customizado. No MVP, não use serviços externos; use autenticação/persistência local no navegador."
 
 Setup do Projeto: Inicializar projeto React/TypeScript com a estrutura de diretórios acima.
 
-Configurar Supabase: Criar projeto, executar SQL de criação de tabelas (fornecido no arquitetura.md) e configurar autenticação Google.
+Backend (opcional, futuro): Se for adotado um BaaS, documentar setup e integrar somente após o MVP local estar estável.
 
 Conversão do Modelo: Criar script Python para converter modelo_gestos.h5 para formato TensorFlow.js.
 

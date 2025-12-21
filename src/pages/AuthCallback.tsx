@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { supabase } from '@/lib/supabase'
+import { getSession } from '@/lib/auth'
 
 export function AuthCallbackPage() {
   const navigate = useNavigate()
@@ -12,28 +12,13 @@ export function AuthCallbackPage() {
 
     async function run() {
       try {
-        const url = new URL(window.location.href)
-        const code = url.searchParams.get('code')
-        const errorDescription = url.searchParams.get('error_description')
-        const errorParam = url.searchParams.get('error')
-
-        if (errorParam || errorDescription) {
-          throw new Error(errorDescription || errorParam || 'Erro no login')
-        }
-
-        if (!code) {
-          // If user navigates here directly without OAuth params.
+        // Modo local: esta rota existe para compatibilidade com o fluxo original.
+        // Se já houver sessão local, seguimos para o dashboard; caso contrário, login.
+        const session = getSession()
+        if (!session) {
           navigate('/login', { replace: true })
           return
         }
-
-        // PKCE exchange (Supabase returns ?code=...).
-        const { error: exchangeError } =
-          // supabase-js supports exchanging the auth code for a session
-          await supabase.auth.exchangeCodeForSession(code)
-
-        if (exchangeError) throw exchangeError
-
         if (!cancelled) navigate('/dashboard', { replace: true })
       } catch (e) {
         const message = e instanceof Error ? e.message : 'Erro inesperado'

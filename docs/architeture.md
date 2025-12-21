@@ -1,13 +1,15 @@
 # Documento de Arquitetura: LIA Web
 
 ## 1. Visão Arquitetural
-Arquitetura: Aplicação Web Progressiva (PWA) com arquitetura de "Backend-for-Frontend" usando BaaS (Backend-as-a-Service). O processamento de IA ocorre integralmente no navegador (edge computing).
+Arquitetura (MVP): Aplicação Web Progressiva (PWA) **sem backend** (modo local). O processamento de IA ocorre integralmente no navegador (edge computing).
 
 Padrão: Separação clara entre:
 
 Cliente Rico (Fat Client): Contém toda a lógica de negócio, interface e pipeline de ML.
 
-Serviços Gerenciados (Supabase): Fornece banco de dados relacional, autenticação e armazenamento de arquivos como serviço.
+Persistência Local (Browser Storage): Autenticação e progresso persistidos no navegador (ex.: `localStorage`/`IndexedDB`), sem dependências de serviços externos.
+
+Serviços Gerenciados (Opcional/Futuro): Um BaaS (ex.: Supabase) pode ser integrado mais tarde para sincronização entre dispositivos, mas **não faz parte do MVP**.
 
 Justificativa: Elimina a complexidade operacional de manter servidores de inferência, reduz custos iniciais, garante privacidade por padrão (dados nunca saem do dispositivo) e atende ao requisito crítico de latência (<50ms).
 
@@ -17,11 +19,11 @@ Justificativa: Elimina a complexidade operacional de manter servidores de infer�
 flowchart TD
   U[Usuário] --> UI[Interface React]
   UI --> MP[MediaPipe Hands]
-  UI --> SA[Supabase Auth]
+  UI --> LA[Auth Local]
   MP --> B[Buffer 30 frames]
   B --> TF[TF.js Model]
   TF --> GL[Lógica de Jogo]
-  SA --> P[Perfil do Usuário]
+  LA --> P[Perfil do Usuário (Local)]
   GL --> F[Feedback UI]
   GL --> PP[Persistência de Progresso]
   P --> PP
@@ -35,14 +37,12 @@ Context API + useReducer: Para estado global de autenticação e progresso da se
 Hooks Customizados: Para estado complexo e efeitos colaterais da câmera e IA (useCamera, useHandPose). Isolam a lógica, facilitam testes.
 
 ### 3.2. Padrões de Comunicação
-Repository Pattern via SDK: Todas as chamadas ao Supabase encapsuladas em funções puras em /lib/supabase.ts. Exemplo:
+Camada de Persistência Local: Autenticação/sessão e dados locais encapsulados em utilitários em `/src/lib/*` (ex.: `src/lib/auth.ts`), evitando acoplamento da UI ao mecanismo de storage. Exemplo:
 
 ```typescript
-// /lib/supabase.ts
-export const progressService = {
-  saveLessonProgress: async (userId, lessonId, score) => {
-    /* ... */
-  },
+// src/lib/auth.ts (exemplo)
+export async function signOut() {
+  /* ... */
 }
 ```
 Eventos Customizados: Para comunicação desacoplada entre componentes de UI e o pipeline de IA (ex: evento "gestureRecognized").
@@ -63,7 +63,6 @@ Web Workers (Opcional Fase 2): O processamento do MediaPipe e TF.js pode ser mov
     "typescript": "^5.0.0",
     "@tensorflow/tfjs": "^4.10.0",
     "@mediapipe/hands": "^0.4.1646424915",
-    "@supabase/supabase-js": "^2.38.0",
     "react-router-dom": "^6.20.0",
     "tailwindcss": "^3.3.0"
   },
@@ -73,7 +72,8 @@ Web Workers (Opcional Fase 2): O processamento do MediaPipe e TF.js pode ser mov
   }
 }
 ```
-### 4.2. Configuração do Supabase (SQL Inicial)
+### 4.2. (Opcional/Futuro) Configuração do Supabase (SQL Inicial)
+> Nota: o MVP atual não utiliza Supabase. Esta seção fica como referência caso a sincronização remota seja adicionada futuramente.
 
 ```sql
 -- Habilitar Extensões
@@ -186,30 +186,28 @@ export function normalizeLandmarks(
 ## 6. Estratégia de Implantação e DevOps
 
 ### 6.1. Ambiente
-Desenvolvimento: localhost:5173 (Vite) + Supabase Local (opcional) ou projeto Dev.
+Desenvolvimento: localhost:5173 (Vite) — modo local, sem backend.
 
-Produção: Frontend na Vercel (deploy automático via Git), Supabase em cloud.
+Produção (MVP): Opcional. Frontend estático em qualquer host de arquivos estáticos (ou apenas uso local), sem dependências de backend.
 
 ### 6.2. Variáveis de Ambiente (.env.example)
 
 ```env
-VITE_SUPABASE_URL=https://xyz.supabase.co
-VITE_SUPABASE_ANON_KEY=chave_publica_anonima
 VITE_APP_VERSION=0.1.0
 ```
 
 ### 6.3. Pipeline de Deploy
-Push para branch main → trigger GitHub Action/Vercel
+Push para branch main → trigger CI (opcional)
 
 Build do frontend (TypeScript compilation, bundling)
 
-Upload de assets estáticos para CDN da Vercel
+Upload de assets estáticos para host de arquivos estáticos (opcional)
 
 Deploy automático com URL de preview
 
 ## 7. Monitoramento e Métricas
 
-### 7.1. Métricas do Cliente (Logging no Console/Supabase)
+### 7.1. Métricas do Cliente (Logging no Console)
 
 ```typescript
 // Estrutura de log para análise de performance
@@ -223,7 +221,7 @@ interface InferenceLog {
 }
 ```
 
-### 7.2. Dashboards (Supabase + Metabase)
+### 7.2. Dashboards (Opcional/Futuro)
 Uso: Usuários ativos diários/semanais.
 
 Progresso: Média de lições concluídas por usuário.
@@ -238,7 +236,7 @@ Engajamento: XP total distribuído, insígnias mais conquistadas.
 | --- | --- | --- | --- |
 | Modelo TF.js muito lento no mobile | Alta | Alto | 1. Quantização do modelo. 2. Fallback para versão reduzida (10 frames). 3. Feedback visual de “processando”. |
 | MediaPipe não detecta mãos em baixa luz | Média | Médio | 1. Guia visual de posicionamento. 2. Modo “prática” sem validação. 3. Usar iluminação auxiliar como preenchimento. |
-| Limite de funções do Supabase Free | Baixa | Baixo | Monitorar uso com alertas. Considerar upgrade para Pro se necessário. |
+| Limites de storage local / quotas do navegador | Média | Médio | Evitar armazenar blobs grandes em `localStorage`; preferir `IndexedDB` quando necessário; documentar limites por navegador. |
 
 ## 9. Roadmap Técnico
 
@@ -246,7 +244,7 @@ Fase 1 (MVP): Core funcional.
 
 PRD & Arquitetura
 
-Setup do projeto e Supabase
+Setup do projeto (modo local, sem backend)
 
 Conversão do modelo LSTM → TF.js
 

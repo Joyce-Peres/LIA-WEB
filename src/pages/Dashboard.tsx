@@ -1,41 +1,40 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import type { Session } from '@supabase/supabase-js'
-
-import { supabase } from '@/lib/supabase'
+import type { AuthSession } from '@/lib/auth'
+import { getSession, onAuthStateChange, signOut } from '@/lib/auth'
 
 export function DashboardPage() {
   const navigate = useNavigate()
-  const [session, setSession] = useState<Session | null>(null)
+  const [session, setSession] = useState<AuthSession | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     let isMounted = true
 
     async function load() {
-      const { data } = await supabase.auth.getSession()
       if (!isMounted) return
-      setSession(data.session ?? null)
+      const current = getSession()
+      setSession(current)
       setIsLoading(false)
-      if (!data.session) navigate('/login', { replace: true })
+      if (!current) navigate('/login', { replace: true })
     }
 
     void load()
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
+    const unsubscribe = onAuthStateChange((next) => {
       setSession(next)
       if (!next) navigate('/login', { replace: true })
     })
 
     return () => {
       isMounted = false
-      sub.subscription.unsubscribe()
+      unsubscribe()
     }
   }, [navigate])
 
   async function handleLogout() {
-    await supabase.auth.signOut()
+    await signOut()
   }
 
   if (isLoading) {
@@ -53,13 +52,22 @@ export function DashboardPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
-          >
-            Sair
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => navigate('/profile')}
+              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+            >
+              Perfil
+            </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+            >
+              Sair
+            </button>
+          </div>
         </div>
 
         <div className="mt-6 rounded-xl bg-white border border-gray-200 p-4">

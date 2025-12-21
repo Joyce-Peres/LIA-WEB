@@ -1,6 +1,6 @@
 ---
-title: Setup do Supabase (Auth Google + Schema)
-description: Passo a passo para configurar o Supabase e habilitar login com Google para o LIA Web.
+title: (Opcional/Futuro) Setup do Supabase (Auth Google + Schema)
+description: Referência opcional para integrar Supabase no futuro. O MVP atual funciona 100% em modo local, sem serviços externos.
 author: Joyce
 date: 2025-12-21
 ---
@@ -67,6 +67,9 @@ No Supabase, configure também (quando aplicável):
 - **Authentication → URL Configuration → Site URL**: use a URL principal do seu app (produção)
 - **Additional Redirect URLs**: inclua o ambiente local:
   - `http://localhost:5173`
+  - `http://localhost:5173/auth/callback`
+
+> Observação: o app redireciona para `/auth/callback` durante o fluxo OAuth. Se essa URL não estiver permitida, o Supabase pode bloquear o retorno do login.
 
 ## 3. Aplicar schema `profiles` + RLS
 

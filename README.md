@@ -7,8 +7,8 @@ Plataforma web responsiva que ensina Língua Brasileira de Sinais (Libras) utili
 - **Frontend:** React 18 + TypeScript + Vite
 - **Styling:** Tailwind CSS
 - **Machine Learning:** TensorFlow.js + MediaPipe Hands
-- **Backend:** Supabase (PostgreSQL, Auth, Storage)
-- **Deployment:** Vercel
+- **Backend (MVP):** nenhum (modo local — sessão e dados no navegador)
+- **Deployment (opcional):** host de arquivos estáticos (quando/Se necessário)
 
 ## 📋 Pré-requisitos
 
@@ -33,8 +33,8 @@ npm install
 3. Configure as variáveis de ambiente:
 
 ```bash
-cp .env.example .env
-# Edite .env com suas credenciais do Supabase
+# (MVP local) Não há variáveis obrigatórias de backend.
+# Opcional: defina VITE_APP_VERSION (ou deixe vazio).
 ```
 
 4. Inicie o servidor de desenvolvimento:
@@ -54,7 +54,7 @@ O aplicativo estará disponível em `http://localhost:5173`
   /components/game      # Componentes do jogo (CameraFrame, GestureOverlay, ScoreBoard)
   /hooks                # Hooks customizados (useCamera, useHandPose, useAuth)
   /services/ai          # Lógica de IA (normalização, buffer, inferência)
-  /lib                  # Cliente Supabase e utilitários
+  /lib                  # Utilitários locais (auth/perfil/etc.)
   /types                # Definições TypeScript
   /pages                # Componentes de página (Login, Dashboard, LessonRoom, Profile)
 ```
@@ -71,9 +71,10 @@ O aplicativo estará disponível em `http://localhost:5173`
 > Nota: este repositório está em fase inicial (setup). As funcionalidades abaixo serão entregues ao longo das próximas stories/épicos.
 
 - ⏳ Autenticação com Google via Supabase
+- ✅ Autenticação local (sem serviços externos)
 - ⏳ Reconhecimento de gestos em tempo real
 - ⏳ Sistema gamificado (XP, badges, streaks)
-- ⏳ Progresso persistente entre sessões
+- ⏳ Progresso persistente entre sessões (modo local)
 - ✅ Interface responsiva e acessível (base UI + Tailwind, ainda sem telas do produto)
 
 ## 👩‍💻 Desenvolvimento
