@@ -1,0 +1,110 @@
+# Workflow Status Template
+
+# This tracks progress through BMM methodology Analysis, Planning, and Solutioning phases.
+# Implementation phase is tracked separately in sprint-status.yaml
+
+# STATUS DEFINITIONS:
+# ==================
+# Initial Status (before completion):
+#   - required: Must be completed to progress
+#   - optional: Can be completed but not required
+#   - recommended: Strongly suggested but not required
+#   - conditional: Required only if certain conditions met (e.g., if_has_ui)
+#
+# Completion Status:
+#   - {file-path}: File created/found (e.g., "docs/product-brief.md")
+#   - skipped: Optional/conditional workflow that was skipped
+
+generated: "2025-12-21 14:55:31"
+project: "LIA Web"
+project_type: "web-application"
+selected_track: "bmad-method"
+field_type: "greenfield"
+workflow_path: "_bmad/bmm/workflows/workflow-status/paths/method-greenfield.yaml"
+workflow_status:
+  phase_0_discovery:
+    name: "Discovery (Optional)"
+    optional: true
+    workflows:
+      - id: "brainstorm-project"
+        status: "_bmad-output/analysis/brainstorming-session-2025-12-21-145636.md"
+        agent: "analyst"
+        command: "brainstorm-project"
+        included_by: "user_choice"
+        note: "✅ Completed - 22 ideas generated and prioritized"
+        
+      - id: "research"
+        status: "required"
+        agent: "analyst"
+        command: "research"
+        included_by: "user_choice"
+        
+      - id: "product-brief"
+        status: "required"
+        agent: "analyst"
+        command: "product-brief"
+        included_by: "user_choice"
+
+  phase_1_planning:
+    name: "Planning"
+    required: true
+    workflows:
+      - id: "prd"
+        status: "docs/prd.md"
+        agent: "pm"
+        command: "prd"
+        output: "Product Requirements Document with FRs and NFRs"
+        note: "✅ Already completed"
+        
+      - id: "create-ux-design"
+        status: "conditional"
+        agent: "ux-designer"
+        command: "create-ux-design"
+        note: "Determined after PRD - user/agent decides if needed"
+
+  phase_2_solutioning:
+    name: "Solutioning"
+    required: true
+    workflows:
+      - id: "create-architecture"
+        status: "docs/architeture.md"
+        agent: "architect"
+        command: "create-architecture"
+        output: "System architecture document"
+        note: "✅ Already completed"
+        
+      - id: "create-epics-and-stories"
+        status: "_bmad-output/epics.md"
+        agent: "pm"
+        command: "create-epics-and-stories"
+        note: "✅ Completed - 7 epics with 35+ stories created"
+        
+      - id: "test-design"
+        status: "_bmad-output/test-design-system.md"
+        agent: "tea"
+        command: "test-design"
+        output: "System-level testability review"
+        note: "✅ Completed - System-level testability review with ASRs and NFR testing approach"
+        
+      - id: "validate-architecture"
+        status: "optional"
+        agent: "architect"
+        command: "validate-architecture"
+        note: "Quality check for architecture completeness"
+        
+      - id: "implementation-readiness"
+        status: "_bmad-output/implementation-readiness-report-2025-12-21-155636.md"
+        agent: "architect"
+        command: "implementation-readiness"
+        note: "✅ Completed - READY FOR IMPLEMENTATION (95/100 score, 4 minor non-blocking issues)"
+
+  phase_3_implementation:
+    name: "Implementation"
+    required: true
+    workflows:
+      - id: "sprint-planning"
+        status: "_bmad-output/implementation-artifacts/sprint-status.yaml"
+        agent: "sm"
+        command: "sprint-planning"
+        note: "✅ Completed - Sprint status initialized with 7 epics and 32 stories"
+
