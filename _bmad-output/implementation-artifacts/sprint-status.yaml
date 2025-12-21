@@ -43,9 +43,9 @@ development_status:
   # Epic 1: Setup e Autenticação
   epic-1: in-progress
   1-1-configuracao-inicial-do-projeto-react: done
-  1-2-configuracao-do-supabase-e-autenticacao-google: in-progress
-  1-3-implementacao-de-login-com-google: in-progress
-  1-4-pagina-de-perfil-do-usuario: backlog
+  1-2-autenticacao-local-sem-servicos-externos: done
+  1-3-remocao-do-supabase-e-ajustes-de-documentacao: done
+  1-4-pagina-de-perfil-do-usuario: done
   1-5-persistencia-de-sessao-e-progresso: backlog
   epic-1-retrospective: optional
 

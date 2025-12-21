@@ -1,8 +1,10 @@
 import { useState } from 'react'
 
-import { supabase } from '@/lib/supabase'
+import { signInLocal } from '@/lib/auth'
+import { useNavigate } from 'react-router-dom'
 
 export function LoginPage() {
+  const navigate = useNavigate()
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -10,16 +12,13 @@ export function LoginPage() {
     setError(null)
     setIsLoading(true)
 
-    const redirectTo = `${window.location.origin}/auth/callback`
-
-    const { error: authError } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo },
-    })
-
-    // If successful, the browser navigates away to Google/Supabase.
-    if (authError) {
-      setError(authError.message)
+    try {
+      // Modo local: sem serviços externos. Criamos uma sessão e seguimos para o dashboard.
+      await signInLocal()
+      navigate('/dashboard', { replace: true })
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Erro inesperado'
+      setError(message)
       setIsLoading(false)
     }
   }
@@ -38,7 +37,7 @@ export function LoginPage() {
           disabled={isLoading}
           className="mt-6 w-full rounded-lg bg-primary-purple px-4 py-2 text-white font-semibold hover:opacity-95 disabled:opacity-60"
         >
-          {isLoading ? 'Redirecionando…' : 'Login com Google'}
+          {isLoading ? 'Entrando…' : 'Entrar (modo local)'}
         </button>
 
         {error ? (
@@ -48,8 +47,8 @@ export function LoginPage() {
         ) : null}
 
         <div className="mt-4 text-xs text-gray-500">
-          Dica: se o Google OAuth ainda não estiver habilitado no Supabase, o login
-          pode falhar. Veja <code>docs/supabase-setup.md</code>.
+          Você escolheu <strong>evitar serviços externos</strong>. Este login cria
+          uma sessão local (armazenada no navegador) e não usa Google/Supabase.
         </div>
       </div>
     </div>
