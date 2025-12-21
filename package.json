@@ -1,0 +1,34 @@
+{
+  "name": "lia-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.89.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vitejs/plugin-react": "^5.1.2",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.45.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5.0.0",
+    "vite": "^7.3.0"
+  }
+}

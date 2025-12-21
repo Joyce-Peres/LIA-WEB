@@ -1,0 +1,102 @@
+# generated: 2025-12-21 15:59
+# project: LIA Web
+# project_key: lia-web
+# tracking_system: file-system
+# story_location: "{project-root}/_bmad-output/implementation-artifacts"
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2025-12-21 15:59
+project: LIA Web
+project_key: lia-web
+tracking_system: file-system
+story_location: "{project-root}/_bmad-output/implementation-artifacts"
+
+development_status:
+  # Epic 1: Setup e Autenticação
+  epic-1: in-progress
+  1-1-configuracao-inicial-do-projeto-react: done
+  1-2-configuracao-do-supabase-e-autenticacao-google: in-progress
+  1-3-implementacao-de-login-com-google: in-progress
+  1-4-pagina-de-perfil-do-usuario: backlog
+  1-5-persistencia-de-sessao-e-progresso: backlog
+  epic-1-retrospective: optional
+
+  # Epic 2: Motor de Reconhecimento de Gestos (Core)
+  epic-2: backlog
+  2-1-conversao-do-modelo-lstm-para-tensorflow-js: backlog
+  2-2-implementacao-do-hook-usecamera: backlog
+  2-3-integracao-do-mediapipe-hands: backlog
+  2-4-implementacao-do-buffer-circular-de-30-frames: backlog
+  2-5-normalizacao-de-landmarks: backlog
+  2-6-carga-e-execucao-do-modelo-tensorflow-js: backlog
+  2-7-pos-processamento-com-threshold-e-debounce: backlog
+  epic-2-retrospective: optional
+
+  # Epic 3: Catálogo e Navegação de Conteúdo
+  epic-3: backlog
+  3-1-criacao-das-tabelas-de-modulos-e-licoes-no-supabase: backlog
+  3-2-servico-de-repositorio-para-modulos-e-licoes: backlog
+  3-3-pagina-de-catalogo-de-modulos: backlog
+  3-4-dashboard-com-caminho-linear-visual: backlog
+  3-5-pagina-de-detalhes-da-licao: backlog
+  epic-3-retrospective: optional
+
+  # Epic 4: Interface de Prática e Feedback Visual
+  epic-4: backlog
+  4-1-componente-cameraframe-com-overlay: backlog
+  4-2-layout-da-tela-de-pratica: backlog
+  4-3-feedback-visual-com-cores-overlay: backlog
+  4-4-sistema-de-estrelas-com-combo-visual: backlog
+  4-5-tooltip-com-feedback-tecnico: backlog
+  epic-4-retrospective: optional
+
+  # Epic 5: Sistema de Gamificação e Progresso
+  epic-5: backlog
+  5-1-sistema-de-pontuacao-baseado-em-precisao-e-tempo: backlog
+  5-2-sistema-de-5-vidas-por-licao: backlog
+  5-3-calculo-e-atualizacao-de-xp: backlog
+  5-4-sistema-de-insignias-badges: backlog
+  5-5-registro-automatico-de-progresso: backlog
+  5-6-personal-records-no-dashboard: backlog
+  5-7-sincronizacao-continua-com-supabase: backlog
+  epic-5-retrospective: optional
+
+  # Epic 6: Melhorias de UX e Features Adicionais (Quick Wins)
+  epic-6: backlog
+  6-1-onboarding-simplificado: backlog
+  epic-6-retrospective: optional
+
+  # Epic 7: Modo Tradutor (Feature Futura)
+  epic-7: backlog
+  7-1-modo-tradutor-continuo: backlog
+  7-2-deteccao-de-pausas-para-delimitar-palavras: backlog
+  epic-7-retrospective: optional
+
