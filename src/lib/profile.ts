@@ -59,6 +59,22 @@ export function saveProfile(profile: UserProfile) {
   }
 }
 
+export function updateProfile(
+  userId: string,
+  updater: (current: UserProfile) => UserProfile,
+): UserProfile {
+  const current = ensureProfile(userId)
+  const next = updater(current)
+  const now = Date.now()
+  const normalized: UserProfile = {
+    ...next,
+    userId,
+    updatedAt: now,
+  }
+  saveProfile(normalized)
+  return normalized
+}
+
 export function ensureProfile(userId: string): UserProfile {
   const existing = getProfile(userId)
   if (existing) return existing
