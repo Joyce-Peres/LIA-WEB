@@ -19,6 +19,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { contentRepository } from '../repositories/contentRepository'
 import { CameraFrame, HandLandmark } from '../components/practice/CameraFrame'
 import { useFeedbackState } from '../hooks/feedback/useFeedbackState'
+import { useComboSystem } from '../hooks/feedback/useComboSystem'
+import { StarParticle } from '../components/practice/StarParticle'
 import type { LessonWithModule } from '../types/database'
 
 /**
@@ -34,6 +36,17 @@ interface PredictionResult {
   confidence: number
   timestamp: number
   isCorrect: boolean
+}
+
+/**
+ * Star particle data for animations
+ */
+interface StarParticleData {
+  id: string
+  x: number
+  y: number
+  size: number
+  color: 'purple' | 'yellow'
 }
 
 /**
@@ -212,12 +225,22 @@ function CameraSection({
   lesson,
   practiceState,
   feedbackState,
-  onLandmarksDetected
+  stars,
+  encouragementMessage,
+  combo,
+  onLandmarksDetected,
+  onStarComplete,
+  onMessageComplete
 }: {
   lesson: LessonWithModule | null
   practiceState: PracticeState
   feedbackState: 'idle' | 'processing' | 'correct' | 'incorrect'
+  stars: StarParticleData[]
+  encouragementMessage: string | null
+  combo: number
   onLandmarksDetected: (landmarks: HandLandmark[][], dimensions: VideoDimensions) => void
+  onStarComplete: (starId: string) => void
+  onMessageComplete: () => void
 }) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -293,6 +316,38 @@ function CameraSection({
         {practiceState === 'active' && (
           <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium animate-pulse">
             🎥 Ativo
+          </div>
+        )}
+
+        {/* Star Particles */}
+        {stars.map(star => (
+          <StarParticle
+            key={star.id}
+            id={star.id}
+            x={star.x}
+            y={star.y}
+            size={star.size}
+            color={star.color}
+            onComplete={onStarComplete}
+          />
+        ))}
+
+        {/* Encouragement Message */}
+        {encouragementMessage && (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50">
+            <div
+              className="bg-black/80 text-white px-6 py-3 rounded-full text-xl font-bold shadow-2xl animate-bounce"
+              onAnimationEnd={onMessageComplete}
+            >
+              {encouragementMessage}
+            </div>
+          </div>
+        )}
+
+        {/* Combo Counter */}
+        {combo > 1 && (
+          <div className="absolute top-4 left-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full text-lg font-bold shadow-lg animate-pulse">
+            {combo}x COMBO! 🔥
           </div>
         )}
       </div>
@@ -534,6 +589,8 @@ export function Practice() {
   const [error, setError] = useState<string | null>(null)
   const [practiceState, setPracticeState] = useState<PracticeState>('ready')
   const [currentPrediction, setCurrentPrediction] = useState<PredictionResult | null>(null)
+  const [stars, setStars] = useState<StarParticleData[]>([])
+  const [encouragementMessage, setEncouragementMessage] = useState<string | null>(null)
 
   // Feedback state management
   const { state: feedbackState, handlePrediction } = useFeedbackState({
@@ -543,6 +600,42 @@ export function Practice() {
     confidenceThreshold: 0.7,
     processingTimeout: 2000,
     feedbackDuration: 1500,
+  })
+
+  // Combo system
+  const { combo, addCorrectGesture } = useComboSystem({
+    onComboIncrease: (comboLevel, starCount) => {
+      console.log(`Combo increased to ${comboLevel}, spawning ${starCount} stars`)
+
+      // Spawn stars at random positions near center
+      const newStars: StarParticleData[] = []
+      for (let i = 0; i < starCount; i++) {
+        newStars.push({
+          id: `star-${Date.now()}-${i}`,
+          x: 200 + Math.random() * 200, // Random position in camera area
+          y: 150 + Math.random() * 100,
+          size: 20 + comboLevel * 2, // Bigger stars for higher combos
+          color: comboLevel % 2 === 0 ? 'purple' : 'yellow',
+        })
+      }
+
+      setStars(prev => [...prev, ...newStars])
+
+      // Show encouragement message for combos >= 3
+      if (comboLevel >= 3) {
+        const messages = [
+          'Incrível!', 'Fantástico!', 'Você é demais!',
+          'Combo impressionante!', 'Sensacional!', 'Extraordinário!'
+        ]
+        setEncouragementMessage(messages[Math.floor(Math.random() * messages.length)])
+      }
+    },
+    onComboBreak: (finalCombo) => {
+      console.log(`Combo broken at ${finalCombo}`)
+      if (finalCombo >= 5) {
+        setEncouragementMessage('Que combo incrível! 🎉')
+      }
+    },
   })
 
   /**
@@ -602,6 +695,11 @@ export function Practice() {
         isCorrect,
       })
 
+      // Trigger combo system for correct gestures
+      if (isCorrect) {
+        addCorrectGesture()
+      }
+
       // Check for practice completion (5 correct gestures)
       // This is simplified - in reality, you'd track over time
       if (isCorrect && Math.random() > 0.8) {
@@ -610,7 +708,21 @@ export function Practice() {
     } else {
       setCurrentPrediction(null)
     }
-  }, [practiceState, lesson, handlePrediction])
+  }, [practiceState, lesson, handlePrediction, addCorrectGesture])
+
+  /**
+   * Handle star particle completion
+   */
+  const handleStarComplete = (starId: string) => {
+    setStars(prev => prev.filter(star => star.id !== starId))
+  }
+
+  /**
+   * Handle encouragement message completion
+   */
+  const handleMessageComplete = () => {
+    setEncouragementMessage(null)
+  }
 
   /**
    * Practice control handlers
@@ -627,6 +739,9 @@ export function Practice() {
   const handleResetPractice = () => {
     setPracticeState('ready')
     setCurrentPrediction(null)
+    // Reset combo and stars
+    setStars([])
+    setEncouragementMessage(null)
   }
 
   // Load lesson on mount and when lessonId changes
@@ -658,7 +773,12 @@ export function Practice() {
               lesson={lesson}
               practiceState={practiceState}
               feedbackState={feedbackState}
+              stars={stars}
+              encouragementMessage={encouragementMessage}
+              combo={combo}
               onLandmarksDetected={handleLandmarksDetected}
+              onStarComplete={handleStarComplete}
+              onMessageComplete={handleMessageComplete}
             />
           </div>
 
