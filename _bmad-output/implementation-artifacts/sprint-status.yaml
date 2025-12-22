@@ -60,11 +60,12 @@ development_status:
   2-7-pos-processamento-com-threshold-e-debounce: done
 
   # Epic 3: Catálogo e Navegação de Conteúdo
-  epic-3: in-progress
+  epic-3: done
   3-1-criacao-das-tabelas-de-modulos-e-licoes-no-supabase: done
   3-2-servico-de-repositorio-para-modulos-e-licoes: done
   3-3-pagina-de-catalogo-de-modulos: done
   3-4-dashboard-com-caminho-linear-visual: done
+  3-5-pagina-de-detalhes-da-licao: done
   2-6-carga-e-execucao-do-modelo-tensorflow-js: in-progress
   2-2-implementacao-do-hook-usecamera: backlog
   2-3-integracao-do-mediapipe-hands: backlog
