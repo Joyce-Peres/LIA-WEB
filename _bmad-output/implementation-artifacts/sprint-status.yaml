@@ -55,6 +55,7 @@ development_status:
   2-2-implementacao-do-hook-usecamera: done
   2-3-integracao-do-mediapipe-hands: done
   2-4-implementacao-do-buffer-circular-de-30-frames: done
+  2-5-normalizacao-de-landmarks: done
   2-2-implementacao-do-hook-usecamera: backlog
   2-3-integracao-do-mediapipe-hands: backlog
   2-4-implementacao-do-buffer-circular-de-30-frames: backlog
