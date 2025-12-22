@@ -58,6 +58,10 @@ development_status:
   2-5-normalizacao-de-landmarks: done
   2-6-carga-e-execucao-do-modelo-tensorflow-js: done
   2-7-pos-processamento-com-threshold-e-debounce: done
+
+  # Epic 3: Catálogo e Navegação de Conteúdo
+  epic-3: in-progress
+  3-1-criacao-das-tabelas-de-modulos-e-licoes-no-supabase: done
   2-6-carga-e-execucao-do-modelo-tensorflow-js: in-progress
   2-2-implementacao-do-hook-usecamera: backlog
   2-3-integracao-do-mediapipe-hands: backlog
