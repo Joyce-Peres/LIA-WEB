@@ -18,6 +18,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { contentRepository } from '../repositories/contentRepository'
 import { CameraFrame, HandLandmark } from '../components/practice/CameraFrame'
+import { useFeedbackState } from '../hooks/feedback/useFeedbackState'
 import type { LessonWithModule } from '../types/database'
 
 /**
@@ -210,10 +211,12 @@ function PracticeHeader({ lesson }: { lesson: LessonWithModule | null }) {
 function CameraSection({
   lesson,
   practiceState,
+  feedbackState,
   onLandmarksDetected
 }: {
   lesson: LessonWithModule | null
   practiceState: PracticeState
+  feedbackState: 'idle' | 'processing' | 'correct' | 'incorrect'
   onLandmarksDetected: (landmarks: HandLandmark[][], dimensions: VideoDimensions) => void
 }) {
   return (
@@ -233,6 +236,29 @@ function CameraSection({
           className="w-full h-full"
           onLandmarksDetected={onLandmarksDetected}
         />
+
+        {/* Feedback color overlay */}
+        <div
+          className={`absolute inset-0 pointer-events-none transition-all duration-300 rounded-lg ${
+            feedbackState === 'processing'
+              ? 'bg-yellow-500/20 animate-pulse'
+              : feedbackState === 'correct'
+              ? 'bg-green-500/25'
+              : feedbackState === 'incorrect'
+              ? 'bg-red-500/25'
+              : 'bg-transparent'
+          }`}
+          aria-hidden="true"
+        />
+
+        {/* Feedback status indicator */}
+        {feedbackState !== 'idle' && (
+          <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
+            {feedbackState === 'processing' && '🔄 Processando...'}
+            {feedbackState === 'correct' && '✅ Correto!'}
+            {feedbackState === 'incorrect' && '❌ Tente novamente'}
+          </div>
+        )}
 
         {/* Practice state overlay */}
         {practiceState === 'ready' && (
@@ -279,6 +305,25 @@ function CameraSection({
           <li>• Foque na precisão dos movimentos</li>
           <li>• Pratique lentamente no início</li>
         </ul>
+      </div>
+
+      {/* Feedback color legend */}
+      <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+        <h3 className="text-sm font-medium text-gray-900 mb-3">🎨 Feedback Visual:</h3>
+        <div className="grid grid-cols-3 gap-3 text-xs">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-yellow-400 rounded opacity-60"></div>
+            <span>Processando</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-green-500 rounded opacity-60"></div>
+            <span>Correto</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-red-500 rounded opacity-60"></div>
+            <span>Incorreto</span>
+          </div>
+        </div>
       </div>
     </div>
   )
@@ -490,6 +535,16 @@ export function Practice() {
   const [practiceState, setPracticeState] = useState<PracticeState>('ready')
   const [currentPrediction, setCurrentPrediction] = useState<PredictionResult | null>(null)
 
+  // Feedback state management
+  const { state: feedbackState, handlePrediction } = useFeedbackState({
+    onStateChange: (state, prediction) => {
+      console.log('Feedback state changed:', state, prediction?.gesture)
+    },
+    confidenceThreshold: 0.7,
+    processingTimeout: 2000,
+    feedbackDuration: 1500,
+  })
+
   /**
    * Load lesson data
    */
@@ -555,7 +610,7 @@ export function Practice() {
     } else {
       setCurrentPrediction(null)
     }
-  }, [practiceState, lesson])
+  }, [practiceState, lesson, handlePrediction])
 
   /**
    * Practice control handlers
@@ -602,6 +657,7 @@ export function Practice() {
             <CameraSection
               lesson={lesson}
               practiceState={practiceState}
+              feedbackState={feedbackState}
               onLandmarksDetected={handleLandmarksDetected}
             />
           </div>
