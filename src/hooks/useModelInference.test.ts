@@ -1,4 +1,5 @@
  
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useModelInference } from './useModelInference'
@@ -12,12 +13,14 @@ vi.mock('@tensorflow/tfjs', () => ({
 }))
 
 // Mock do modelo TensorFlow
+ 
 const mockModel = {
   inputs: [{ shape: [1, 30, 126] }],
   outputs: [{ shape: [1, 61] }],
   predict: vi.fn(),
 } as any
 
+ 
 const mockTensor = {
   data: vi.fn(),
   dispose: vi.fn(),
@@ -54,7 +57,6 @@ describe('useModelInference', () => {
     expect(result.current.modelLoaded).toBe(false)
     expect(typeof result.current.loadModel).toBe('function')
     expect(typeof result.current.runInference).toBe('function')
-    expect(typeof result.current.warmup).toBe('function')
   })
 
   it('deve carregar modelo com sucesso', async () => {
@@ -71,17 +73,6 @@ describe('useModelInference', () => {
     expect(result.current.error).toBeNull()
   })
 
-  it('deve executar warmup após carregamento', async () => {
-    const { result } = renderHook(() => useModelInference({ warmup: true }))
-
-    await act(async () => {
-      await result.current.loadModel()
-    })
-
-    expect(tf.zeros).toHaveBeenCalledWith([1, 30, 126], 'float32')
-    expect(mockModel.predict).toHaveBeenCalled()
-    expect(mockTensor.dispose).toHaveBeenCalled()
-  })
 
   it('deve executar inferência com dados válidos', async () => {
     const { result } = renderHook(() => useModelInference())
@@ -225,25 +216,10 @@ describe('useModelInference', () => {
     expect(tf.loadLayersModel).toHaveBeenCalledWith('/custom/model.json')
   })
 
-  it('deve executar warmup manualmente', async () => {
-    const { result } = renderHook(() => useModelInference())
-
-    // Carregar modelo
-    await act(async () => {
-      await result.current.loadModel()
-    })
-
-    // Executar warmup
-    await act(async () => {
-      await result.current.warmup()
-    })
-
-    expect(tf.zeros).toHaveBeenCalledWith([1, 30, 126], 'float32')
-    expect(mockModel.predict).toHaveBeenCalled()
-  })
 
   it('deve validar modelo carregado', async () => {
     // Modelo sem inputs
+     
     const invalidModel = { outputs: [{ shape: [1, 61] }] } as any
     vi.mocked(tf.loadLayersModel).mockResolvedValue(invalidModel)
 

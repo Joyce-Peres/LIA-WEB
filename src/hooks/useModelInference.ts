@@ -80,8 +80,6 @@ export interface UseModelInferenceControls {
   loadModel: () => Promise<void>
   /** Executa inferência com buffer de dados */
   runInference: (buffer: number[][][]) => Promise<InferenceResult | null>
-  /** Executa warmup do modelo */
-  warmup: () => Promise<void>
 }
 
 export type UseModelInferenceReturn = UseModelInferenceState & UseModelInferenceControls
@@ -145,11 +143,7 @@ export function useModelInference(config?: ModelInferenceConfig): UseModelInfere
       setModelLoaded(true)
       setIsReady(true)
 
-      // Executar warmup se configurado
-      if (finalConfig.warmup) {
-        // Não aguardar warmup para não bloquear
-        warmup().catch(err => console.warn('Warmup failed:', err))
-      }
+      // Warmup será feito na primeira inferência real
     } catch (err) {
       console.error('Erro ao carregar modelo TensorFlow.js:', err)
 
@@ -174,34 +168,6 @@ export function useModelInference(config?: ModelInferenceConfig): UseModelInfere
     }
   }, [finalConfig.modelPath, finalConfig.warmup])
 
-  /**
-   * Executa warmup do modelo com dados dummy
-   */
-  const warmup = useCallback(async (): Promise<void> => {
-    if (!modelRef.current) {
-      return
-    }
-
-    try {
-      // Criar tensor dummy com shape [1, 30, 126]
-      const dummyInput = tf.zeros([1, 30, 126], 'float32')
-
-      // Executar inferência dummy
-      const warmupStart = performance.now()
-      const dummyOutput = modelRef.current.predict(dummyInput) as tf.Tensor
-      await dummyOutput.data() // Forçar avaliação
-
-      const warmupTime = performance.now() - warmupStart
-      console.log(`Model warmup completed in ${warmupTime.toFixed(2)}ms`)
-
-      // Cleanup
-      dummyInput.dispose()
-      dummyOutput.dispose()
-    } catch (err) {
-      console.warn('Model warmup failed:', err)
-      // Não é erro crítico, continuar
-    }
-  }, [])
 
   /**
    * Executa inferência com dados do buffer
@@ -303,7 +269,6 @@ export function useModelInference(config?: ModelInferenceConfig): UseModelInfere
     modelLoaded,
     loadModel,
     runInference,
-    warmup,
   }
 }
 
