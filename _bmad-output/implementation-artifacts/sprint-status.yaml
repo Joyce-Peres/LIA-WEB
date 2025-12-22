@@ -52,6 +52,7 @@ development_status:
   # Epic 2: Motor de Reconhecimento de Gestos (Core)
   epic-2: in-progress
   2-1-conversao-do-modelo-lstm-para-tensorflow-js: done
+  2-2-implementacao-do-hook-usecamera: done
   2-2-implementacao-do-hook-usecamera: backlog
   2-3-integracao-do-mediapipe-hands: backlog
   2-4-implementacao-do-buffer-circular-de-30-frames: backlog
