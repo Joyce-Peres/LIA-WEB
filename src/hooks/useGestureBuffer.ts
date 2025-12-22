@@ -35,6 +35,7 @@
 
 import { useState, useCallback, useRef } from 'react'
 import type { HandResult } from './useHandPose'
+import { normalizeLandmarks } from '../services/ai/normalizeLandmarks'
 
 /**
  * Configuração do buffer de gestos
@@ -100,45 +101,22 @@ export function useGestureBuffer(config?: GestureBufferConfig): UseGestureBuffer
   })
 
   /**
-   * Normaliza landmarks de uma mão para o formato esperado
-   */
-  const normalizeHand = useCallback(
-    (handResult: HandResult | null): number[] => {
-      const features: number[] = []
-      const { width: videoWidth, height: videoHeight } = videoDimensionsRef.current
-
-      if (handResult) {
-        // Mão detectada: normalizar coordenadas
-        handResult.landmarks.forEach((point) => {
-          features.push(point.x / videoWidth)  // X normalizado 0-1
-          features.push(point.y / videoHeight) // Y normalizado 0-1
-          features.push(point.z)               // Z relativo, manter como está
-        })
-      } else {
-        // Mão não detectada: preencher com zeros
-        for (let i = 0; i < 21 * 3; i++) {
-          features.push(0)
-        }
-      }
-
-      return features
-    },
-    []
-  )
-
-  /**
-   * Converte resultados das mãos para array de 126 features
+   * Converte resultados das mãos para array de 126 features normalizadas
    * Formato: [hand1_x0, hand1_y0, hand1_z0, ..., hand1_x20, hand1_y20, hand1_z20,
    *          hand2_x0, hand2_y0, hand2_z0, ..., hand2_x20, hand2_y20, hand2_z20]
    */
   const convertToFeatures = useCallback(
     (handResults: HandResult[] | null): number[] => {
-      const hand1Features = normalizeHand(handResults?.[0] || null)
-      const hand2Features = normalizeHand(handResults?.[1] || null)
+      const { width: videoWidth, height: videoHeight } = videoDimensionsRef.current
 
-      return [...hand1Features, ...hand2Features] // 42 + 84 = 126 features
+      const normalized = normalizeLandmarks(handResults, {
+        videoWidth,
+        videoHeight,
+      })
+
+      return normalized.features
     },
-    [normalizeHand]
+    []
   )
 
   /**
