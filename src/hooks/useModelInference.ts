@@ -166,7 +166,7 @@ export function useModelInference(config?: ModelInferenceConfig): UseModelInfere
     } finally {
       setIsLoading(false)
     }
-  }, [finalConfig.modelPath, finalConfig.warmup])
+  }, [finalConfig.modelPath])
 
 
   /**
