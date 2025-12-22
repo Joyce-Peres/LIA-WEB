@@ -61,6 +61,11 @@ development_status:
 
   # Epic 3: Catálogo e Navegação de Conteúdo
   epic-3: done
+
+  # Epic 4: Interface de Prática e Feedback Visual
+  epic-4: in-progress
+  4-1-componente-cameraframe-com-overlay: done
+  4-2-layout-da-tela-de-pratica: done
   3-1-criacao-das-tabelas-de-modulos-e-licoes-no-supabase: done
   3-2-servico-de-repositorio-para-modulos-e-licoes: done
   3-3-pagina-de-catalogo-de-modulos: done
