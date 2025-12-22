@@ -64,6 +64,7 @@ development_status:
   3-1-criacao-das-tabelas-de-modulos-e-licoes-no-supabase: done
   3-2-servico-de-repositorio-para-modulos-e-licoes: done
   3-3-pagina-de-catalogo-de-modulos: done
+  3-4-dashboard-com-caminho-linear-visual: done
   2-6-carga-e-execucao-do-modelo-tensorflow-js: in-progress
   2-2-implementacao-do-hook-usecamera: backlog
   2-3-integracao-do-mediapipe-hands: backlog
