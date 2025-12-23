@@ -21,6 +21,7 @@
  */
 
 import React, { useState, useEffect } from 'react'
+import { TooltipTechnicalData } from '../../hooks/ui/useTooltip'
 
 /**
  * Props for the StarParticle component
@@ -42,6 +43,12 @@ export interface StarParticleProps {
   duration?: number
   /** Gravity strength (pixels per second squared) */
   gravity?: number
+  /** Technical data for tooltip */
+  technicalData?: TooltipTechnicalData
+  /** Callback to show tooltip */
+  onShowTooltip?: (data: TooltipTechnicalData, position: { x: number; y: number }) => void
+  /** Callback to hide tooltip */
+  onHideTooltip?: () => void
 }
 
 /**
@@ -55,7 +62,10 @@ export function StarParticle({
   color,
   onComplete,
   duration = 1500,
-  gravity = 150
+  gravity = 150,
+  technicalData,
+  onShowTooltip,
+  onHideTooltip
 }: StarParticleProps) {
   const [position, setPosition] = useState({ x, y })
   const [opacity, setOpacity] = useState(0)
@@ -66,6 +76,20 @@ export function StarParticle({
   const angle = Math.random() * Math.PI * 2 // Random direction
   const distance = 60 + Math.random() * 80 // Random distance
   const wobble = (Math.random() - 0.5) * 0.5 // Random wobble factor
+
+  // Tooltip handlers
+  const handleMouseEnter = () => {
+    if (technicalData && onShowTooltip) {
+      onShowTooltip(technicalData, {
+        x: position.x + size / 2,
+        y: position.y + size / 2
+      })
+    }
+  }
+
+  const handleMouseLeave = () => {
+    onHideTooltip?.()
+  }
 
   useEffect(() => {
     let startTime: number | null = null
@@ -81,7 +105,6 @@ export function StarParticle({
 
       // Easing function for smooth animation
       const easeOutCubic = 1 - Math.pow(1 - progress, 3)
-      const easeInCubic = progress * progress * progress
 
       // Calculate position with physics
       const currentDistance = distance * easeOutCubic
@@ -142,7 +165,9 @@ export function StarParticle({
 
   return (
     <div
-      className={`absolute pointer-events-none select-none ${colorClasses[color]}`}
+      className={`absolute select-none ${colorClasses[color]} ${
+        predictionData ? 'cursor-help pointer-events-auto' : 'pointer-events-none'
+      }`}
       style={{
         left: position.x,
         top: position.y,
@@ -151,9 +176,16 @@ export function StarParticle({
         fontSize: `${size}px`,
         zIndex: 40,
       }}
+      onMouseEnter={technicalData ? handleMouseEnter : undefined}
+      onMouseLeave={technicalData ? handleMouseLeave : undefined}
       aria-hidden="true"
     >
-      <span role="img" aria-label="estrela">⭐</span>
+      <span
+        role="img"
+        aria-label={technicalData ? `Estrela de reconhecimento - ${technicalData.gestureName || 'gesto'}` : "estrela"}
+      >
+        ⭐
+      </span>
     </div>
   )
 }
