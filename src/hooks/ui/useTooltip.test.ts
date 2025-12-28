@@ -34,11 +34,10 @@ describe('useTooltip', () => {
     // Wait for delay
     act(() => {
       vi.advanceTimersByTime(100)
+      vi.runAllTimers()
     })
 
-    await waitFor(() => {
-      expect(result.current.isVisible).toBe(true)
-    })
+    expect(result.current.isVisible).toBe(true)
     expect(result.current.tooltipData).toBe(mockData)
     expect(result.current.tooltipPosition).toEqual({ x: 100, y: 190 }) // With offset
   })
@@ -69,11 +68,10 @@ describe('useTooltip', () => {
     // Wait for auto-hide
     act(() => {
       vi.advanceTimersByTime(500)
+      vi.runAllTimers()
     })
 
-    await waitFor(() => {
-      expect(result.current.isVisible).toBe(false)
-    })
+    expect(result.current.isVisible).toBe(false)
   })
 
   it('should not auto-hide if disabled', () => {
@@ -115,11 +113,10 @@ describe('useTooltip', () => {
     // Wait for delay
     act(() => {
       vi.advanceTimersByTime(50)
+      vi.runAllTimers()
     })
 
-    await waitFor(() => {
-      expect(result.current.isVisible).toBe(true)
-    })
+    expect(result.current.isVisible).toBe(true)
     expect(result.current.tooltipPosition).toEqual({ x: 150, y: 90 }) // Center of element
   })
 
@@ -153,11 +150,10 @@ describe('useTooltip', () => {
     // Wait for delay
     act(() => {
       vi.advanceTimersByTime(50)
+      vi.runAllTimers()
     })
 
-    await waitFor(() => {
-      expect(result.current.isVisible).toBe(true)
-    })
+    expect(result.current.isVisible).toBe(true)
     expect(result.current.tooltipPosition).toEqual({ x: 250, y: 140 }) // Click position with offset
   })
 

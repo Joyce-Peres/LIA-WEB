@@ -166,7 +166,7 @@ export function StarParticle({
   return (
     <div
       className={`absolute select-none ${colorClasses[color]} ${
-        predictionData ? 'cursor-help pointer-events-auto' : 'pointer-events-none'
+        technicalData ? 'cursor-help pointer-events-auto' : 'pointer-events-none'
       }`}
       style={{
         left: position.x,
@@ -183,6 +183,7 @@ export function StarParticle({
       <span
         role="img"
         aria-label={technicalData ? `Estrela de reconhecimento - ${technicalData.gestureName || 'gesto'}` : "estrela"}
+        aria-hidden="true"
       >
         ⭐
       </span>
