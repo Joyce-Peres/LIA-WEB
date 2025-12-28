@@ -65,8 +65,11 @@ describe('LessonStar', () => {
   it('does not call onClick when locked star is clicked', () => {
     render(<LessonStar lesson={mockLesson} status="locked" onClick={mockOnClick} />)
 
-    const starButton = screen.getByRole('button', { hidden: true }) // presentation role when locked
-    fireEvent.click(starButton)
+    // When locked, the element has role="presentation", not "button"
+    const starElement = screen.getByLabelText('Letra A - Bloqueada')
+    expect(starElement).toHaveAttribute('role', 'presentation')
+    
+    fireEvent.click(starElement)
 
     expect(mockOnClick).not.toHaveBeenCalled()
   })
