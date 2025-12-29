@@ -86,12 +86,14 @@ export function normalizeLandmarks(
     const handFeatures: number[] = []
 
     if (handResult && handResult.landmarks.length === HAND_LANDMARKS.COUNT) {
+      const coordsAlreadyNormalized = handResult.landmarks.every(p => p.x <= 1.01 && p.y <= 1.01)
+
       // Mão detectada: normalizar coordenadas
       handResult.landmarks.forEach((point, index) => {
         // X: normalizar pela largura do vídeo (0-1)
-        const normalizedX = point.x / videoWidth
+        const normalizedX = coordsAlreadyNormalized ? point.x : point.x / videoWidth
         // Y: normalizar pela altura do vídeo (0-1)
-        const normalizedY = point.y / videoHeight
+        const normalizedY = coordsAlreadyNormalized ? point.y : point.y / videoHeight
         // Z: manter relativo (não normalizar)
         const relativeZ = point.z
 
