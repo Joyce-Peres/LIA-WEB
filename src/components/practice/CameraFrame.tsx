@@ -200,26 +200,13 @@ export function CameraFrame({ className = '', onLandmarksDetected, skipHandPose 
     const containerRect = container.getBoundingClientRect()
     const containerWidth = containerRect.width || videoDimensions.width
     const containerHeight = containerRect.height || (containerWidth * (videoDimensions.height / videoDimensions.width))
-    const containerAspect = containerWidth / containerHeight
-    const videoAspect = videoDimensions.width / videoDimensions.height
 
-    // Match the drawn area to the letterboxed video area so normalized coords align
-    let drawWidth = containerWidth
-    let drawHeight = containerHeight
-    let offsetX = 0
-    let offsetY = 0
-
-    if (containerAspect > videoAspect) {
-      // Bars on left/right
-      drawHeight = containerHeight
-      drawWidth = containerHeight * videoAspect
-      offsetX = (containerWidth - drawWidth) / 2
-    } else {
-      // Bars on top/bottom
-      drawWidth = containerWidth
-      drawHeight = containerWidth / videoAspect
-      offsetY = (containerHeight - drawHeight) / 2
-    }
+    // Cover logic: scale video to fully cover the container (may crop), mirror overlay to same area
+    const scale = Math.max(containerWidth / videoDimensions.width, containerHeight / videoDimensions.height)
+    const drawWidth = videoDimensions.width * scale
+    const drawHeight = videoDimensions.height * scale
+    const offsetX = (containerWidth - drawWidth) / 2
+    const offsetY = (containerHeight - drawHeight) / 2
 
     canvas.width = containerWidth
     canvas.height = containerHeight
@@ -395,7 +382,7 @@ export function CameraFrame({ className = '', onLandmarksDetected, skipHandPose 
         autoPlay
         playsInline
         muted
-        className={`w-full h-full object-contain ${showLoading || fatalError ? 'opacity-0' : 'opacity-100'}`}
+        className={`w-full h-full object-cover ${showLoading || fatalError ? 'opacity-0' : 'opacity-100'}`}
         style={{
           transform: 'scaleX(-1)', // Mirror effect for natural hand movement
           minHeight: '300px',
