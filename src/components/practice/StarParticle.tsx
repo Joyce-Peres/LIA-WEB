@@ -20,7 +20,7 @@
  * ```
  */
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { TooltipTechnicalData } from '../../hooks/ui/useTooltip'
 
 /**
@@ -46,9 +46,9 @@ export interface StarParticleProps {
   /** Technical data for tooltip */
   technicalData?: TooltipTechnicalData
   /** Callback to show tooltip */
-  onShowTooltip?: (data: TooltipTechnicalData, position: { x: number; y: number }) => void
+    onTooltipShow?: (data: TooltipTechnicalData, position: { x: number; y: number }) => void
   /** Callback to hide tooltip */
-  onHideTooltip?: () => void
+  onTooltipHide?: () => void
 }
 
 /**
@@ -64,8 +64,8 @@ export function StarParticle({
   duration = 1500,
   gravity = 150,
   technicalData,
-  onShowTooltip,
-  onHideTooltip
+  onTooltipShow,
+  onTooltipHide
 }: StarParticleProps) {
   const [position, setPosition] = useState({ x, y })
   const [opacity, setOpacity] = useState(0)
@@ -79,8 +79,8 @@ export function StarParticle({
 
   // Tooltip handlers
   const handleMouseEnter = () => {
-    if (technicalData && onShowTooltip) {
-      onShowTooltip(technicalData, {
+    if (technicalData && onTooltipShow) {
+      onTooltipShow(technicalData, {
         x: position.x + size / 2,
         y: position.y + size / 2
       })
@@ -88,7 +88,7 @@ export function StarParticle({
   }
 
   const handleMouseLeave = () => {
-    onHideTooltip?.()
+    onTooltipHide?.()
   }
 
   useEffect(() => {
@@ -182,7 +182,7 @@ export function StarParticle({
     >
       <span
         role="img"
-        aria-label={technicalData ? `Estrela de reconhecimento - ${technicalData.gestureName || 'gesto'}` : "estrela"}
+        aria-label={technicalData ? `Estrela de reconhecimento - ${technicalData.gesture || 'gesto'}` : "estrela"}
         aria-hidden="true"
       >
         ⭐

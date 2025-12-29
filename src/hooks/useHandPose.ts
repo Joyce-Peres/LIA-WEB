@@ -136,14 +136,21 @@ export function useHandPose(config?: HandPoseConfig): UseHandPoseReturn {
    * Inicializa o MediaPipe Hands
    */
   useEffect(() => {
+    let isMounted = true
+
     const initMediaPipe = async () => {
+      console.log('[useHandPose] Starting MediaPipe initialization...')
+      
       try {
         const hands = new Hands({
           locateFile: (file) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+            const url = `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+            console.log('[useHandPose] Loading file:', file)
+            return url
           },
         })
 
+        console.log('[useHandPose] Setting options...')
         hands.setOptions({
           maxNumHands: finalConfig.maxHands,
           modelComplexity: finalConfig.modelComplexity,
@@ -179,24 +186,37 @@ export function useHandPose(config?: HandPoseConfig): UseHandPoseReturn {
           }
         })
 
+        console.log('[useHandPose] Initializing hands model...')
         await hands.initialize()
+        
+        if (!isMounted) {
+          console.log('[useHandPose] Component unmounted during init, cleaning up...')
+          hands.close()
+          return
+        }
+        
+        console.log('[useHandPose] MediaPipe Hands initialized successfully!')
         handsRef.current = hands
         setIsReady(true)
         setError(null)
       } catch (err) {
-        console.error('Erro ao inicializar MediaPipe Hands:', err)
-        setError(
-          'Falha ao carregar MediaPipe Hands. Verifique sua conexão com a internet.'
-        )
-        setIsReady(false)
+        console.error('[useHandPose] Error initializing MediaPipe Hands:', err)
+        if (isMounted) {
+          setError(
+            'Falha ao carregar MediaPipe Hands. Verifique sua conexão com a internet.'
+          )
+          setIsReady(false)
+        }
       }
     }
 
     initMediaPipe()
 
     return () => {
+      isMounted = false
       // Cleanup: fecha MediaPipe ao desmontar
       if (handsRef.current) {
+        console.log('[useHandPose] Closing MediaPipe...')
         handsRef.current.close()
         handsRef.current = null
       }

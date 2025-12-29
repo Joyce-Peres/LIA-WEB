@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ModuleCard, ModuleProgress } from './ModuleCard'
 import { Module } from '../../types/database'
@@ -18,7 +18,7 @@ const mockModule: Module = {
 
 const mockModuleWithoutIcon: Module = {
   ...mockModule,
-  iconUrl: undefined,
+  iconUrl: null,
   title: 'Módulo sem ícone',
 }
 
@@ -120,7 +120,7 @@ describe('ModuleCard', () => {
   })
 
   it('handles modules without description', () => {
-    const moduleWithoutDesc = { ...mockModule, description: undefined }
+    const moduleWithoutDesc = { ...mockModule, description: null }
 
     render(<ModuleCard module={moduleWithoutDesc} onClick={mockOnClick} />)
 

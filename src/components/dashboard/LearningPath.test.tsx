@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { LearningPath } from './LearningPath'
 import { Lesson, Module } from '../../types/database'
@@ -39,6 +39,7 @@ const mockLessons: Lesson[] = [
     minConfidenceThreshold: 0.75,
     xpReward: 10,
     orderIndex: 1,
+    level: 1,
     createdAt: '2025-01-01T00:00:00Z',
     updatedAt: '2025-01-01T00:00:00Z',
   },
@@ -51,6 +52,7 @@ const mockLessons: Lesson[] = [
     minConfidenceThreshold: 0.75,
     xpReward: 10,
     orderIndex: 2,
+    level: 1,
     createdAt: '2025-01-01T00:00:00Z',
     updatedAt: '2025-01-01T00:00:00Z',
   },
@@ -63,6 +65,7 @@ const mockLessons: Lesson[] = [
     minConfidenceThreshold: 0.75,
     xpReward: 10,
     orderIndex: 1,
+    level: 1,
     createdAt: '2025-01-01T00:00:00Z',
     updatedAt: '2025-01-01T00:00:00Z',
   },
@@ -237,9 +240,9 @@ describe('LearningPath', () => {
 
   it('shows different motivational messages based on progress', () => {
     // Test with 100% progress (all lessons completed)
-    const allCompletedLessons = mockLessons.map((lesson, index) => ({
+    const allCompletedLessons = mockLessons.map((lesson) => ({
       ...lesson,
-      gestureName: index < 10 ? '1' : '9', // Make all appear completed
+      gestureName: '1', // Make all appear completed
     }))
 
     const { rerender } = render(
@@ -253,7 +256,7 @@ describe('LearningPath', () => {
     expect(screen.getByText('Parabéns! Você completou todo o caminho!')).toBeInTheDocument()
 
     // Test with low progress
-    const lowProgressLessons = mockLessons.map((lesson, index) => ({
+    const lowProgressLessons = mockLessons.map((lesson) => ({
       ...lesson,
       gestureName: '9', // Make all appear locked
     }))

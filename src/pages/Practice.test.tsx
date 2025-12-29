@@ -1,12 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { Practice } from './Practice'
-import { contentRepository } from '../repositories/contentRepository'
+import { contentRepository as mockedContentRepository } from '../repositories/contentRepository'
 import { LessonWithModule } from '../types/database'
+import type { CameraFrameProps, HandLandmark } from '../components/practice/CameraFrame'
 
 // Mock React Router
 const mockNavigate = vi.fn()
-const mockParams = { lessonId: 'lesson-1' }
+const mockParams: { lessonId?: string } = { lessonId: 'lesson-1' }
+
+type MockCameraFrameProps = Pick<CameraFrameProps, 'onLandmarksDetected' | 'className'>
 
 vi.mock('react-router-dom', () => ({
   useParams: () => mockParams,
@@ -20,23 +23,27 @@ vi.mock('../repositories/contentRepository', () => ({
   },
 }))
 
+const getLessonByIdMock = vi.mocked(mockedContentRepository.getLessonById)
+
 // Mock CameraFrame component
 vi.mock('../components/practice/CameraFrame', () => ({
-  CameraFrame: ({ onLandmarksDetected, className }: any) => (
-    <div data-testid="camera-frame" className={className}>
-      <video data-testid="camera-video" />
-      <canvas data-testid="camera-canvas" />
-      <button
-        data-testid="mock-landmarks-btn"
-        onClick={() => onLandmarksDetected([[[{ x: 0.5, y: 0.5, z: 0 }]]], { width: 640, height: 480 })}
-      >
-        Mock Landmarks
-      </button>
-    </div>
-  ),
-}))
+  CameraFrame: ({ onLandmarksDetected, className }: MockCameraFrameProps) => {
+    const mockLandmarks: HandLandmark[][] = [[{ x: 0.5, y: 0.5, z: 0 }]]
 
-import { contentRepository as mockedContentRepository } from '../repositories/contentRepository'
+    return (
+      <div data-testid="camera-frame" className={className}>
+        <video data-testid="camera-video" />
+        <canvas data-testid="camera-canvas" />
+        <button
+          data-testid="mock-landmarks-btn"
+          onClick={() => onLandmarksDetected?.(mockLandmarks, { width: 640, height: 480 })}
+        >
+          Mock Landmarks
+        </button>
+      </div>
+    )
+  },
+}))
 
 // Mock lesson data
 const mockLesson: LessonWithModule = {
@@ -48,6 +55,7 @@ const mockLesson: LessonWithModule = {
   minConfidenceThreshold: 0.75,
   xpReward: 10,
   orderIndex: 1,
+  level: 1,
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-01T00:00:00Z',
   module: {
@@ -63,24 +71,27 @@ const mockLesson: LessonWithModule = {
   },
 }
 
+const getStartButton = () => screen.getByRole('button', { name: /Começar Prática/ })
+
 describe('Practice', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockParams.lessonId = 'lesson-1'
   })
 
   it('shows loading skeleton initially', () => {
-    ;(mockedContentRepository.getLessonById as any).mockImplementation(
+    getLessonByIdMock.mockImplementation(
       () => new Promise(() => {}) // Never resolves
     )
 
     render(<Practice />)
 
-    expect(screen.getByText('Dashboard')).toBeInTheDocument()
-    expect(document.querySelector('.animate-pulse')).toBeInTheDocument()
+    const shimmerBlocks = document.querySelectorAll('.bg-gray-200')
+    expect(shimmerBlocks.length).toBeGreaterThan(0)
   })
 
   it('loads and displays lesson data successfully', async () => {
-    ;(mockedContentRepository.getLessonById as any).mockResolvedValue(mockLesson)
+    getLessonByIdMock.mockResolvedValue(mockLesson)
 
     render(<Practice />)
 
@@ -88,13 +99,14 @@ describe('Practice', () => {
       expect(screen.getByText('Praticando: Letra A')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Sinal: A')).toBeInTheDocument()
-    expect(screen.getByText('Módulo: Alfabeto')).toBeInTheDocument()
-    expect(screen.getByText('10 XP')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Praticando:\s*Letra A/ })).toBeInTheDocument()
+    expect(screen.getByText(/Sinal:/)).toBeInTheDocument()
+    expect(screen.getByText(/Módulo:/)).toBeInTheDocument()
+    expect(screen.getByText(/10\s+XP/)).toBeInTheDocument()
   })
 
   it('shows error state when lesson not found', async () => {
-    ;(mockedContentRepository.getLessonById as any).mockResolvedValue(null)
+    getLessonByIdMock.mockResolvedValue(null)
 
     render(<Practice />)
 
@@ -106,7 +118,7 @@ describe('Practice', () => {
   })
 
   it('shows error state when loading fails', async () => {
-    ;(mockedContentRepository.getLessonById as any).mockRejectedValue(new Error('Network error'))
+    getLessonByIdMock.mockRejectedValue(new Error('Network error'))
 
     render(<Practice />)
 
@@ -116,7 +128,7 @@ describe('Practice', () => {
   })
 
   it('displays camera section with practice instructions', async () => {
-    ;(mockedContentRepository.getLessonById as any).mockResolvedValue(mockLesson)
+    getLessonByIdMock.mockResolvedValue(mockLesson)
 
     render(<Practice />)
 
@@ -124,12 +136,16 @@ describe('Practice', () => {
       expect(screen.getByText('Sua Prática')).toBeInTheDocument()
     })
 
-    expect(screen.getByText(/Posicione sua mão na câmera/)).toBeInTheDocument()
+    const cameraSection = screen.getByRole('heading', { name: 'Sua Prática' }).closest('div')
+    expect(cameraSection).not.toBeNull()
+    expect(
+      within(cameraSection as HTMLElement).getByText(/Posicione sua mão na câmera e pratique/)
+    ).toBeInTheDocument()
     expect(screen.getByTestId('camera-frame')).toBeInTheDocument()
   })
 
   it('displays reference video section', async () => {
-    ;(mockedContentRepository.getLessonById as any).mockResolvedValue(mockLesson)
+    getLessonByIdMock.mockResolvedValue(mockLesson)
 
     render(<Practice />)
 
@@ -137,24 +153,25 @@ describe('Practice', () => {
       expect(screen.getByText('Vídeo de Referência')).toBeInTheDocument()
     })
 
-    const video = document.querySelector('video')
-    expect(video).toBeInTheDocument()
-    expect(video).toHaveAttribute('src', '/videos/a.mp4')
+    const referenceVideo = screen.getByTestId('reference-video') as HTMLVideoElement
+    expect(referenceVideo).toHaveAttribute('src', '/videos/a.mp4')
   })
 
   it('shows video placeholder when no video URL', async () => {
     const lessonWithoutVideo = { ...mockLesson, videoRefUrl: null }
-    ;(mockedContentRepository.getLessonById as any).mockResolvedValue(lessonWithoutVideo)
+    getLessonByIdMock.mockResolvedValue(lessonWithoutVideo)
 
     render(<Practice />)
 
     await waitFor(() => {
       expect(screen.getByText('Vídeo não disponível')).toBeInTheDocument()
     })
+
+    expect(screen.getByTestId('reference-video-placeholder')).toBeInTheDocument()
   })
 
   it('displays controls section with start button initially', async () => {
-    ;(mockedContentRepository.getLessonById as any).mockResolvedValue(mockLesson)
+    getLessonByIdMock.mockResolvedValue(mockLesson)
 
     render(<Practice />)
 
@@ -162,11 +179,11 @@ describe('Practice', () => {
       expect(screen.getByText('Controles da Prática')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Começar Prática')).toBeInTheDocument()
+    expect(getStartButton()).toBeInTheDocument()
   })
 
   it('shows ready state overlay when practice not started', async () => {
-    ;(mockedContentRepository.getLessonById as any).mockResolvedValue(mockLesson)
+    getLessonByIdMock.mockResolvedValue(mockLesson)
 
     render(<Practice />)
 
@@ -176,46 +193,46 @@ describe('Practice', () => {
   })
 
   it('handles start practice button click', async () => {
-    ;(mockedContentRepository.getLessonById as any).mockResolvedValue(mockLesson)
+    getLessonByIdMock.mockResolvedValue(mockLesson)
 
     render(<Practice />)
 
     await waitFor(() => {
-      expect(screen.getByText('Começar Prática')).toBeInTheDocument()
+      expect(getStartButton()).toBeInTheDocument()
     })
 
-    const startButton = screen.getByText('Começar Prática')
+    const startButton = getStartButton()
     fireEvent.click(startButton)
 
     expect(screen.getByText('🎥 Ativo')).toBeInTheDocument()
   })
 
   it('shows pause button when practice is active', async () => {
-    ;(mockedContentRepository.getLessonById as any).mockResolvedValue(mockLesson)
+    getLessonByIdMock.mockResolvedValue(mockLesson)
 
     render(<Practice />)
 
     await waitFor(() => {
-      expect(screen.getByText('Começar Prática')).toBeInTheDocument()
+      expect(getStartButton()).toBeInTheDocument()
     })
 
     // Start practice
-    fireEvent.click(screen.getByText('Começar Prática'))
+    fireEvent.click(getStartButton())
 
     expect(screen.getByText('⏸️ Pausar')).toBeInTheDocument()
   })
 
   it('shows continue and reset buttons when paused', async () => {
-    ;(mockedContentRepository.getLessonById as any).mockResolvedValue(mockLesson)
+    getLessonByIdMock.mockResolvedValue(mockLesson)
 
     render(<Practice />)
 
     await waitFor(() => {
-      expect(screen.getByText('Começar Prática')).toBeInTheDocument()
+        expect(getStartButton()).toBeInTheDocument()
     })
 
     // Start and pause practice
-    fireEvent.click(screen.getByText('Começar Prática'))
+      fireEvent.click(getStartButton())
     fireEvent.click(screen.getByText('⏸️ Pausar'))
 
     expect(screen.getByText('▶️ Continuar')).toBeInTheDocument()
@@ -223,16 +240,16 @@ describe('Practice', () => {
   })
 
   it('handles landmarks detected callback', async () => {
-    ;(mockedContentRepository.getLessonById as any).mockResolvedValue(mockLesson)
+    getLessonByIdMock.mockResolvedValue(mockLesson)
 
     render(<Practice />)
 
     await waitFor(() => {
-      expect(screen.getByText('Começar Prática')).toBeInTheDocument()
+        expect(getStartButton()).toBeInTheDocument()
     })
 
     // Start practice
-    fireEvent.click(screen.getByText('Começar Prática'))
+      fireEvent.click(getStartButton())
 
     // Trigger mock landmarks detection
     const mockButton = screen.getByTestId('mock-landmarks-btn')
@@ -247,7 +264,7 @@ describe('Practice', () => {
   })
 
   it('displays breadcrumb navigation', async () => {
-    ;(mockedContentRepository.getLessonById as any).mockResolvedValue(mockLesson)
+    getLessonByIdMock.mockResolvedValue(mockLesson)
 
     render(<Practice />)
 
@@ -255,15 +272,17 @@ describe('Practice', () => {
       expect(screen.getByText('Dashboard')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('›')).toBeInTheDocument()
-    expect(screen.getByText('Módulos')).toBeInTheDocument()
-    expect(screen.getByText('Alfabeto')).toBeInTheDocument()
-    expect(screen.getByText('Letra A')).toBeInTheDocument()
-    expect(screen.getByText('Prática')).toBeInTheDocument()
+    const breadcrumb = screen.getByRole('navigation')
+
+    expect(within(breadcrumb).getAllByText('›')).toHaveLength(4)
+    expect(within(breadcrumb).getByText('Módulos')).toBeInTheDocument()
+    expect(within(breadcrumb).getByText('Alfabeto')).toBeInTheDocument()
+    expect(within(breadcrumb).getByText('Letra A')).toBeInTheDocument()
+    expect(within(breadcrumb).getByText('Prática')).toBeInTheDocument()
   })
 
   it('shows practice tips', async () => {
-    ;(mockedContentRepository.getLessonById as any).mockResolvedValue(mockLesson)
+    getLessonByIdMock.mockResolvedValue(mockLesson)
 
     render(<Practice />)
 
@@ -271,11 +290,11 @@ describe('Practice', () => {
       expect(screen.getByText('💡 Dicas para praticar:')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Mantenha a mão relaxada e natural')).toBeInTheDocument()
+    expect(screen.getByText(/Mantenha a mão relaxada/)).toBeInTheDocument()
   })
 
   it('displays practice statistics', async () => {
-    ;(mockedContentRepository.getLessonById as any).mockResolvedValue(mockLesson)
+    getLessonByIdMock.mockResolvedValue(mockLesson)
 
     render(<Practice />)
 
@@ -291,7 +310,7 @@ describe('Practice', () => {
 
   it('handles missing lessonId parameter', () => {
     // Mock useParams to return no lessonId
-    vi.mocked(vi.importMock('react-router-dom')).useParams.mockReturnValue({})
+    mockParams.lessonId = undefined
 
     render(<Practice />)
 
@@ -300,9 +319,7 @@ describe('Practice', () => {
   })
 
   it('handles retry button click', async () => {
-    ;(mockedContentRepository.getLessonById as any)
-      .mockRejectedValueOnce(new Error('First error'))
-      .mockResolvedValueOnce(mockLesson)
+    getLessonByIdMock.mockRejectedValueOnce(new Error('First error')).mockResolvedValueOnce(mockLesson)
 
     render(<Practice />)
 
@@ -323,7 +340,7 @@ describe('Practice', () => {
   it('logs lesson loading to console', async () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
-    ;(mockedContentRepository.getLessonById as any).mockResolvedValue(mockLesson)
+    getLessonByIdMock.mockResolvedValue(mockLesson)
 
     render(<Practice />)
 

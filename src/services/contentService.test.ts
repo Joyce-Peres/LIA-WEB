@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { contentService, ContentServiceUtils } from './contentService'
 import { mockLessons } from '../data/mockContent'
+import type { Module, Lesson } from '../types/content'
 
 // Mock console.error to avoid noise in tests
 vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -14,14 +15,15 @@ describe('ContentService', () => {
     it('deve retornar todos os módulos ordenados por orderIndex', async () => {
       const response = await contentService.getModules()
 
-      expect(response.data).toHaveLength(3)
-      expect(response.total).toBe(3)
+      expect(response.data).toHaveLength(11)
+      expect(response.total).toBe(11)
       expect(response.hasMore).toBe(false)
 
       // Verificar ordenação
       expect(response.data[0].slug).toBe('alfabeto')
       expect(response.data[1].slug).toBe('numeros')
-      expect(response.data[2].slug).toBe('saudacoes')
+      expect(response.data[2].slug).toBe('dias-da-semana')
+      expect(response.data[response.data.length - 1].slug).toBe('adjetivos')
     })
 
     it('deve filtrar por difficulty level', async () => {
@@ -29,7 +31,7 @@ describe('ContentService', () => {
         difficultyLevel: 'iniciante'
       })
 
-      expect(response.data).toHaveLength(2)
+      expect(response.data).toHaveLength(5)
       expect(response.data.every(m => m.difficultyLevel === 'iniciante')).toBe(true)
     })
 
@@ -90,7 +92,7 @@ describe('ContentService', () => {
         moduleId: 'mod-alfabeto'
       })
 
-      expect(response.data.length).toBe(5) // 5 letras do alfabeto
+      expect(response.data.length).toBe(26)
       expect(response.data.every(l => l.moduleId === 'mod-alfabeto')).toBe(true)
     })
 
@@ -109,7 +111,7 @@ describe('ContentService', () => {
     it('deve retornar lições de um módulo existente', async () => {
       const response = await contentService.getLessonsByModule('mod-alfabeto')
 
-      expect(response.data.length).toBe(5)
+      expect(response.data.length).toBe(26)
       expect(response.data[0].module).toBeDefined()
       expect(response.data[0].module!.title).toBe('Alfabeto')
     })
@@ -146,7 +148,7 @@ describe('ContentService', () => {
 
       expect(result).not.toBeNull()
       expect(result!.module.title).toBe('Alfabeto')
-      expect(result!.lessons).toHaveLength(5)
+      expect(result!.lessons).toHaveLength(26)
       expect(result!.lessons.every(l => l.moduleId === 'mod-alfabeto')).toBe(true)
     })
 
@@ -181,7 +183,7 @@ describe('ContentServiceUtils', () => {
         title: 'Test Module',
         // difficultyLevel faltando
         orderIndex: 'not-a-number',
-      }
+      } as unknown as Partial<Module>
 
       const result = ContentServiceUtils.validateModule(invalidModule)
 
@@ -213,7 +215,7 @@ describe('ContentServiceUtils', () => {
         gestureName: 'TEST',
         displayName: 'Test Gesture',
         minConfidenceThreshold: 'not-a-number',
-      }
+      } as unknown as Partial<Lesson>
 
       const result = ContentServiceUtils.validateLesson(invalidLesson)
 
@@ -226,10 +228,10 @@ describe('ContentServiceUtils', () => {
     it('deve retornar estatísticas corretas', () => {
       const stats = ContentServiceUtils.getContentStats()
 
-      expect(stats.totalModules).toBe(3)
+      expect(stats.totalModules).toBe(11)
       expect(stats.totalLessons).toBe(mockLessons.length)
-      expect(stats.modulesByDifficulty.iniciante).toBe(2)
-      expect(stats.modulesByDifficulty.intermediario).toBe(1)
+      expect(stats.modulesByDifficulty.iniciante).toBe(5)
+      expect(stats.modulesByDifficulty.intermediario).toBe(6)
       expect(stats.averageXpPerLesson).toBeGreaterThan(0)
     })
   })

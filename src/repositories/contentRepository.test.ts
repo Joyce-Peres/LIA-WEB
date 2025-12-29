@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { contentRepository, SupabaseContentRepository } from './contentRepository'
-import type { Module, Lesson } from '../types/database'
+import { SupabaseContentRepository } from './contentRepository'
 
 // Mock Supabase
 vi.mock('../lib/supabase', () => ({
@@ -20,6 +19,9 @@ vi.mock('../lib/supabase', () => ({
 }))
 
 import { supabase } from '../lib/supabase'
+
+// Create a test instance of the Supabase repository
+let contentRepository: SupabaseContentRepository
 
 // Mock data
 const mockModule = {
@@ -57,6 +59,9 @@ describe('ContentRepository', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+
+    // Create a fresh instance of the Supabase repository for each test
+    contentRepository = new SupabaseContentRepository()
 
     // Setup mock query chain that returns itself for chaining
     // The last method in chain (order, eq, single, range) should return Promise
@@ -290,6 +295,7 @@ describe('ContentRepository', () => {
         minConfidenceThreshold: 0.75,
         xpReward: 10,
         orderIndex: 1,
+        level: 1,
         createdAt: '2025-01-01T00:00:00Z',
         updatedAt: '2025-01-01T00:00:00Z',
       }])

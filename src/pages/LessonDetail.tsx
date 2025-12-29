@@ -14,7 +14,7 @@
  * ```
  */
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { contentRepository } from '../repositories/contentRepository'
 import type { LessonWithModule } from '../types/database'
@@ -401,7 +401,6 @@ function LessonActionSection({
  */
 export function LessonDetail() {
   const { lessonId } = useParams<{ lessonId: string }>()
-  const navigate = useNavigate()
   const [lesson, setLesson] = useState<LessonWithModule | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

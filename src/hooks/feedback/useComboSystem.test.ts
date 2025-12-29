@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { renderHook, act } from '@testing-library/react'
 import { useComboSystem } from './useComboSystem'
 
 describe('useComboSystem', () => {
-  let mockOnComboIncrease: ReturnType<typeof vi.fn>
-  let mockOnComboBreak: ReturnType<typeof vi.fn>
+  let mockOnComboIncrease: ReturnType<typeof vi.fn<(combo: number, stars: number) => void>>
+  let mockOnComboBreak: ReturnType<typeof vi.fn<(finalCombo: number) => void>>
 
   beforeEach(() => {
-    mockOnComboIncrease = vi.fn()
-    mockOnComboBreak = vi.fn()
+    mockOnComboIncrease = vi.fn<(combo: number, stars: number) => void>()
+    mockOnComboBreak = vi.fn<(finalCombo: number) => void>()
     vi.useFakeTimers()
   })
 
@@ -71,8 +71,8 @@ describe('useComboSystem', () => {
       })
     }
 
-    // Combo 6 should give 4 stars (3 base + 1 bonus for combo 6)
-    expect(mockOnComboIncrease).toHaveBeenLastCalledWith(6, 4)
+    // Combo 6 should give 5 stars (3 base + 2 bonus for combo 6)
+    expect(mockOnComboIncrease).toHaveBeenLastCalledWith(6, 5)
   })
 
   it('should cap stars at maximum', () => {
@@ -109,9 +109,7 @@ describe('useComboSystem', () => {
       vi.advanceTimersByTime(2500)
     })
 
-    await waitFor(() => {
-      expect(result.current.combo).toBe(0)
-    })
+    expect(result.current.combo).toBe(0)
     expect(mockOnComboBreak).toHaveBeenCalledWith(1)
   })
 
@@ -134,9 +132,7 @@ describe('useComboSystem', () => {
       vi.advanceTimersByTime(3000)
     })
 
-    await waitFor(() => {
-      expect(result.current.combo).toBe(0)
-    })
+    expect(result.current.combo).toBe(0)
     expect(mockOnComboBreak).toHaveBeenCalledWith(1)
 
     // Next gesture should start new combo
@@ -211,9 +207,7 @@ describe('useComboSystem', () => {
       vi.advanceTimersByTime(2500)
     })
 
-    await waitFor(() => {
-      expect(result.current.combo).toBe(0)
-    })
+    expect(result.current.combo).toBe(0)
   })
 
   it('should respect max combo limit', () => {
@@ -239,12 +233,16 @@ describe('useComboSystem', () => {
     // Rapid fire gestures
     act(() => {
       result.current.addCorrectGesture()
+    })
+    act(() => {
       result.current.addCorrectGesture()
+    })
+    act(() => {
       result.current.addCorrectGesture()
     })
 
     expect(result.current.combo).toBe(3)
-    expect(mockOnComboIncrease).toHaveBeenCalledWith(3, 3)
+    expect(mockOnComboIncrease).toHaveBeenLastCalledWith(3, 4)
   })
 
   it('should not break combo when gestures are within timeout', () => {

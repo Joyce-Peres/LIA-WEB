@@ -32,14 +32,20 @@ import { useState, useCallback, useRef, useEffect } from 'react'
  * Technical data displayed in tooltip
  */
 export interface TooltipTechnicalData {
+  /** Gesture name */
+  gesture?: string
   /** Confidence percentage (0.0 to 1.0) */
   confidence: number
   /** Inference time in milliseconds */
-  inferenceTime: number
+  inferenceTime?: number
   /** Optional additional metrics */
   timestamp?: number
-  /** Optional gesture name */
-  gestureName?: string
+  /** Optional model version */
+  modelVersion?: string
+  /** Optional landmarks count */
+  landmarksCount?: number
+  /** Whether the prediction is correct */
+  isCorrect?: boolean
 }
 
 /**

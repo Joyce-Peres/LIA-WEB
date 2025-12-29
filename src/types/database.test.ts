@@ -30,6 +30,7 @@ describe('Database Types', () => {
       minConfidenceThreshold: 0.75,
       xpReward: 10,
       orderIndex: 1,
+      level: 1,
       createdAt: '2025-01-01T00:00:00Z',
       updatedAt: '2025-01-01T00:00:00Z',
     }
@@ -82,6 +83,7 @@ describe('Database Types', () => {
       minConfidenceThreshold: 0.75, // Valid: between 0 and 1
       xpReward: 10,
       orderIndex: 1,
+      level: 1,
       createdAt: '2025-01-01T00:00:00Z',
       updatedAt: '2025-01-01T00:00:00Z',
     }

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { renderHook, act } from '@testing-library/react'
 import { useTooltip } from './useTooltip'
 
 describe('useTooltip', () => {
@@ -34,7 +34,6 @@ describe('useTooltip', () => {
     // Wait for delay
     act(() => {
       vi.advanceTimersByTime(100)
-      vi.runAllTimers()
     })
 
     expect(result.current.isVisible).toBe(true)
@@ -68,7 +67,6 @@ describe('useTooltip', () => {
     // Wait for auto-hide
     act(() => {
       vi.advanceTimersByTime(500)
-      vi.runAllTimers()
     })
 
     expect(result.current.isVisible).toBe(false)
@@ -113,7 +111,6 @@ describe('useTooltip', () => {
     // Wait for delay
     act(() => {
       vi.advanceTimersByTime(50)
-      vi.runAllTimers()
     })
 
     expect(result.current.isVisible).toBe(true)
@@ -150,7 +147,6 @@ describe('useTooltip', () => {
     // Wait for delay
     act(() => {
       vi.advanceTimersByTime(50)
-      vi.runAllTimers()
     })
 
     expect(result.current.isVisible).toBe(true)
