@@ -83,8 +83,15 @@ const DEFAULT_CONFIG: Required<CameraConfig> = {
  */
 export function useCamera(config?: CameraConfig): UseCameraReturn {
   const finalConfig = { ...DEFAULT_CONFIG, ...config }
+  const configRef = useRef(finalConfig)
+  
+  // Atualiza configRef quando config mudar
+  useEffect(() => {
+    configRef.current = finalConfig
+  })
 
   const videoRef = useRef<HTMLVideoElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [isActive, setIsActive] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -94,15 +101,16 @@ export function useCamera(config?: CameraConfig): UseCameraReturn {
    * Para a câmera e libera recursos
    */
   const stopCamera = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach((track) => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => {
         track.stop()
       })
+      streamRef.current = null
       setStream(null)
     }
     setIsActive(false)
     setError(null)
-  }, [stream])
+  }, [])
 
   /**
    * Inicia a câmera com as configurações especificadas
@@ -123,12 +131,13 @@ export function useCamera(config?: CameraConfig): UseCameraReturn {
       }
 
       // Solicita acesso à câmera
+      const currentConfig = configRef.current
       const constraints: MediaStreamConstraints = {
         video: {
-          facingMode: finalConfig.facingMode,
-          frameRate: { ideal: finalConfig.fps },
-          width: { ideal: finalConfig.width },
-          height: { ideal: finalConfig.height },
+          facingMode: currentConfig.facingMode,
+          frameRate: { ideal: currentConfig.fps },
+          width: { ideal: currentConfig.width },
+          height: { ideal: currentConfig.height },
         },
         audio: false,
       }
@@ -182,6 +191,7 @@ export function useCamera(config?: CameraConfig): UseCameraReturn {
         console.log('[useCamera] Video ready!')
       }
 
+      streamRef.current = mediaStream
       setStream(mediaStream)
       setIsActive(true)
       setError(null)
@@ -219,24 +229,26 @@ export function useCamera(config?: CameraConfig): UseCameraReturn {
 
       setError(errorMessage)
       setIsActive(false)
+      streamRef.current = null
       setStream(null)
     } finally {
       setIsLoading(false)
     }
-  }, [finalConfig.facingMode, finalConfig.fps, finalConfig.width, finalConfig.height])
+  }, [])
 
   /**
    * Cleanup: para a câmera ao desmontar o componente
    */
   useEffect(() => {
     return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => {
           track.stop()
         })
+        streamRef.current = null
       }
     }
-  }, [stream])
+  }, [])
 
   return {
     videoRef,
