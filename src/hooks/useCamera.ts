@@ -115,6 +115,10 @@ export function useCamera(config?: CameraConfig): UseCameraReturn {
     try {
       // Verifica se getUserMedia está disponível
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        // Check if it's a secure context issue
+        if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost') {
+          throw new Error('INSECURE_CONTEXT')
+        }
         throw new Error('UNSUPPORTED_BROWSER')
       }
 
@@ -205,7 +209,9 @@ export function useCamera(config?: CameraConfig): UseCameraReturn {
             errorMessage = 'Configurações de câmera não suportadas pelo dispositivo.'
             break
           default:
-            if (err.message === 'UNSUPPORTED_BROWSER') {
+            if (err.message === 'INSECURE_CONTEXT') {
+              errorMessage = 'Acesso à câmera bloqueado. Acesse via localhost ou HTTPS. Você está usando HTTP em um IP de rede.'
+            } else if (err.message === 'UNSUPPORTED_BROWSER') {
               errorMessage = 'Navegador não suporta acesso à câmera. Use Chrome, Firefox ou Edge.'
             }
         }

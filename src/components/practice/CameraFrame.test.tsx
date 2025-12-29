@@ -144,15 +144,18 @@ describe('CameraFrame', () => {
     expect(screen.getByText('Tentar novamente')).toBeInTheDocument()
   })
 
-  it('shows error state when hand pose has error', () => {
+  it('shows warning when hand pose has error but camera still works', () => {
     mockedUseHandPose.mockReturnValue(buildHandPoseReturn({
       error: 'MediaPipe initialization failed',
     }))
 
     render(<CameraFrame />)
 
-    expect(screen.getByText('Erro na câmera')).toBeInTheDocument()
-    expect(screen.getByText('MediaPipe initialization failed')).toBeInTheDocument()
+    // Camera should still work - no fatal error screen
+    expect(screen.queryByText('Erro na câmera')).not.toBeInTheDocument()
+    
+    // Should show a warning about hand detection being unavailable
+    expect(screen.getByText(/Detecção de mãos indisponível/)).toBeInTheDocument()
   })
 
   it('renders video and canvas elements when ready', () => {
