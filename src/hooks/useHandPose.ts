@@ -117,6 +117,7 @@ const DEFAULT_CONFIG: Required<HandPoseConfig> = {
  */
 export function useHandPose(config?: HandPoseConfig): UseHandPoseReturn {
   const finalConfig = { ...DEFAULT_CONFIG, ...config }
+  const configRef = useRef(finalConfig)
 
   const [results, setResults] = useState<HandResult[] | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -126,6 +127,7 @@ export function useHandPose(config?: HandPoseConfig): UseHandPoseReturn {
 
   const handsRef = useRef<Hands | null>(null)
   const processingLoopRef = useRef<number | null>(null)
+  const isProcessingRef = useRef(false)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const fpsCounterRef = useRef<{ frames: number; lastTime: number }>({
     frames: 0,
@@ -144,18 +146,20 @@ export function useHandPose(config?: HandPoseConfig): UseHandPoseReturn {
       try {
         const hands = new Hands({
           locateFile: (file) => {
-            const url = `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-            console.log('[useHandPose] Loading file:', file)
+            // Usa versão específica para garantir compatibilidade
+            const url = `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${file}`
+            console.log('[useHandPose] Loading file:', url)
             return url
           },
         })
 
+        const cfg = configRef.current
         console.log('[useHandPose] Setting options...')
         hands.setOptions({
-          maxNumHands: finalConfig.maxHands,
-          modelComplexity: finalConfig.modelComplexity,
-          minDetectionConfidence: finalConfig.minDetectionConfidence,
-          minTrackingConfidence: finalConfig.minTrackingConfidence,
+          maxNumHands: cfg.maxHands,
+          modelComplexity: cfg.modelComplexity,
+          minDetectionConfidence: cfg.minDetectionConfidence,
+          minTrackingConfidence: cfg.minTrackingConfidence,
         })
 
         hands.onResults((mpResults: Results) => {
@@ -187,7 +191,20 @@ export function useHandPose(config?: HandPoseConfig): UseHandPoseReturn {
         })
 
         console.log('[useHandPose] Initializing hands model...')
-        await hands.initialize()
+        
+        // MediaPipe precisa de um primeiro envio para completar a inicialização
+        // Cria um canvas temporário como "warmup"
+        const tempCanvas = document.createElement('canvas')
+        tempCanvas.width = 640
+        tempCanvas.height = 480
+        const ctx = tempCanvas.getContext('2d')
+        if (ctx) {
+          ctx.fillStyle = '#000000'
+          ctx.fillRect(0, 0, 640, 480)
+        }
+        
+        console.log('[useHandPose] Sending warmup frame...')
+        await hands.send({ image: tempCanvas })
         
         if (!isMounted) {
           console.log('[useHandPose] Component unmounted during init, cleaning up...')
@@ -195,7 +212,7 @@ export function useHandPose(config?: HandPoseConfig): UseHandPoseReturn {
           return
         }
         
-        console.log('[useHandPose] MediaPipe Hands initialized successfully!')
+        console.log('[useHandPose] ✅ MediaPipe Hands initialized successfully!')
         handsRef.current = hands
         setIsReady(true)
         setError(null)
@@ -221,14 +238,14 @@ export function useHandPose(config?: HandPoseConfig): UseHandPoseReturn {
         handsRef.current = null
       }
     }
-  }, [finalConfig.maxHands, finalConfig.modelComplexity, finalConfig.minDetectionConfidence, finalConfig.minTrackingConfidence])
+  }, []) // Executa apenas uma vez na montagem
 
   /**
    * Processa um único frame do vídeo
    */
   const processFrame = useCallback(
     async (video: HTMLVideoElement) => {
-      if (!handsRef.current || !isReady) {
+      if (!handsRef.current) {
         return
       }
 
@@ -244,7 +261,7 @@ export function useHandPose(config?: HandPoseConfig): UseHandPoseReturn {
         // Não seta error para não interromper o loop
       }
     },
-    [isReady]
+    []
   )
 
   /**
@@ -252,29 +269,56 @@ export function useHandPose(config?: HandPoseConfig): UseHandPoseReturn {
    */
   const startProcessing = useCallback(
     (video: HTMLVideoElement) => {
-      if (!isReady || isProcessing) {
+      if (!isReady) {
+        console.log('[useHandPose] Not ready yet, cannot start processing')
+        return
+      }
+      
+      if (isProcessingRef.current) {
+        console.log('[useHandPose] Already processing')
         return
       }
 
+      console.log('[useHandPose] Starting processing loop...')
       videoRef.current = video
+      isProcessingRef.current = true
       setIsProcessing(true)
 
       const processLoop = async () => {
-        if (videoRef.current && isProcessing) {
-          await processFrame(videoRef.current)
+        if (!videoRef.current || !isProcessingRef.current || !handsRef.current) {
+          return
+        }
+
+        const vid = videoRef.current
+        
+        // Verifica se o vídeo está pronto e tem dimensões válidas
+        if (vid.readyState >= 2 && vid.videoWidth > 0 && vid.videoHeight > 0) {
+          try {
+            await handsRef.current.send({ image: vid })
+          } catch (err) {
+            // Ignora erros individuais para não travar o loop
+            console.warn('[useHandPose] Frame error (ignoring):', err)
+          }
+        }
+        
+        // Agenda próximo frame apenas se ainda estiver processando
+        if (isProcessingRef.current) {
           processingLoopRef.current = requestAnimationFrame(processLoop)
         }
       }
 
-      processLoop()
+      // Inicia o loop
+      processingLoopRef.current = requestAnimationFrame(processLoop)
     },
-    [isReady, isProcessing, processFrame]
+    [isReady]
   )
 
   /**
    * Para o loop de processamento
    */
   const stopProcessing = useCallback(() => {
+    console.log('[useHandPose] Stopping processing...')
+    isProcessingRef.current = false
     if (processingLoopRef.current) {
       cancelAnimationFrame(processingLoopRef.current)
       processingLoopRef.current = null

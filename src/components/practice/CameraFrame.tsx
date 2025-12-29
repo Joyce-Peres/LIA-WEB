@@ -158,7 +158,9 @@ export function CameraFrame({ className = '', onLandmarksDetected, skipHandPose 
   const {
     results: handResults,
     isReady: handPoseReady,
+    isProcessing: handPoseProcessing,
     error: handPoseError,
+    fps: handPoseFps,
     startProcessing,
     stopProcessing,
   } = useHandPose()
@@ -170,17 +172,17 @@ export function CameraFrame({ className = '', onLandmarksDetected, skipHandPose 
   const isHandPoseEffectivelyReady = skipHandPose || handPoseReady || handPoseTimeout || !!handPoseError
 
   /**
-   * Set timeout for hand pose loading (15 seconds)
+   * Set timeout for hand pose loading (30 seconds)
    */
   useEffect(() => {
     if (skipHandPose || handPoseReady) return
 
     const timeoutId = setTimeout(() => {
       if (!handPoseReady) {
-        console.warn('MediaPipe Hands loading timeout - continuing without hand detection')
+        console.warn('[CameraFrame] MediaPipe Hands loading timeout (30s) - continuing without hand detection')
         setHandPoseTimeout(true)
       }
-    }, 15000)
+    }, 30000)
 
     return () => clearTimeout(timeoutId)
   }, [skipHandPose, handPoseReady])
@@ -319,25 +321,51 @@ export function CameraFrame({ className = '', onLandmarksDetected, skipHandPose 
     return () => {
       stopCamera()
     }
-  }, [startCamera, stopCamera])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Executa apenas uma vez na montagem
 
   /**
    * Start MediaPipe processing when camera and model are ready
    */
   useEffect(() => {
     // Don't start processing if skipping hand pose or if timeout occurred without ready
-    if (skipHandPose || handPoseTimeout) return
-    if (!isCameraReady || !handPoseReady) return
+    if (skipHandPose || handPoseTimeout) {
+      console.log('[CameraFrame] Skipping hand pose:', { skipHandPose, handPoseTimeout })
+      return
+    }
+    
+    if (!isCameraReady) {
+      console.log('[CameraFrame] Camera not ready yet')
+      return
+    }
+    
+    if (!handPoseReady) {
+      console.log('[CameraFrame] HandPose not ready yet')
+      return
+    }
 
     const video = videoRef.current
-    if (!video) return
+    if (!video) {
+      console.log('[CameraFrame] No video ref')
+      return
+    }
 
+    console.log('[CameraFrame] ✅ All ready! Starting hand pose processing...', {
+      isCameraReady,
+      handPoseReady,
+      videoWidth: video.videoWidth,
+      videoHeight: video.videoHeight,
+      readyState: video.readyState
+    })
+    
     startProcessing(video)
 
     return () => {
+      console.log('[CameraFrame] Cleanup: stopping hand pose processing')
       stopProcessing()
     }
-  }, [handPoseReady, isCameraReady, startProcessing, stopProcessing, videoRef, skipHandPose, handPoseTimeout])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [handPoseReady, isCameraReady, skipHandPose, handPoseTimeout])
 
   // Determine what overlay to show
   const showLoading = !isCameraReady || (!isHandPoseEffectivelyReady && !cameraError && !handPoseError)
@@ -434,10 +462,13 @@ export function CameraFrame({ className = '', onLandmarksDetected, skipHandPose 
 
       {/* Debug info overlay (development only) */}
       {import.meta.env.DEV && !showLoading && !fatalError && (
-        <div className="absolute top-2 left-2 bg-black/70 text-white text-xs p-2 rounded">
-          <div>Mãos detectadas: {handResults?.length || 0}</div>
-          <div>Dimensões: {videoDimensions.width}x{videoDimensions.height}</div>
+        <div className="absolute top-2 left-2 bg-black/70 text-white text-xs p-2 rounded space-y-1">
+          <div>Mãos: {handResults?.length || 0}</div>
+          <div>Video: {videoDimensions.width}x{videoDimensions.height}</div>
+          <div>Camera: {isActive ? '✅' : '❌'} | Ready: {isCameraReady ? '✅' : '❌'}</div>
           <div>HandPose: {handPoseReady ? '✅' : handPoseError ? '❌' : handPoseTimeout ? '⏱️' : '⏳'}</div>
+          <div>Processing: {handPoseProcessing ? '✅' : '❌'}</div>
+          <div>FPS: {handPoseFps.toFixed(1)}</div>
         </div>
       )}
     </div>
