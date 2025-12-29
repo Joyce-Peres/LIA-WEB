@@ -108,6 +108,7 @@ export function useCamera(config?: CameraConfig): UseCameraReturn {
    * Inicia a câmera com as configurações especificadas
    */
   const startCamera = useCallback(async () => {
+    console.log('[useCamera] Starting camera...')
     setIsLoading(true)
     setError(null)
 
@@ -128,20 +129,53 @@ export function useCamera(config?: CameraConfig): UseCameraReturn {
         audio: false,
       }
 
+      console.log('[useCamera] Requesting camera access with constraints:', constraints)
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints)
+      console.log('[useCamera] Camera access granted!')
 
       // Anexa stream ao elemento de vídeo
       if (videoRef.current) {
+        console.log('[useCamera] Attaching stream to video element...')
         videoRef.current.srcObject = mediaStream
+        
         // Aguarda até que o vídeo esteja pronto
-        await new Promise<void>((resolve) => {
-          if (videoRef.current) {
-            videoRef.current.onloadedmetadata = () => {
-              videoRef.current?.play()
-              resolve()
-            }
+        await new Promise<void>((resolve, reject) => {
+          const video = videoRef.current
+          if (!video) {
+            reject(new Error('Video element not found'))
+            return
+          }
+
+          // Timeout para evitar espera infinita
+          const timeout = setTimeout(() => {
+            console.warn('[useCamera] Metadata load timeout, proceeding anyway...')
+            video.play().catch(() => {})
+            resolve()
+          }, 5000)
+
+          // Se já tiver metadata, resolve imediatamente
+          if (video.readyState >= 1) {
+            console.log('[useCamera] Video already has metadata')
+            clearTimeout(timeout)
+            video.play().catch(() => {})
+            resolve()
+            return
+          }
+
+          video.onloadedmetadata = () => {
+            console.log('[useCamera] Video metadata loaded, playing...')
+            clearTimeout(timeout)
+            video.play().catch(() => {})
+            resolve()
+          }
+
+          video.onerror = () => {
+            console.error('[useCamera] Video error')
+            clearTimeout(timeout)
+            reject(new Error('Video loading error'))
           }
         })
+        console.log('[useCamera] Video ready!')
       }
 
       setStream(mediaStream)

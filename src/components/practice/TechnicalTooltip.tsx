@@ -19,7 +19,6 @@
  * ```
  */
 
-import React from 'react'
 import { TooltipTechnicalData } from '../../hooks/ui/useTooltip'
 
 /**
@@ -45,7 +44,8 @@ export function TechnicalTooltip({
   isVisible,
   onClose
 }: TechnicalTooltipProps) {
-  const { confidence, inferenceTime, gestureName } = technicalData
+  const { confidence, inferenceTime, gesture, isCorrect } = technicalData
+  const safeInference = inferenceTime ?? 0
 
   if (!isVisible) return null
 
@@ -104,12 +104,12 @@ export function TechnicalTooltip({
         }}
         role="tooltip"
         aria-live="polite"
-        aria-label={`Detalhes técnicos do reconhecimento: ${gestureName || 'gesto'}`}
+        aria-label={`Detalhes técnicos do reconhecimento: ${gesture || 'gesto'}`}
       >
         {/* Header with gesture name if available */}
-        {gestureName && (
+        {gesture && (
           <div className="text-sm font-medium text-gray-300 mb-3 pb-2 border-b border-gray-600">
-            {gestureName}
+            {gesture} {isCorrect ? '✓' : '✗'}
           </div>
         )}
 
@@ -141,15 +141,15 @@ export function TechnicalTooltip({
           {/* Inference time */}
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-gray-300">Tempo:</span>
-            <span className={`text-sm font-bold ${getInferenceTimeColor(inferenceTime)}`}>
-              {inferenceTime.toFixed(0)}ms
+            <span className={`text-sm font-bold ${getInferenceTimeColor(safeInference)}`}>
+              {safeInference.toFixed(0)}ms
             </span>
           </div>
 
           {/* Performance indicator */}
           <div className="text-xs text-gray-400 text-center pt-1 border-t border-gray-600">
-            {inferenceTime < 50 ? '⚡ Rápido' :
-             inferenceTime < 100 ? '✓ Adequado' :
+            {safeInference < 50 ? '⚡ Rápido' :
+             safeInference < 100 ? '✓ Adequado' :
              '🐌 Lento'}
           </div>
         </div>

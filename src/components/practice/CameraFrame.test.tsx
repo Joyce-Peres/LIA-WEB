@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, beforeAll, afterAll, type Mock } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { CameraFrame } from './CameraFrame'
+import type { CameraFrameProps } from './CameraFrame'
 
 // Mock hooks
 vi.mock('../../hooks/useCamera', () => ({
@@ -12,53 +13,108 @@ vi.mock('../../hooks/useHandPose', () => ({
 }))
 
 import { useCamera } from '../../hooks/useCamera'
+import type { UseCameraReturn } from '../../hooks/useCamera'
 import { useHandPose } from '../../hooks/useHandPose'
+import type { HandResult, UseHandPoseReturn } from '../../hooks/useHandPose'
+
+const mockedUseCamera = vi.mocked(useCamera)
+const mockedUseHandPose = vi.mocked(useHandPose)
 
 // Mock data
-const mockVideoDimensions = { width: 640, height: 480 }
-const mockHandResults = [
+const mockHandResults: HandResult[] = [
   {
     landmarks: [
-      { x: 0.5, y: 0.5, z: 0 }, // Wrist
-      { x: 0.4, y: 0.4, z: 0 }, // Thumb
-      // ... more landmarks would be here
+      { x: 0.5, y: 0.5, z: 0 },
+      { x: 0.4, y: 0.4, z: 0 },
     ],
-    handedness: 'Right' as const,
+    handedness: 'Right',
+    score: 0.95,
   },
 ]
 
 describe('CameraFrame', () => {
   const mockStartCamera = vi.fn()
   const mockStopCamera = vi.fn()
-  const mockOnLandmarksDetected = vi.fn()
+  let mockStartProcessing: Mock
+  let mockStopProcessing: Mock
+  let mockProcessFrame: Mock
+  let mockVideoElement: HTMLVideoElement
+  let mockVideoRef: { current: HTMLVideoElement | null } = { current: null }
+  type LandmarksHandler = NonNullable<CameraFrameProps['onLandmarksDetected']>
+  const mockOnLandmarksDetected = vi.fn<LandmarksHandler>()
+  const landmarksHandler = mockOnLandmarksDetected as unknown as LandmarksHandler
+  const buildCameraReturn = (overrides: Partial<UseCameraReturn> = {}): UseCameraReturn => ({
+    videoRef: mockVideoRef,
+    stream: null,
+    startCamera: mockStartCamera,
+    stopCamera: mockStopCamera,
+    isActive: true,
+    isLoading: false,
+    error: null,
+    ...overrides,
+  })
+  const buildHandPoseReturn = (overrides: Partial<UseHandPoseReturn> = {}): UseHandPoseReturn => ({
+    results: [],
+    isProcessing: false,
+    isReady: true,
+    error: null,
+    fps: 0,
+    processFrame: mockProcessFrame,
+    startProcessing: mockStartProcessing,
+    stopProcessing: mockStopProcessing,
+    ...overrides,
+  })
+  const mockCanvasContext = {
+    clearRect: vi.fn(),
+    beginPath: vi.fn(),
+    moveTo: vi.fn(),
+    lineTo: vi.fn(),
+    stroke: vi.fn(),
+    arc: vi.fn(),
+    fill: vi.fn(),
+    fillStyle: '#fff',
+    strokeStyle: '#fff',
+    lineWidth: 0,
+    globalAlpha: 1,
+    canvas: {
+      width: 640,
+      height: 480,
+      style: {},
+    },
+  } as unknown as CanvasRenderingContext2D;
+  const originalGetContext = HTMLCanvasElement.prototype.getContext
+
+  beforeAll(() => {
+    const mockGetContext = ((contextId: unknown) => (
+      contextId === '2d' ? mockCanvasContext : null
+    )) as typeof HTMLCanvasElement.prototype.getContext
+
+    HTMLCanvasElement.prototype.getContext = mockGetContext
+  })
+
+  afterAll(() => {
+    HTMLCanvasElement.prototype.getContext = originalGetContext
+  })
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockVideoElement = document.createElement('video') as HTMLVideoElement
+    mockVideoRef = { current: mockVideoElement }
+    mockStartProcessing = vi.fn()
+    mockStopProcessing = vi.fn()
+    mockProcessFrame = vi.fn()
 
     // Default mock implementations
-    ;(useCamera as any).mockReturnValue({
-      startCamera: mockStartCamera,
-      stopCamera: mockStopCamera,
-      isCameraReady: true,
-      error: null,
-      videoDimensions: mockVideoDimensions,
-    })
+    mockedUseCamera.mockReturnValue(buildCameraReturn())
 
-    ;(useHandPose as any).mockReturnValue({
-      handResults: [],
-      isReady: true,
-      error: null,
-    })
+    mockedUseHandPose.mockReturnValue(buildHandPoseReturn())
   })
 
   it('shows loading state when camera is not ready', () => {
-    ;(useCamera as any).mockReturnValue({
-      startCamera: mockStartCamera,
-      stopCamera: mockStopCamera,
-      isCameraReady: false,
-      error: null,
-      videoDimensions: mockVideoDimensions,
-    })
+    mockedUseCamera.mockReturnValue(buildCameraReturn({
+      isActive: false,
+      isLoading: true,
+    }))
 
     render(<CameraFrame />)
 
@@ -67,11 +123,9 @@ describe('CameraFrame', () => {
   })
 
   it('shows loading state when hand pose is not ready', () => {
-    ;(useHandPose as any).mockReturnValue({
-      handResults: [],
+    mockedUseHandPose.mockReturnValue(buildHandPoseReturn({
       isReady: false,
-      error: null,
-    })
+    }))
 
     render(<CameraFrame />)
 
@@ -79,13 +133,9 @@ describe('CameraFrame', () => {
   })
 
   it('shows error state when camera has error', () => {
-    ;(useCamera as any).mockReturnValue({
-      startCamera: mockStartCamera,
-      stopCamera: mockStopCamera,
-      isCameraReady: true,
+    mockedUseCamera.mockReturnValue(buildCameraReturn({
       error: 'Camera access denied',
-      videoDimensions: mockVideoDimensions,
-    })
+    }))
 
     render(<CameraFrame />)
 
@@ -95,11 +145,9 @@ describe('CameraFrame', () => {
   })
 
   it('shows error state when hand pose has error', () => {
-    ;(useHandPose as any).mockReturnValue({
-      handResults: [],
-      isReady: true,
+    mockedUseHandPose.mockReturnValue(buildHandPoseReturn({
       error: 'MediaPipe initialization failed',
-    })
+    }))
 
     render(<CameraFrame />)
 
@@ -132,25 +180,23 @@ describe('CameraFrame', () => {
   })
 
   it('calls onLandmarksDetected when hands are detected', () => {
-    ;(useHandPose as any).mockReturnValue({
-      handResults: mockHandResults,
-      isReady: true,
-      error: null,
-    })
+    mockedUseHandPose.mockReturnValue(buildHandPoseReturn({
+      results: mockHandResults,
+    }))
 
-    render(<CameraFrame onLandmarksDetected={mockOnLandmarksDetected} />)
+    render(<CameraFrame onLandmarksDetected={landmarksHandler} />)
 
     // Wait for effect to run
-    waitFor(() => {
+    return waitFor(() => {
       expect(mockOnLandmarksDetected).toHaveBeenCalledWith(
         [mockHandResults[0].landmarks],
-        mockVideoDimensions
+        { width: 640, height: 480 }
       )
     })
   })
 
   it('does not call onLandmarksDetected when no hands detected', () => {
-    render(<CameraFrame onLandmarksDetected={mockOnLandmarksDetected} />)
+    render(<CameraFrame onLandmarksDetected={landmarksHandler} />)
 
     expect(mockOnLandmarksDetected).not.toHaveBeenCalled()
   })
@@ -185,13 +231,9 @@ describe('CameraFrame', () => {
   })
 
   it('handles retry button click', () => {
-    ;(useCamera as any).mockReturnValue({
-      startCamera: mockStartCamera,
-      stopCamera: mockStopCamera,
-      isCameraReady: true,
+    mockedUseCamera.mockReturnValue(buildCameraReturn({
       error: 'Camera error',
-      videoDimensions: mockVideoDimensions,
-    })
+    }))
 
     render(<CameraFrame />)
 

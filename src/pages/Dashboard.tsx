@@ -8,14 +8,13 @@ import {
   contentRepository,
   type ModuleWithStats,
 } from '@/repositories/contentRepository'
-import type { Lesson } from '@/types/database'
+import { MockContentUtils, sectionIcons } from '@/data/mockContent'
 
 export function DashboardPage() {
   const navigate = useNavigate()
   const [session, setSession] = useState<AuthSession | null>(null)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [modules, setModules] = useState<ModuleWithStats[]>([])
-  const [lessonsByModule, setLessonsByModule] = useState<Record<string, Lesson[]>>({})
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -34,22 +33,6 @@ export function DashboardPage() {
           // Carrega módulos com contagem de lições
           const modulesWithStats = await contentRepository.getModulesWithStats()
           setModules(modulesWithStats)
-
-          // Carrega lições por módulo (para numerar níveis)
-          const lessonEntries = await Promise.all(
-            modulesWithStats.map(async (module) => {
-              const lessons = await contentRepository.getLessonsByModule(module.id)
-              lessons.sort((a, b) => a.orderIndex - b.orderIndex)
-              return [module.id, lessons] as const
-            }),
-          )
-
-          const grouped: Record<string, Lesson[]> = {}
-          lessonEntries.forEach(([moduleId, lessons]) => {
-            grouped[moduleId] = lessons
-          })
-
-          setLessonsByModule(grouped)
         } else {
           navigate('/login', { replace: true })
         }
@@ -95,29 +78,41 @@ export function DashboardPage() {
     return { totalLessons, completedLessons, progress }
   }, [modules])
 
-  const renderModuleLevels = (lessons: Lesson[]) => {
-    if (!lessons.length) {
+  const renderModuleLevels = (moduleId: string) => {
+    const levels = MockContentUtils.getLevelsForModule(moduleId)
+
+    if (!levels.length) {
       return <div className="text-xs text-gray-500">Nenhum nível disponível</div>
     }
 
     return (
       <div className="flex flex-wrap gap-2 mt-3">
-        {lessons.map((lesson, index) => (
-          <button
-            key={lesson.id}
-            type="button"
-            className={`min-w-[36px] rounded-md border px-2 py-1 text-xs font-semibold transition ${
-              index === 0
-                ? 'border-purple-500 bg-purple-50 text-purple-700'
-                : 'border-gray-200 bg-gray-100 text-gray-600'
-            }`}
-            onClick={() => navigate(`/lessons/${lesson.id}`)}
-          >
-            {index + 1}
-          </button>
-        ))}
+        {levels.map((level) => {
+          // Only first level is unlocked by default
+          const isUnlocked = level === 1
+          return (
+            <button
+              key={level}
+              type="button"
+              disabled={!isUnlocked}
+              className={`min-w-[36px] rounded-md border px-2 py-1 text-xs font-semibold transition ${
+                isUnlocked
+                  ? 'border-purple-500 bg-purple-50 text-purple-700 hover:bg-purple-100'
+                  : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+              }`}
+              onClick={() => navigate(`/modules/${moduleId}/level/${level}`)}
+              title={isUnlocked ? `Nível ${level}` : 'Complete o nível anterior para desbloquear'}
+            >
+              {isUnlocked ? level : `🔒 ${level}`}
+            </button>
+          )
+        })}
       </div>
     )
+  }
+
+  const handleModuleClick = (_moduleId: string, moduleSlug: string) => {
+    navigate(`/modules/${moduleSlug}`)
   }
 
   if (isLoading) {
@@ -177,27 +172,28 @@ export function DashboardPage() {
         {/* Grade de seções / níveis semelhante ao projeto base */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {modules.map((module) => {
-            const lessons = lessonsByModule[module.id] ?? []
             const completed = 0 // placeholder
             const progress = module.lessonCount > 0 ? completed / module.lessonCount : 0
+            const icon = sectionIcons[module.id] || { emoji: '📚', label: module.title }
 
             return (
               <div
                 key={module.id}
-                className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition"
+                className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition cursor-pointer"
+                onClick={() => handleModuleClick(module.id, module.slug)}
               >
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-lg" aria-hidden>
-                        {module.iconUrl ? '📚' : '📘'}
+                      <span className="text-2xl" aria-hidden>
+                        {icon.emoji}
                       </span>
                       <h2 className="text-lg font-semibold text-gray-900">{module.title}</h2>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">{module.description}</p>
+                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">{module.description}</p>
                   </div>
-                  <span className="text-xs text-gray-500">
-                    {(lessons.length || module.lessonCount) ?? 0} níveis
+                  <span className="text-xs text-gray-500 whitespace-nowrap">
+                    {MockContentUtils.getLevelsForModule(module.id).length} níveis
                   </span>
                 </div>
 
@@ -214,7 +210,7 @@ export function DashboardPage() {
                   </div>
                 </div>
 
-                {renderModuleLevels(lessons)}
+                {renderModuleLevels(module.id)}
               </div>
             )
           })}
@@ -229,27 +225,20 @@ export function DashboardPage() {
         {/* Ações rápidas para manter fluxo atual */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold text-gray-900">Ações Rápidas</h3>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => navigate('/modules')}
-                className="px-3 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Explorar Módulos
-              </button>
-              <button
-                type="button"
-                onClick={handleAddXp}
-                className="px-3 py-2 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition-colors"
-              >
-                +1 XP (Demo)
-              </button>
-            </div>
+            <h3 className="text-lg font-semibold text-gray-900">💡 Dicas</h3>
+            <button
+              type="button"
+              onClick={handleAddXp}
+              className="px-3 py-2 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              +1 XP (Demo)
+            </button>
           </div>
-          <p className="text-sm text-gray-600">
-            Clique em um nível para abrir a lição correspondente. As seções seguem a mesma divisão do projeto base.
-          </p>
+          <ul className="text-sm text-gray-600 space-y-1">
+            <li>• Clique em uma <strong>seção</strong> para ver todos os níveis disponíveis</li>
+            <li>• Complete o <strong>Nível 1</strong> de cada seção para desbloquear os próximos</li>
+            <li>• Pratique os gestos em frente à câmera para ganhar XP!</li>
+          </ul>
         </div>
 
         {/* Debug Info (development only) */}

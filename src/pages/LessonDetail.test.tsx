@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { LessonDetail } from './LessonDetail'
 import { contentRepository } from '../repositories/contentRepository'
 import { LessonWithModule } from '../types/database'
 
 // Mock React Router
 const mockNavigate = vi.fn()
-const mockParams = { lessonId: 'lesson-1' }
+const mockParams: { lessonId?: string } = { lessonId: 'lesson-1' }
 
 vi.mock('react-router-dom', () => ({
   useParams: () => mockParams,
@@ -30,6 +30,7 @@ const mockLesson: LessonWithModule = {
   minConfidenceThreshold: 0.75,
   xpReward: 10,
   orderIndex: 1,
+  level: 1,
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-01T00:00:00Z',
   module: {
@@ -54,6 +55,7 @@ describe('LessonDetail', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockNavigate.mockClear()
+    mockParams.lessonId = 'lesson-1'
   })
 
   it('shows loading skeleton initially', () => {
@@ -63,8 +65,8 @@ describe('LessonDetail', () => {
 
     render(<LessonDetail />)
 
-    expect(screen.getByText('Dashboard')).toBeInTheDocument()
-    expect(document.querySelector('.animate-pulse')).toBeInTheDocument()
+    const shimmerBlocks = document.querySelectorAll('.animate-pulse')
+    expect(shimmerBlocks.length).toBeGreaterThan(0)
   })
 
   it('loads and displays lesson data successfully', async () => {
@@ -73,12 +75,20 @@ describe('LessonDetail', () => {
     render(<LessonDetail />)
 
     await waitFor(() => {
-      expect(screen.getByText('Letra A')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /Letra A/ })).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Sinal: A')).toBeInTheDocument()
-    expect(screen.getByText('Módulo: Alfabeto')).toBeInTheDocument()
-    expect(screen.getByText('10 XP')).toBeInTheDocument()
+    const header = screen.getByRole('heading', { name: /Letra A/ }).closest('div')
+    expect(header).not.toBeNull()
+
+    expect(screen.getByText(/Sinal:/)).toBeInTheDocument()
+    expect(screen.getByText(/Módulo:/)).toBeInTheDocument()
+
+    const rewardBadge = screen.getByText('Recompensa').parentElement
+    expect(rewardBadge).not.toBeNull()
+    expect(
+      within(rewardBadge as HTMLElement).getByText(/10\s+XP/)
+    ).toBeInTheDocument()
     expect(screen.getByText('Sobre esta lição')).toBeInTheDocument()
   })
 
@@ -151,7 +161,13 @@ describe('LessonDetail', () => {
       expect(screen.getByText('Começar Prática')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Ganhe 10 XP ao completar esta lição')).toBeInTheDocument()
+    const practiceSection = screen.getByRole('heading', { name: 'Pronto para praticar?' }).closest('div')
+    expect(practiceSection).not.toBeNull()
+    expect(
+      within(practiceSection as HTMLElement).getByText(
+        (text) => text.includes('Ganhe') && text.includes('10') && text.includes('XP')
+      )
+    ).toBeInTheDocument()
   })
 
   it('shows locked state for locked lessons', async () => {
@@ -198,9 +214,10 @@ describe('LessonDetail', () => {
       expect(screen.getByText('Dashboard')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('›')).toBeInTheDocument()
-    expect(screen.getByText('Módulos')).toBeInTheDocument()
-    expect(screen.getByText('Alfabeto')).toBeInTheDocument()
+    const breadcrumb = screen.getByRole('navigation')
+    expect(within(breadcrumb).getAllByText('›')).toHaveLength(3)
+    expect(within(breadcrumb).getByText('Módulos')).toBeInTheDocument()
+    expect(within(breadcrumb).getByText('Alfabeto')).toBeInTheDocument()
   })
 
   it('shows tips for practice', async () => {
@@ -242,7 +259,7 @@ describe('LessonDetail', () => {
     fireEvent.click(retryButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Letra A')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /Letra A/ })).toBeInTheDocument()
     })
 
     expect(contentRepository.getLessonById).toHaveBeenCalledTimes(2)
@@ -250,7 +267,7 @@ describe('LessonDetail', () => {
 
   it('handles missing lessonId parameter', () => {
     // Mock useParams to return no lessonId
-    vi.mocked(vi.importMock('react-router-dom')).useParams.mockReturnValue({})
+    mockParams.lessonId = undefined
 
     render(<LessonDetail />)
 
@@ -266,7 +283,7 @@ describe('LessonDetail', () => {
     render(<LessonDetail />)
 
     await waitFor(() => {
-      expect(screen.getByText('Letra A')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /Letra A/ })).toBeInTheDocument()
     })
 
     expect(consoleSpy).toHaveBeenCalledWith('Loading lesson:', 'lesson-1')

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { TechnicalTooltip } from './TechnicalTooltip'
 import { TooltipTechnicalData } from '../../hooks/ui/useTooltip'
@@ -13,7 +13,9 @@ describe('TechnicalTooltip', () => {
 
   const mockData: TooltipTechnicalData = {
     confidence: 0.85,
-    inferenceTime: 45
+    inferenceTime: 45,
+    gesture: 'Olá',
+    isCorrect: true
   }
 
   beforeEach(() => {
@@ -49,7 +51,7 @@ describe('TechnicalTooltip', () => {
   it('displays confidence percentage', () => {
     render(
       <TechnicalTooltip
-        technicalData={{ confidence: 0.75, inferenceTime: 60 }}
+        technicalData={{ confidence: 0.75, inferenceTime: 60, gesture: 'Teste' }}
         {...baseProps}
       />
     )
@@ -71,7 +73,7 @@ describe('TechnicalTooltip', () => {
   it('shows green color for high confidence', () => {
     render(
       <TechnicalTooltip
-        technicalData={{ confidence: 0.9, inferenceTime: 30 }}
+        technicalData={{ confidence: 0.9, inferenceTime: 30, gesture: 'Teste' }}
         {...baseProps}
       />
     )
@@ -83,7 +85,7 @@ describe('TechnicalTooltip', () => {
   it('shows yellow color for medium confidence', () => {
     render(
       <TechnicalTooltip
-        technicalData={{ confidence: 0.7, inferenceTime: 30 }}
+        technicalData={{ confidence: 0.7, inferenceTime: 30, gesture: 'Teste' }}
         {...baseProps}
       />
     )
@@ -95,7 +97,7 @@ describe('TechnicalTooltip', () => {
   it('shows red color for low confidence', () => {
     render(
       <TechnicalTooltip
-        technicalData={{ confidence: 0.5, inferenceTime: 30 }}
+        technicalData={{ confidence: 0.5, inferenceTime: 30, gesture: 'Teste' }}
         {...baseProps}
       />
     )
@@ -107,7 +109,7 @@ describe('TechnicalTooltip', () => {
   it('displays confidence bar with correct width', () => {
     render(
       <TechnicalTooltip
-        technicalData={{ confidence: 0.75, inferenceTime: 30 }}
+        technicalData={{ confidence: 0.75, inferenceTime: 30, gesture: 'Teste' }}
         {...baseProps}
       />
     )
@@ -130,7 +132,7 @@ describe('TechnicalTooltip', () => {
   it('shows fast performance indicator', () => {
     render(
       <TechnicalTooltip
-        technicalData={{ confidence: 0.8, inferenceTime: 40 }}
+        technicalData={{ confidence: 0.8, inferenceTime: 40, gesture: 'Teste' }}
         {...baseProps}
       />
     )
@@ -141,7 +143,7 @@ describe('TechnicalTooltip', () => {
   it('shows adequate performance indicator', () => {
     render(
       <TechnicalTooltip
-        technicalData={{ confidence: 0.8, inferenceTime: 75 }}
+        technicalData={{ confidence: 0.8, inferenceTime: 75, gesture: 'Teste' }}
         {...baseProps}
       />
     )
@@ -152,7 +154,7 @@ describe('TechnicalTooltip', () => {
   it('shows slow performance indicator', () => {
     render(
       <TechnicalTooltip
-        technicalData={{ confidence: 0.8, inferenceTime: 120 }}
+        technicalData={{ confidence: 0.8, inferenceTime: 120, gesture: 'Teste' }}
         {...baseProps}
       />
     )
@@ -164,7 +166,8 @@ describe('TechnicalTooltip', () => {
     const dataWithGesture: TooltipTechnicalData = {
       confidence: 0.8,
       inferenceTime: 50,
-      gestureName: 'Olá'
+      gesture: 'Olá',
+      isCorrect: true
     }
 
     render(
@@ -174,7 +177,7 @@ describe('TechnicalTooltip', () => {
       />
     )
 
-    expect(screen.getByText('Olá')).toBeInTheDocument()
+    expect(screen.getByText(/Olá/)).toBeInTheDocument()
   })
 
   it('closes tooltip when close button is clicked', () => {
@@ -216,7 +219,6 @@ describe('TechnicalTooltip', () => {
     )
 
     const closeButton = screen.getByLabelText('Fechar tooltip')
-    const mockEvent = { stopPropagation: vi.fn() }
 
     // Simulate click with custom event
     closeButton.click()
@@ -247,7 +249,7 @@ describe('TechnicalTooltip', () => {
     const dataWithGesture: TooltipTechnicalData = {
       confidence: 0.8,
       inferenceTime: 50,
-      gestureName: 'Olá'
+      gesture: 'Olá'
     }
 
     render(

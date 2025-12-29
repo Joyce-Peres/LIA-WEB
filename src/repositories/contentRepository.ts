@@ -3,6 +3,7 @@
  *
  * Repository layer for accessing modules and lessons data from Supabase.
  * Provides typed, error-safe functions for content operations.
+ * Falls back to mock data when Supabase is not available.
  *
  * @module repositories/contentRepository
  * @category Data Access
@@ -23,6 +24,7 @@
  */
 
 import { supabase } from '../lib/supabase'
+import { mockContentRepository, MockContentRepository } from './mockContentRepository'
 import type {
   Module,
   Lesson,
@@ -30,6 +32,13 @@ import type {
   LessonWithModule,
   DifficultyLevel
 } from '../types/database'
+
+/**
+ * Check if we should use mock data
+ * Always use mock data for now since Supabase database is empty
+ * TODO: Set to false when Supabase has real data
+ */
+const USE_MOCK_DATA = true
 
 /**
  * Query options for module operations
@@ -353,6 +362,7 @@ class SupabaseContentRepository implements ContentRepository {
       minConfidenceThreshold: dbLesson.min_confidence_threshold,
       xpReward: dbLesson.xp_reward,
       orderIndex: dbLesson.order_index,
+      level: dbLesson.level || 1,
       createdAt: dbLesson.created_at,
       updatedAt: dbLesson.updated_at,
     }
@@ -361,8 +371,11 @@ class SupabaseContentRepository implements ContentRepository {
 
 /**
  * Singleton instance of the content repository
+ * Uses mock data in development or when Supabase is not configured
  */
-export const contentRepository = new SupabaseContentRepository()
+export const contentRepository: SupabaseContentRepository | MockContentRepository = USE_MOCK_DATA
+  ? mockContentRepository
+  : new SupabaseContentRepository()
 
 /**
  * Export repository class for testing purposes

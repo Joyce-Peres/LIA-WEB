@@ -64,11 +64,9 @@ function PathConnector({ fromStatus, toStatus, isLast = false }: PathConnectorPr
     // Determine connector color based on progress flow
     if (fromStatus === 'completed' && toStatus === 'completed') {
       return 'bg-gradient-to-r from-yellow-400 to-yellow-400'
-    }
-    if (fromStatus === 'completed' || toStatus === 'in-progress') {
+    } else if (fromStatus === 'completed' && toStatus === 'in-progress') {
       return 'bg-gradient-to-r from-yellow-400 to-purple-500'
-    }
-    if (fromStatus === 'in-progress' && toStatus === 'in-progress') {
+    } else if (fromStatus === 'in-progress' && toStatus === 'in-progress') {
       return 'bg-gradient-to-r from-purple-500 to-purple-500'
     }
     return 'bg-gradient-to-r from-gray-300 to-gray-300'

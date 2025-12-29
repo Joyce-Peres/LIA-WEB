@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { renderHook, act, waitFor } from '@testing-library/react'
-import { useFeedbackState, PredictionResult } from './useFeedbackState'
+import { renderHook, act } from '@testing-library/react'
+import { useFeedbackState, type PredictionResult, type FeedbackState } from './useFeedbackState'
 
 describe('useFeedbackState', () => {
-  let mockOnStateChange: ReturnType<typeof vi.fn>
+  let mockOnStateChange: ReturnType<typeof vi.fn<(state: FeedbackState, prediction?: PredictionResult) => void>>
 
   beforeEach(() => {
-    mockOnStateChange = vi.fn()
+    mockOnStateChange = vi.fn<(state: FeedbackState, prediction?: PredictionResult) => void>()
     vi.useFakeTimers()
   })
 
@@ -32,7 +32,7 @@ describe('useFeedbackState', () => {
     expect(mockOnStateChange).toHaveBeenCalledWith('processing', undefined)
   })
 
-  it('should handle correct prediction with high confidence', async () => {
+  it('should handle correct prediction with high confidence', () => {
     const { result } = renderHook(() => useFeedbackState({ onStateChange: mockOnStateChange }))
 
     const prediction: PredictionResult = {
@@ -55,9 +55,7 @@ describe('useFeedbackState', () => {
       vi.advanceTimersByTime(200)
     })
 
-    await waitFor(() => {
-      expect(result.current.state).toBe('correct')
-    })
+    expect(result.current.state).toBe('correct')
     expect(mockOnStateChange).toHaveBeenCalledWith('correct', prediction)
 
     // Fast-forward feedback duration
@@ -65,13 +63,11 @@ describe('useFeedbackState', () => {
       vi.advanceTimersByTime(1500)
     })
 
-    await waitFor(() => {
-      expect(result.current.state).toBe('idle')
-    })
+    expect(result.current.state).toBe('idle')
     expect(mockOnStateChange).toHaveBeenCalledWith('idle', undefined)
   })
 
-  it('should handle incorrect prediction', async () => {
+  it('should handle incorrect prediction', () => {
     const { result } = renderHook(() => useFeedbackState({ onStateChange: mockOnStateChange }))
 
     const prediction: PredictionResult = {
@@ -93,13 +89,11 @@ describe('useFeedbackState', () => {
       vi.advanceTimersByTime(200)
     })
 
-    await waitFor(() => {
-      expect(result.current.state).toBe('incorrect')
-    })
+    expect(result.current.state).toBe('incorrect')
     expect(mockOnStateChange).toHaveBeenCalledWith('incorrect', prediction)
   })
 
-  it('should handle correct prediction with low confidence', async () => {
+  it('should handle correct prediction with low confidence', () => {
     const { result } = renderHook(() => useFeedbackState({
       onStateChange: mockOnStateChange,
       confidenceThreshold: 0.8
@@ -121,9 +115,7 @@ describe('useFeedbackState', () => {
       vi.advanceTimersByTime(200)
     })
 
-    await waitFor(() => {
-      expect(result.current.state).toBe('incorrect')
-    })
+    expect(result.current.state).toBe('incorrect')
     // Even though isCorrect is true, confidence is too low
   })
 
@@ -196,7 +188,7 @@ describe('useFeedbackState', () => {
     consoleSpy.mockRestore()
   })
 
-  it('should use custom timeouts', async () => {
+  it('should use custom timeouts', () => {
     const { result } = renderHook(() => useFeedbackState({
       processingTimeout: 500,
       feedbackDuration: 300,
@@ -219,21 +211,17 @@ describe('useFeedbackState', () => {
       vi.advanceTimersByTime(500)
     })
 
-    await waitFor(() => {
-      expect(result.current.state).toBe('correct')
-    })
+    expect(result.current.state).toBe('correct')
 
     // Fast-forward custom feedback duration
     act(() => {
       vi.advanceTimersByTime(300)
     })
 
-    await waitFor(() => {
-      expect(result.current.state).toBe('idle')
-    })
+    expect(result.current.state).toBe('idle')
   })
 
-  it('should store last prediction result', async () => {
+  it('should store last prediction result', () => {
     const { result } = renderHook(() => useFeedbackState())
 
     const prediction: PredictionResult = {
@@ -254,9 +242,7 @@ describe('useFeedbackState', () => {
       vi.advanceTimersByTime(1700)
     })
 
-    await waitFor(() => {
-      expect(result.current.lastPrediction).toBeNull()
-    })
+    expect(result.current.lastPrediction).toBeNull()
   })
 
   it('should cleanup timeouts on unmount', () => {

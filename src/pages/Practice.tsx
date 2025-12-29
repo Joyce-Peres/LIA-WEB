@@ -14,15 +14,14 @@
  * ```
  */
 
-import React, { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { contentRepository } from '../repositories/contentRepository'
 import { CameraFrame, HandLandmark } from '../components/practice/CameraFrame'
-import { useFeedbackState } from '../hooks/feedback/useFeedbackState'
+import { useFeedbackState, type PredictionResult as FeedbackPredictionResult } from '../hooks/feedback/useFeedbackState'
 import { useComboSystem } from '../hooks/feedback/useComboSystem'
-import { useTooltip } from '../hooks/ui/useTooltip'
+import { useTooltip, type TooltipTechnicalData } from '../hooks/ui/useTooltip'
 import { StarParticle } from '../components/practice/StarParticle'
-import { TechnicalTooltip } from '../components/practice/TechnicalTooltip'
 import { TechnicalTooltip } from '../components/practice/TechnicalTooltip'
 import type { LessonWithModule } from '../types/database'
 
@@ -42,6 +41,7 @@ interface PredictionResult {
   inferenceTime?: number
   modelVersion?: string
   landmarksCount?: number
+  videoDimensions?: VideoDimensions
 }
 
 /**
@@ -53,7 +53,7 @@ interface StarParticleData {
   y: number
   size: number
   color: 'purple' | 'yellow'
-  predictionData?: PredictionResult
+  technicalData?: TooltipTechnicalData
 }
 
 /**
@@ -245,7 +245,6 @@ function CameraSection({
   onTooltipHide,
   onFeedbackAreaHover,
   onFeedbackAreaLeave,
-  onTooltipDismiss
 }: {
   lesson: LessonWithModule | null
   practiceState: PracticeState
@@ -255,15 +254,14 @@ function CameraSection({
   combo: number
   tooltipVisible: boolean
   tooltipPosition: { x: number; y: number }
-  tooltipData: PredictionResult | null
+  tooltipData: TooltipTechnicalData | null
   onLandmarksDetected: (landmarks: HandLandmark[][], dimensions: VideoDimensions) => void
   onStarComplete: (starId: string) => void
   onMessageComplete: () => void
-  onTooltipShow: (data: PredictionResult, position: { x: number; y: number }) => void
+  onTooltipShow: (data: TooltipTechnicalData, position: { x: number; y: number }) => void
   onTooltipHide: () => void
   onFeedbackAreaHover: (event: React.MouseEvent) => void
   onFeedbackAreaLeave: () => void
-  onTooltipDismiss: () => void
 }) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -351,7 +349,7 @@ function CameraSection({
             y={star.y}
             size={star.size}
             color={star.color}
-            predictionData={star.predictionData}
+            technicalData={star.technicalData}
             onComplete={onStarComplete}
             onTooltipShow={onTooltipShow}
             onTooltipHide={onTooltipHide}
@@ -384,32 +382,21 @@ function CameraSection({
           technicalData={tooltipData}
           position={tooltipPosition}
           isVisible={tooltipVisible}
-          onClose={hideTooltip}
+          onClose={onTooltipHide}
         />
       )}
 
       {/* Invisible hover area for tooltip */}
-        {practiceState === 'active' && (
-          <div
-            className="absolute inset-0 cursor-help"
-            onMouseEnter={onFeedbackAreaHover}
-            onMouseMove={onFeedbackAreaHover}
-            onMouseLeave={onFeedbackAreaLeave}
-            aria-label="Área de feedback - passe o mouse para ver detalhes técnicos"
-            style={{ pointerEvents: tooltipVisible ? 'auto' : 'none' }}
-          />
-        )}
-      </div>
-
-      {/* Technical Tooltip */}
-      <TechnicalTooltip
-        prediction={tooltipData}
-        inferenceTime={tooltipData?.inferenceTime || null}
-        combo={combo}
-        isVisible={tooltipVisible}
-        position={tooltipPosition}
-        onDismiss={onTooltipDismiss}
-      />
+      {practiceState === 'active' && (
+        <div
+          className="absolute inset-0 cursor-help"
+          onMouseEnter={onFeedbackAreaHover}
+          onMouseMove={onFeedbackAreaHover}
+          onMouseLeave={onFeedbackAreaLeave}
+          aria-label="Área de feedback - passe o mouse para ver detalhes técnicos"
+          style={{ pointerEvents: tooltipVisible ? 'auto' : 'none' }}
+        />
+      )}
 
       {/* Practice tips */}
       <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
@@ -464,6 +451,7 @@ function ReferenceSection({
         <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
           {lesson?.videoRefUrl ? (
             <video
+              data-testid="reference-video"
               src={lesson.videoRefUrl}
               controls
               className="w-full h-full object-contain"
@@ -473,7 +461,10 @@ function ReferenceSection({
               Seu navegador não suporta vídeos.
             </video>
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-500">
+            <div
+              data-testid="reference-video-placeholder"
+              className="w-full h-full flex items-center justify-center text-gray-500"
+            >
               <div className="text-center">
                 <div className="text-4xl mb-2">🎥</div>
                 <p className="font-medium">Vídeo não disponível</p>
@@ -640,7 +631,6 @@ function ControlsSection({
  */
 export function Practice() {
   const { lessonId } = useParams<{ lessonId: string }>()
-  const navigate = useNavigate()
 
   // State management
   const [lesson, setLesson] = useState<LessonWithModule | null>(null)
@@ -650,9 +640,6 @@ export function Practice() {
   const [currentPrediction, setCurrentPrediction] = useState<PredictionResult | null>(null)
   const [stars, setStars] = useState<StarParticleData[]>([])
   const [encouragementMessage, setEncouragementMessage] = useState<string | null>(null)
-  const [tooltipVisible, setTooltipVisible] = useState(false)
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
-  const [tooltipData, setTooltipData] = useState<PredictionResult | null>(null)
 
   // Feedback state management
   const { state: feedbackState, handlePrediction } = useFeedbackState({
@@ -693,11 +680,11 @@ export function Practice() {
           color: comboLevel % 2 === 0 ? 'purple' : 'yellow',
           technicalData: currentPrediction ? {
             confidence: currentPrediction.confidence,
-            inferenceTime: 45, // Placeholder - will be calculated from performance API
-            gestureName: currentPrediction.gesture
+            inferenceTime: currentPrediction.inferenceTime,
+            gesture: currentPrediction.gesture,
+            isCorrect: currentPrediction.isCorrect,
+            timestamp: currentPrediction.timestamp,
           } : undefined,
-          onShowTooltip: showTooltip,
-          onHideTooltip: hideTooltip,
         })
       }
 
@@ -723,7 +710,7 @@ export function Practice() {
   /**
    * Load lesson data
    */
-  const loadLesson = async () => {
+  const loadLesson = useCallback(async () => {
     if (!lessonId) {
       setError('ID da lição não fornecido')
       setLoading(false)
@@ -750,14 +737,14 @@ export function Practice() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [lessonId])
 
   /**
    * Handle landmarks detected from camera
    */
   const handleLandmarksDetected = useCallback((
     landmarks: HandLandmark[][],
-    dimensions: VideoDimensions
+    videoDimensions: VideoDimensions
   ) => {
     if (practiceState !== 'active' || !lesson) return
 
@@ -776,21 +763,32 @@ export function Practice() {
       // Simulate processing delay (real implementation would measure actual inference time)
       setTimeout(() => {
         const inferenceTime = performance.now() - startTime
+        const predictionResult: PredictionResult = {
+          gesture: isCorrect ? lesson.gestureName : 'Outro sinal',
+          confidence,
+          timestamp: Date.now(),
+          isCorrect,
+          inferenceTime,
+          modelVersion: '1.2.0',
+          landmarksCount: landmarks[0]?.length ?? 0,
+          videoDimensions,
+        }
 
-      setCurrentPrediction({
-        gesture: isCorrect ? lesson.gestureName : 'Outro sinal',
-        confidence,
-        timestamp: Date.now(),
-        isCorrect,
-        inferenceTime,
-        modelVersion: '1.2.0',
-        landmarksCount: 21, // Standard MediaPipe Hands landmark count
-      })
+        setCurrentPrediction(predictionResult)
 
-      // Trigger combo system for correct gestures
-      if (isCorrect) {
-        addCorrectGesture()
-      }
+        const feedbackPayload: FeedbackPredictionResult = {
+          gesture: predictionResult.gesture,
+          confidence: predictionResult.confidence,
+          timestamp: predictionResult.timestamp,
+          isCorrect: predictionResult.isCorrect,
+        }
+
+        handlePrediction(feedbackPayload)
+
+        // Trigger combo system for correct gestures
+        if (isCorrect) {
+          addCorrectGesture()
+        }
 
         // Check for practice completion (5 correct gestures)
         // This is simplified - in reality, you'd track over time
@@ -820,18 +818,15 @@ export function Practice() {
   /**
    * Handle tooltip show from stars
    */
-  const handleTooltipShow = (data: PredictionResult, position: { x: number; y: number }) => {
-    setTooltipData(data)
-    setTooltipPosition(position)
-    setTooltipVisible(true)
+  const handleTooltipShow = (data: TooltipTechnicalData, position: { x: number; y: number }) => {
+    showTooltip(data, position)
   }
 
   /**
    * Handle tooltip hide
    */
   const handleTooltipHide = () => {
-    setTooltipVisible(false)
-    setTooltipData(null)
+    hideTooltip()
   }
 
   /**
@@ -839,9 +834,18 @@ export function Practice() {
    */
   const handleFeedbackAreaHover = (event: React.MouseEvent) => {
     if (currentPrediction) {
-      setTooltipData(currentPrediction)
-      setTooltipPosition({ x: event.clientX, y: event.clientY })
-      setTooltipVisible(true)
+      showTooltip(
+        {
+          confidence: currentPrediction.confidence,
+          inferenceTime: currentPrediction.inferenceTime,
+          gesture: currentPrediction.gesture,
+          isCorrect: currentPrediction.isCorrect,
+          timestamp: currentPrediction.timestamp,
+          modelVersion: currentPrediction.modelVersion,
+          landmarksCount: currentPrediction.landmarksCount,
+        },
+        { x: event.clientX, y: event.clientY }
+      )
     }
   }
 
@@ -849,8 +853,7 @@ export function Practice() {
    * Handle feedback area mouse leave
    */
   const handleFeedbackAreaLeave = () => {
-    setTooltipVisible(false)
-    setTooltipData(null)
+    hideTooltip()
   }
 
   /**
@@ -876,7 +879,7 @@ export function Practice() {
   // Load lesson on mount and when lessonId changes
   useEffect(() => {
     loadLesson()
-  }, [lessonId])
+  }, [loadLesson])
 
   // Show loading state
   if (loading) {
@@ -915,7 +918,6 @@ export function Practice() {
               onTooltipHide={handleTooltipHide}
               onFeedbackAreaHover={handleFeedbackAreaHover}
               onFeedbackAreaLeave={handleFeedbackAreaLeave}
-              onTooltipDismiss={handleTooltipHide}
             />
           </div>
 

@@ -71,7 +71,7 @@ export interface UseFeedbackStateReturn {
 export function useFeedbackState(options: UseFeedbackStateOptions = {}): UseFeedbackStateReturn {
   const {
     onStateChange,
-    processingTimeout = 2000,
+    processingTimeout = 200,
     feedbackDuration = 1500,
     confidenceThreshold = 0.7,
   } = options
@@ -141,7 +141,7 @@ export function useFeedbackState(options: UseFeedbackStateOptions = {}): UseFeed
       feedbackTimeoutRef.current = setTimeout(() => {
         setFeedbackState('idle')
       }, feedbackDuration)
-    }, 200) // Small delay for visual feedback
+    }, processingTimeout)
   }, [clearTimeouts, setFeedbackState, confidenceThreshold, feedbackDuration])
 
   /**

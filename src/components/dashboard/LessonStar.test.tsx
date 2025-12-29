@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { LessonStar } from './LessonStar'
 import { Lesson } from '../../types/database'
@@ -13,6 +13,7 @@ const mockLesson: Lesson = {
   minConfidenceThreshold: 0.75,
   xpReward: 10,
   orderIndex: 1,
+  level: 1,
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-01T00:00:00Z',
 }

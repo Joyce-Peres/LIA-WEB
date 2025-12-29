@@ -65,7 +65,8 @@ export function useComboSystem(options: UseComboSystemOptions = {}): UseComboSys
 
   // State
   const [combo, setCombo] = useState(0)
-  const [lastCorrectTime, setLastCorrectTime] = useState<number | null>(null)
+  const comboRef = useRef(0)
+  const lastCorrectTimeRef = useRef<number | null>(null)
 
   // Refs for timeout management
   const timeoutRef = useRef<NodeJS.Timeout>()
@@ -78,6 +79,11 @@ export function useComboSystem(options: UseComboSystemOptions = {}): UseComboSys
       clearTimeout(timeoutRef.current)
       timeoutRef.current = undefined
     }
+  }, [])
+
+  const updateCombo = useCallback((value: number) => {
+    comboRef.current = value
+    setCombo(value)
   }, [])
 
   /**
@@ -100,62 +106,57 @@ export function useComboSystem(options: UseComboSystemOptions = {}): UseComboSys
     // Clear existing timeout
     clearTimeoutRef()
 
-    // Check if combo should continue
-    if (lastCorrectTime && (now - lastCorrectTime) < comboTimeout) {
-      // Continue combo
-      setCombo(prevCombo => {
-        const newCombo = Math.min(prevCombo + 1, maxCombo)
+    const canContinueCombo =
+      lastCorrectTimeRef.current !== null &&
+      (now - lastCorrectTimeRef.current) < comboTimeout &&
+      comboRef.current > 0
 
-        // Calculate stars for this combo level
-        const stars = calculateStars(newCombo)
+    let newCombo = 1
 
-        // Notify callback
-        onComboIncrease?.(newCombo, stars)
-
-        return newCombo
-      })
-    } else {
-      // Start new combo
-      setCombo(1)
-      const stars = calculateStars(1)
-      onComboIncrease?.(1, stars)
+    if (canContinueCombo) {
+      newCombo = Math.min(comboRef.current + 1, maxCombo)
     }
 
+    updateCombo(newCombo)
+
+    const stars = calculateStars(newCombo)
+    onComboIncrease?.(newCombo, stars)
+
     // Update last correct time
-    setLastCorrectTime(now)
+    lastCorrectTimeRef.current = now
 
     // Set timeout to break combo if no more correct gestures
     timeoutRef.current = setTimeout(() => {
-      if (combo > 0) {
-        const finalCombo = combo
-        setCombo(0)
-        setLastCorrectTime(null)
+      if (comboRef.current > 0) {
+        const finalCombo = comboRef.current
+        updateCombo(0)
+        lastCorrectTimeRef.current = null
         onComboBreak?.(finalCombo)
       }
     }, comboTimeout)
-  }, [combo, lastCorrectTime, comboTimeout, maxCombo, calculateStars, onComboIncrease, onComboBreak, clearTimeoutRef])
+  }, [comboTimeout, maxCombo, calculateStars, onComboIncrease, onComboBreak, clearTimeoutRef, updateCombo])
 
   /**
    * Manually break current combo
    */
   const breakCombo = useCallback(() => {
-    if (combo > 0) {
-      const finalCombo = combo
-      setCombo(0)
-      setLastCorrectTime(null)
+    if (comboRef.current > 0) {
+      const finalCombo = comboRef.current
+      updateCombo(0)
+      lastCorrectTimeRef.current = null
       clearTimeoutRef()
       onComboBreak?.(finalCombo)
     }
-  }, [combo, onComboBreak, clearTimeoutRef])
+  }, [onComboBreak, clearTimeoutRef, updateCombo])
 
   /**
    * Reset combo to zero
    */
   const reset = useCallback(() => {
-    setCombo(0)
-    setLastCorrectTime(null)
+    updateCombo(0)
+    lastCorrectTimeRef.current = null
     clearTimeoutRef()
-  }, [clearTimeoutRef])
+  }, [clearTimeoutRef, updateCombo])
 
   // Cleanup on unmount
   useEffect(() => {

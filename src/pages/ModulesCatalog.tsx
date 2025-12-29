@@ -14,8 +14,7 @@
  * ```
  */
 
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { Module } from '../types/database'
 import { contentRepository } from '../repositories/contentRepository'
 import { ModuleCard } from '../components/modules/ModuleCard'
@@ -118,7 +117,6 @@ function ModulesEmptyState() {
  * Main ModulesCatalog page component
  */
 export function ModulesCatalog() {
-  const navigate = useNavigate()
   const [modules, setModules] = useState<Module[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

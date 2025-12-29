@@ -31,6 +31,7 @@ export interface Lesson {
   minConfidenceThreshold: number // 0.00 to 1.00
   xpReward: number
   orderIndex: number
+  level: number // Level within the module (1, 2, 3, etc.)
   createdAt: string
   updatedAt: string
 }
@@ -114,4 +115,33 @@ export interface UserLessonProgress {
   attempts: number
   lastAttemptAt: string | null
   isCompleted: boolean
+}
+
+/**
+ * Level metadata within a module/section
+ * Represents a grouped set of lessons within a section
+ */
+export interface Level {
+  /** Level number within the module (1, 2, 3, etc.) */
+  number: number
+  /** Module ID this level belongs to */
+  moduleId: string
+  /** Gestures/lessons included in this level */
+  gestures: string[]
+  /** Whether the level is unlocked for practice */
+  isUnlocked: boolean
+  /** Whether the level has been completed */
+  isCompleted: boolean
+  /** Total lessons in this level */
+  totalLessons: number
+  /** Completed lessons in this level */
+  completedLessons: number
+}
+
+/**
+ * Section icon mapping type
+ */
+export interface SectionIcon {
+  emoji: string
+  label: string
 }

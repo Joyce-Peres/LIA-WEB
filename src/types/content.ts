@@ -8,57 +8,22 @@
  * @category Data Types
  */
 
+import type { DifficultyLevel as DatabaseDifficultyLevel, Module as DatabaseModule, Lesson as DatabaseLesson } from './database'
+
 /**
  * Difficulty levels for modules
  */
-export type DifficultyLevel = 'iniciante' | 'intermediario' | 'avancado'
+export type DifficultyLevel = DatabaseDifficultyLevel
 
 /**
  * Module represents a learning module in the catalog
  */
-export interface Module {
-  /** Unique identifier */
-  id: string
-  /** URL-friendly identifier */
-  slug: string
-  /** Display title */
-  title: string
-  /** Optional description */
-  description?: string
-  /** Difficulty level */
-  difficultyLevel: DifficultyLevel
-  /** Display order (lower numbers appear first) */
-  orderIndex: number
-  /** Optional icon URL */
-  iconUrl?: string
-  /** Creation timestamp */
-  createdAt: string
-  /** Last update timestamp */
-  updatedAt: string
-}
+export type Module = DatabaseModule
 
 /**
  * Lesson represents an individual learning item within a module
  */
-export interface Lesson {
-  /** Unique identifier */
-  id: string
-  /** Foreign key to parent module */
-  moduleId: string
-  /** Technical name of the gesture (used for recognition) */
-  gestureName: string
-  /** User-friendly display name */
-  displayName: string
-  /** Optional video reference URL */
-  videoRefUrl?: string
-  /** Minimum confidence threshold for recognition (0.0-1.0) */
-  minConfidenceThreshold: number
-  /** XP reward for completing this lesson */
-  xpReward: number
-  /** Creation timestamp */
-  createdAt: string
-  /** Last update timestamp */
-  updatedAt: string
+export interface Lesson extends DatabaseLesson {
   /** Populated relationship (optional, populated by queries) */
   module?: Module
 }

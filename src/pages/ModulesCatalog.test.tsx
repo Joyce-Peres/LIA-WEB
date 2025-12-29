@@ -37,7 +37,7 @@ const mockModules: Module[] = [
     description: 'Aprenda os números',
     difficultyLevel: 'intermediario',
     orderIndex: 2,
-    iconUrl: undefined,
+    iconUrl: null,
     createdAt: '2025-01-01T00:00:00Z',
     updatedAt: '2025-01-01T00:00:00Z',
   },
@@ -109,7 +109,7 @@ describe('ModulesCatalog', () => {
     })
 
     // Check for empty state message - use getAllByText since there might be multiple matches
-    const emptyMessages = screen.getAllByText((content, element) => {
+    const emptyMessages = screen.getAllByText((_content, element) => {
       const text = element?.textContent || ''
       return text.includes('Nenhum módulo disponível') || text.includes('não há módulos')
     })
