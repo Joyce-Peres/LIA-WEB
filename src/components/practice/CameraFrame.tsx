@@ -166,8 +166,8 @@ export function CameraFrame({ className = '', onLandmarksDetected, skipHandPose 
   const [videoDimensions, setVideoDimensions] = useState({ width: 640, height: 480 })
   const isCameraReady = isActive && !isLoading
   
-  // Consider hand pose ready if: it's actually ready, or we're skipping it, or timeout occurred
-  const isHandPoseEffectivelyReady = skipHandPose || handPoseReady || handPoseTimeout
+  // Consider hand pose ready if: it's actually ready, we're skipping it, timeout occurred, OR there was an error
+  const isHandPoseEffectivelyReady = skipHandPose || handPoseReady || handPoseTimeout || !!handPoseError
 
   /**
    * Set timeout for hand pose loading (15 seconds)
@@ -340,8 +340,10 @@ export function CameraFrame({ className = '', onLandmarksDetected, skipHandPose 
   }, [handPoseReady, isCameraReady, startProcessing, stopProcessing, videoRef, skipHandPose, handPoseTimeout])
 
   // Determine what overlay to show
-  const showLoading = !isCameraReady || (!isHandPoseEffectivelyReady && !cameraError)
-  const error = cameraError || handPoseError
+  const showLoading = !isCameraReady || (!isHandPoseEffectivelyReady && !cameraError && !handPoseError)
+  
+  // Only camera error is fatal - handPose error just disables hand detection
+  const fatalError = cameraError
 
   return (
     <div ref={containerRef} className={`relative overflow-hidden rounded-lg bg-gray-900 ${className}`}>
@@ -351,7 +353,7 @@ export function CameraFrame({ className = '', onLandmarksDetected, skipHandPose 
         autoPlay
         playsInline
         muted
-        className={`w-full h-full object-cover ${showLoading || error ? 'opacity-0' : 'opacity-100'}`}
+        className={`w-full h-full object-cover ${showLoading || fatalError ? 'opacity-0' : 'opacity-100'}`}
         style={{
           transform: 'scaleX(-1)', // Mirror effect for natural hand movement
           minHeight: '300px',
@@ -361,7 +363,7 @@ export function CameraFrame({ className = '', onLandmarksDetected, skipHandPose 
       {/* Canvas for landmarks overlay */}
       <canvas
         ref={canvasRef}
-        className={`absolute inset-0 pointer-events-none ${showLoading || error ? 'hidden' : ''}`}
+        className={`absolute inset-0 pointer-events-none ${showLoading || fatalError ? 'hidden' : ''}`}
         style={{
           mixBlendMode: 'screen',
           transform: 'scaleX(-1)',
@@ -369,7 +371,7 @@ export function CameraFrame({ className = '', onLandmarksDetected, skipHandPose 
       />
 
       {/* Loading overlay */}
-      {showLoading && !error && (
+      {showLoading && !fatalError && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
@@ -394,15 +396,15 @@ export function CameraFrame({ className = '', onLandmarksDetected, skipHandPose 
         </div>
       )}
 
-      {/* Error overlay */}
-      {error && (
+      {/* Error overlay - only for camera errors */}
+      {fatalError && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white">
             <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl">⚠️</span>
             </div>
             <p className="text-lg font-medium mb-2">Erro na câmera</p>
-            <p className="text-sm text-gray-300 mb-4">{error}</p>
+            <p className="text-sm text-gray-300 mb-4">{fatalError}</p>
             <button
               onClick={() => {
                 stopCamera()
@@ -416,19 +418,26 @@ export function CameraFrame({ className = '', onLandmarksDetected, skipHandPose 
         </div>
       )}
 
-      {/* Status overlay when camera is working */}
-      {!showLoading && !error && (handPoseTimeout && !handPoseReady) && (
+      {/* Warning overlay for hand pose error (non-fatal) */}
+      {!showLoading && !fatalError && handPoseError && (
+        <div className="absolute top-2 right-2 bg-yellow-500/90 text-white text-xs p-2 rounded max-w-xs">
+          ⚠️ Detecção de mãos indisponível
+        </div>
+      )}
+
+      {/* Status overlay when camera is working but timeout occurred */}
+      {!showLoading && !fatalError && !handPoseError && (handPoseTimeout && !handPoseReady) && (
         <div className="absolute top-2 right-2 bg-yellow-500/90 text-white text-xs p-2 rounded">
           ⚠️ Detecção de mãos indisponível
         </div>
       )}
 
       {/* Debug info overlay (development only) */}
-      {import.meta.env.DEV && !showLoading && !error && (
+      {import.meta.env.DEV && !showLoading && !fatalError && (
         <div className="absolute top-2 left-2 bg-black/70 text-white text-xs p-2 rounded">
           <div>Mãos detectadas: {handResults?.length || 0}</div>
           <div>Dimensões: {videoDimensions.width}x{videoDimensions.height}</div>
-          <div>HandPose: {handPoseReady ? '✅' : handPoseTimeout ? '⏱️' : '⏳'}</div>
+          <div>HandPose: {handPoseReady ? '✅' : handPoseError ? '❌' : handPoseTimeout ? '⏱️' : '⏳'}</div>
         </div>
       )}
     </div>
