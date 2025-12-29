@@ -14,7 +14,7 @@
  * ```
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { contentRepository } from '../repositories/contentRepository'
 import { CameraFrame, HandLandmark } from '../components/practice/CameraFrame'
@@ -23,6 +23,9 @@ import { useComboSystem } from '../hooks/feedback/useComboSystem'
 import { useTooltip, type TooltipTechnicalData } from '../hooks/ui/useTooltip'
 import { StarParticle } from '../components/practice/StarParticle'
 import { TechnicalTooltip } from '../components/practice/TechnicalTooltip'
+import { useGestureBuffer } from '../hooks/useGestureBuffer'
+import { useModelInference } from '../hooks/useModelInference'
+import type { HandResult } from '../hooks/useHandPose'
 import type { LessonWithModule } from '../types/database'
 
 /**
@@ -63,6 +66,18 @@ interface VideoDimensions {
   width: number
   height: number
 }
+
+const MODEL_METADATA = {
+  version: '1.0.0-mock',
+  classes: [
+    '1', '10', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'ABAIXO', 'ADOCANTE', 'AGORA', 'AMANHA',
+    'ANO', 'B', 'C', 'D', 'DESCULPA', 'DOMINGO', 'E', 'F', 'G', 'H', 'HORAS', 'I', 'J', 'K', 'L', 'M',
+    'MES', 'MINUTOS', 'N', 'O', 'OBRIGADA', 'ONDE', 'ONTEM', 'P', 'PAI', 'POR FAVOR', 'POR QUE', 'Q',
+    'QUANDO', 'QUARTA-FEIRA', 'QUINTA-FEIRA', 'R', 'S', 'SABADO', 'SEGUNDA-FEIRA', 'SEXTA-FEIRA', 'T',
+    'TCHAU', 'TERÇA-FEIRA', 'TUDO BEM', 'U', 'V', 'W', 'X', 'Y', 'Z'
+  ],
+  confidenceThreshold: 0.7,
+} as const
 
 /**
  * Loading skeleton for practice page
@@ -232,6 +247,7 @@ function CameraSection({
   lesson,
   practiceState,
   feedbackState,
+  currentPrediction,
   stars,
   encouragementMessage,
   combo,
@@ -249,6 +265,7 @@ function CameraSection({
   lesson: LessonWithModule | null
   practiceState: PracticeState
   feedbackState: 'idle' | 'processing' | 'correct' | 'incorrect'
+  currentPrediction: PredictionResult | null
   stars: StarParticleData[]
   encouragementMessage: string | null
   combo: number
@@ -408,24 +425,8 @@ function CameraSection({
         </ul>
       </div>
 
-      {/* Feedback color legend */}
-      <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-        <h3 className="text-sm font-medium text-gray-900 mb-3">🎨 Feedback Visual:</h3>
-        <div className="grid grid-cols-3 gap-3 text-xs">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-yellow-400 rounded opacity-60"></div>
-            <span>Processando</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-green-500 rounded opacity-60"></div>
-            <span>Correto</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-red-500 rounded opacity-60"></div>
-            <span>Incorreto</span>
-          </div>
-        </div>
-      </div>
+      {/* Feedback final (mostra apenas ao concluir ou quando houver predição) */}
+      <FinalFeedback currentPrediction={currentPrediction} />
     </div>
   )
 }
@@ -521,6 +522,24 @@ function ReferenceSection({
           )}
         </div>
       </div>
+    </div>
+  )
+}
+
+/**
+ * Final feedback card shown after a prediction is available
+ */
+function FinalFeedback({ currentPrediction }: { currentPrediction: PredictionResult | null }) {
+  return (
+    <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+      <h3 className="text-sm font-medium text-gray-900 mb-3">🎯 Feedback Final:</h3>
+      {currentPrediction ? (
+        <p className="text-sm text-gray-800">
+          Sinal detectado: <span className="font-semibold">{currentPrediction.gesture}</span>. Parabéns, continue praticando!
+        </p>
+      ) : (
+        <p className="text-sm text-gray-500">O feedback aparecerá aqui quando um sinal for reconhecido.</p>
+      )}
     </div>
   )
 }
@@ -640,6 +659,27 @@ export function Practice() {
   const [currentPrediction, setCurrentPrediction] = useState<PredictionResult | null>(null)
   const [stars, setStars] = useState<StarParticleData[]>([])
   const [encouragementMessage, setEncouragementMessage] = useState<string | null>(null)
+  const lastRewardTimestampRef = useRef(0)
+  const lastInferenceTimestampRef = useRef(0)
+  const isInferencingRef = useRef(false)
+
+  const REWARD_COOLDOWN_MS = 1500
+  const INFERENCE_COOLDOWN_MS = 500
+
+  const normalizeGesture = useCallback((gesture: string) => gesture.trim().toLowerCase(), [])
+
+  const {
+    isReady: bufferReady,
+    addFrame,
+    clear: clearGestureBuffer,
+    getInferenceData,
+  } = useGestureBuffer()
+
+  const {
+    isReady: modelReady,
+    runInference,
+    loadModel,
+  } = useModelInference({ modelPath: '/models/model.json' })
 
   // Feedback state management
   const { state: feedbackState, handlePrediction } = useFeedbackState({
@@ -739,6 +779,10 @@ export function Practice() {
     }
   }, [lessonId])
 
+  useEffect(() => {
+    loadModel().catch((err) => console.error('Model load failed:', err))
+  }, [loadModel])
+
   /**
    * Handle landmarks detected from camera
    */
@@ -747,59 +791,92 @@ export function Practice() {
     videoDimensions: VideoDimensions
   ) => {
     if (practiceState !== 'active' || !lesson) return
+    const handResults: HandResult[] | null = landmarks.length
+      ? landmarks.map(hand => ({
+          landmarks: hand.map(point => ({
+            // Mirror X to match the Python pipeline (frame was flipped before MediaPipe there)
+            x: (1 - point.x) * videoDimensions.width,
+            y: point.y * videoDimensions.height,
+            z: point.z,
+          })),
+          handedness: 'Right',
+          score: 1,
+        }))
+      : null
 
-    // Placeholder gesture recognition logic
-    // In a real implementation, this would use the ML model
-    const hasHand = landmarks.length > 0 && landmarks[0].length > 0
+    addFrame(handResults, videoDimensions.width, videoDimensions.height)
 
-    if (hasHand) {
-      // Start performance measurement
-      const startTime = performance.now()
-
-      // Simulate gesture recognition with some randomness
-      const isCorrect = Math.random() > 0.7 // 30% chance of correct recognition
-      const confidence = Math.random() * 0.5 + 0.5 // 50-100% confidence
-
-      // Simulate processing delay (real implementation would measure actual inference time)
-      setTimeout(() => {
-        const inferenceTime = performance.now() - startTime
-        const predictionResult: PredictionResult = {
-          gesture: isCorrect ? lesson.gestureName : 'Outro sinal',
-          confidence,
-          timestamp: Date.now(),
-          isCorrect,
-          inferenceTime,
-          modelVersion: '1.2.0',
-          landmarksCount: landmarks[0]?.length ?? 0,
-          videoDimensions,
-        }
-
-        setCurrentPrediction(predictionResult)
-
-        const feedbackPayload: FeedbackPredictionResult = {
-          gesture: predictionResult.gesture,
-          confidence: predictionResult.confidence,
-          timestamp: predictionResult.timestamp,
-          isCorrect: predictionResult.isCorrect,
-        }
-
-        handlePrediction(feedbackPayload)
-
-        // Trigger combo system for correct gestures
-        if (isCorrect) {
-          addCorrectGesture()
-        }
-
-        // Check for practice completion (5 correct gestures)
-        // This is simplified - in reality, you'd track over time
-        if (isCorrect && Math.random() > 0.8) {
-          setPracticeState('completed')
-        }
-      }, Math.random() * 50 + 10) // Random delay 10-60ms to simulate processing
-    } else {
+    if (!handResults || handResults.length === 0) {
       setCurrentPrediction(null)
+      return
     }
-  }, [practiceState, lesson, handlePrediction, addCorrectGesture])
+
+    if (!bufferReady || !modelReady) {
+      return
+    }
+
+    const now = Date.now()
+    const isCoolingDown = now - lastInferenceTimestampRef.current < INFERENCE_COOLDOWN_MS
+    if (isInferencingRef.current || isCoolingDown) {
+      return
+    }
+
+    const inferenceData = getInferenceData()
+    if (!inferenceData) return
+
+    isInferencingRef.current = true
+    lastInferenceTimestampRef.current = now
+
+    ;(async () => {
+      const result = await runInference(inferenceData)
+
+      if (!result) {
+        setCurrentPrediction(null)
+        return
+      }
+
+      const predictedGesture = MODEL_METADATA.classes[result.predictedClass] ?? `Classe ${result.predictedClass}`
+      const meetsConfidence = result.confidence >= MODEL_METADATA.confidenceThreshold
+      const isGestureMatch = normalizeGesture(predictedGesture) === normalizeGesture(lesson.gestureName)
+      const isCorrect = meetsConfidence && isGestureMatch
+
+      const predictionResult: PredictionResult = {
+        gesture: predictedGesture,
+        confidence: result.confidence,
+        timestamp: Date.now(),
+        isCorrect,
+        inferenceTime: result.inferenceTime,
+        modelVersion: MODEL_METADATA.version,
+        landmarksCount: handResults[0]?.landmarks?.length ?? 0,
+        videoDimensions,
+      }
+
+      setCurrentPrediction(predictionResult)
+
+      const feedbackPayload: FeedbackPredictionResult = {
+        gesture: predictionResult.gesture,
+        confidence: predictionResult.confidence,
+        timestamp: predictionResult.timestamp,
+        isCorrect: predictionResult.isCorrect,
+      }
+
+      handlePrediction(feedbackPayload)
+
+      // Always surface the prediction (even if low confidence) so the user sees activity
+      if (isCorrect) {
+        const rewardNow = Date.now()
+        const canReward = rewardNow - lastRewardTimestampRef.current >= REWARD_COOLDOWN_MS
+
+        if (canReward) {
+          addCorrectGesture()
+          lastRewardTimestampRef.current = rewardNow
+        }
+      }
+    })()
+      .finally(() => {
+        isInferencingRef.current = false
+      })
+  }, [practiceState, lesson, addFrame, bufferReady, modelReady, getInferenceData, runInference, normalizeGesture, handlePrediction, addCorrectGesture])
 
   /**
    * Handle star particle completion
@@ -874,6 +951,9 @@ export function Practice() {
     // Reset combo and stars
     setStars([])
     setEncouragementMessage(null)
+    clearGestureBuffer()
+    lastRewardTimestampRef.current = 0
+    lastInferenceTimestampRef.current = 0
   }
 
   // Load lesson on mount and when lessonId changes
@@ -905,6 +985,7 @@ export function Practice() {
               lesson={lesson}
               practiceState={practiceState}
               feedbackState={feedbackState}
+              currentPrediction={currentPrediction}
               stars={stars}
               encouragementMessage={encouragementMessage}
               combo={combo}

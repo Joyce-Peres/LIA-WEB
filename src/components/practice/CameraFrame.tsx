@@ -89,15 +89,14 @@ function getLandmarkColor(index: number): string {
  */
 function drawLandmarks(
   ctx: CanvasRenderingContext2D,
-  landmarks: HandLandmark[],
-  videoWidth: number,
-  videoHeight: number
+  landmarks: HandLandmark[]
 ) {
   if (!landmarks || landmarks.length === 0) return
 
-  // Scale factors for canvas
-  const scaleX = ctx.canvas.width / videoWidth
-  const scaleY = ctx.canvas.height / videoHeight
+  const offsetX = (ctx.canvas as any).__liaOffsetX || 0
+  const offsetY = (ctx.canvas as any).__liaOffsetY || 0
+  const drawWidth = (ctx.canvas as any).__liaDrawWidth || ctx.canvas.width
+  const drawHeight = (ctx.canvas as any).__liaDrawHeight || ctx.canvas.height
 
   // Draw connections first (behind keypoints)
   ctx.strokeStyle = '#00ff00'
@@ -111,16 +110,16 @@ function drawLandmarks(
     const end = landmarks[endIdx]
 
     ctx.beginPath()
-    ctx.moveTo(start.x * videoWidth * scaleX, start.y * videoHeight * scaleY)
-    ctx.lineTo(end.x * videoWidth * scaleX, end.y * videoHeight * scaleY)
+    ctx.moveTo(offsetX + start.x * drawWidth, offsetY + start.y * drawHeight)
+    ctx.lineTo(offsetX + end.x * drawWidth, offsetY + end.y * drawHeight)
     ctx.stroke()
   })
 
   // Draw keypoints
   ctx.globalAlpha = 1.0
   landmarks.forEach((landmark, index) => {
-    const x = landmark.x * videoWidth * scaleX
-    const y = landmark.y * videoHeight * scaleY
+    const x = offsetX + landmark.x * drawWidth
+    const y = offsetY + landmark.y * drawHeight
 
     // Outer circle
     ctx.beginPath()
@@ -197,26 +196,41 @@ export function CameraFrame({ className = '', onLandmarksDetected, skipHandPose 
     if (!canvas || !container) return
     if (!videoDimensions.width || !videoDimensions.height) return
 
-    // Get container dimensions
+    // Match canvas to the rendered container size so overlay aligns with object-contain video
     const containerRect = container.getBoundingClientRect()
-    const containerWidth = containerRect.width
-    const containerHeight = containerRect.height
+    const containerWidth = containerRect.width || videoDimensions.width
+    const containerHeight = containerRect.height || (containerWidth * (videoDimensions.height / videoDimensions.width))
+    const containerAspect = containerWidth / containerHeight
+    const videoAspect = videoDimensions.width / videoDimensions.height
 
-    // Calculate size maintaining aspect ratio
-    const videoAspectRatio = videoDimensions.width / videoDimensions.height
-    let canvasWidth = containerWidth
-    let canvasHeight = containerWidth / videoAspectRatio
+    // Match the drawn area to the letterboxed video area so normalized coords align
+    let drawWidth = containerWidth
+    let drawHeight = containerHeight
+    let offsetX = 0
+    let offsetY = 0
 
-    if (canvasHeight > containerHeight) {
-      canvasHeight = containerHeight
-      canvasWidth = containerHeight * videoAspectRatio
+    if (containerAspect > videoAspect) {
+      // Bars on left/right
+      drawHeight = containerHeight
+      drawWidth = containerHeight * videoAspect
+      offsetX = (containerWidth - drawWidth) / 2
+    } else {
+      // Bars on top/bottom
+      drawWidth = containerWidth
+      drawHeight = containerWidth / videoAspect
+      offsetY = (containerHeight - drawHeight) / 2
     }
 
-    // Set canvas size
-    canvas.width = videoDimensions.width
-    canvas.height = videoDimensions.height
-    canvas.style.width = `${canvasWidth}px`
-    canvas.style.height = `${canvasHeight}px`
+    canvas.width = containerWidth
+    canvas.height = containerHeight
+    canvas.style.width = `${containerWidth}px`
+    canvas.style.height = `${containerHeight}px`
+
+    // Store offsets for drawing
+    ;(canvas as any).__liaOffsetX = offsetX
+    ;(canvas as any).__liaOffsetY = offsetY
+    ;(canvas as any).__liaDrawWidth = drawWidth
+    ;(canvas as any).__liaDrawHeight = drawHeight
   }, [videoDimensions])
 
   /**
@@ -270,7 +284,7 @@ export function CameraFrame({ className = '', onLandmarksDetected, skipHandPose 
       if (handResults?.length) {
         handResults.forEach((hand) => {
           if (hand.landmarks?.length) {
-            drawLandmarks(ctx, hand.landmarks, videoDimensions.width, videoDimensions.height)
+            drawLandmarks(ctx, hand.landmarks)
           }
         })
 
@@ -381,10 +395,11 @@ export function CameraFrame({ className = '', onLandmarksDetected, skipHandPose 
         autoPlay
         playsInline
         muted
-        className={`w-full h-full object-cover ${showLoading || fatalError ? 'opacity-0' : 'opacity-100'}`}
+        className={`w-full h-full object-contain ${showLoading || fatalError ? 'opacity-0' : 'opacity-100'}`}
         style={{
           transform: 'scaleX(-1)', // Mirror effect for natural hand movement
           minHeight: '300px',
+          backgroundColor: 'black', // Avoid visual mismatch when letterboxing
         }}
       />
 
