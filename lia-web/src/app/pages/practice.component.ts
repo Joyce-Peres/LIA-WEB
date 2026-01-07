@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild, ElementRef, signal, effect } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, ElementRef, signal, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -13,11 +13,13 @@ import { AuthService } from '../core/services/auth.service';
 import { GestureRecognitionService } from '../core/services/gesture-recognition.service';
 import { GestureBufferService } from '../core/services/gesture-buffer.service';
 import { GestureVideoPlayerComponent } from '../components/gesture-video-player.component';
+import { UserMenuComponent } from '../components/user-menu.component';
+import { SettingsService } from '../core/services/settings.service';
 
 @Component({
   standalone: true,
   selector: 'app-practice',
-  imports: [CommonModule, FormsModule, GestureVideoPlayerComponent],
+  imports: [CommonModule, FormsModule, GestureVideoPlayerComponent, UserMenuComponent],
   templateUrl: './practice.component.html',
   styleUrl: './practice.component.css'
 })
@@ -46,6 +48,7 @@ export class PracticeComponent implements OnInit, OnDestroy {
   private readonly HANDS_MISSING_HIDE_DELAY_MS = 450;
 
   @ViewChild('videoEl') private videoRef?: ElementRef<HTMLVideoElement>;
+  protected readonly settings = inject(SettingsService);
 
   constructor(
     private route: ActivatedRoute,

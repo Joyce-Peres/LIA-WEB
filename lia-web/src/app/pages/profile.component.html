@@ -1,46 +1,70 @@
 <div class="profile-page">
-  <div class="profile-card">
+  <div class="container">
     <div class="header">
-      <div class="avatar" [attr.data-initials]="profile()?.avatarText ?? 'PR'">
-        {{ profile()?.avatarText?.slice(0,2) ?? 'PR' }}
-      </div>
-      <div class="header-info">
-        <h1 class="title">Perfil</h1>
-        <p class="subtitle">Gerencie suas informações pessoais</p>
-      </div>
+      <button class="btn btn-ghost" (click)="back()">← Voltar</button>
+      <div class="spacer"></div>
+      <app-user-menu></app-user-menu>
     </div>
 
-    <div class="profile-info">
-      <div class="field-row">
-        <label>Email</label>
-        <div class="readonly">{{ email }}</div>
-      </div>
-      <div class="field-row">
-        <label for="displayName">Nome de exibição</label>
-        <input id="displayName" type="text" [(ngModel)]="displayName" />
-      </div>
-      <div class="field-row">
-        <label for="avatarText">Iniciais do avatar</label>
-        <input id="avatarText" type="text" maxlength="2" [(ngModel)]="avatarText" />
-      </div>
-    </div>
+    <div class="profile-card">
+      <div class="card-header">
+        <div class="avatar-section">
+          <div class="avatar" (click)="toggleIconPicker()" style="cursor: pointer;">
+            {{ avatarText || profile()?.avatarText || 'PR' }}
+          </div>
+          <button class="change-icon-btn" (click)="toggleIconPicker()">📝 Trocar ícone</button>
 
-    <div class="stats">
-      <div class="stat">
-        <div class="stat-label">XP total</div>
-        <div class="stat-value">{{ profile()?.totalXp ?? 0 }}</div>
+          <div class="icon-picker" *ngIf="showIconPicker">
+            <div class="icon-grid">
+              <button
+                *ngFor="let icon of availableIcons"
+                class="icon-option"
+                (click)="selectIcon(icon)"
+                [class.selected]="avatarText === icon"
+              >
+                {{ icon }}
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="header-info">
+          <h1 class="title">Meu Perfil</h1>
+          <p class="subtitle">Gerencie suas informações pessoais</p>
+        </div>
       </div>
-      <div class="stat">
-        <div class="stat-label">Streak</div>
-        <div class="stat-value">{{ profile()?.currentStreak ?? 0 }} dias</div>
-      </div>
-    </div>
 
-    <div class="actions">
-      <button class="btn primary" [disabled]="isSaving" (click)="saveProfile()">
-        {{ isSaving ? 'Salvando...' : 'Salvar alterações' }}
-      </button>
-      <button class="btn ghost" (click)="handleLogout()">Sair</button>
+      <div class="profile-info">
+        <div class="field-row">
+          <label for="email">Email</label>
+          <input id="email" type="email" [(ngModel)]="email" />
+        </div>
+        <div class="field-row">
+          <label for="displayName">Nome de exibição</label>
+          <input id="displayName" type="text" [(ngModel)]="displayName" />
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">XP total</div>
+          <div class="stat-value">{{ profile()?.totalXp ?? 0 }}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Streak</div>
+          <div class="stat-value">{{ profile()?.currentStreak ?? 0 }} dias</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" [disabled]="isSaving" (click)="saveProfile()">
+          {{ isSaving ? 'Salvando...' : 'Salvar alterações' }}
+        </button>
+      </div>
+
+      <div class="success-message" *ngIf="showSuccessMessage">
+        <span class="icon">✔️</span>
+        Alterações salvas com sucesso!
+      </div>
     </div>
   </div>
 </div>

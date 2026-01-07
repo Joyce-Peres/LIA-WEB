@@ -1,0 +1,72 @@
+.settings-page {
+  min-height: 100vh;
+  background: var(--surface-2);
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+.header .spacer { flex: 1; }
+
+.head {
+  margin-bottom: 2rem;
+}
+.title {
+  margin: 0;
+  font-size: 2.75rem;
+  font-weight: 500;
+  color: var(--text);
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+}
+.desc {
+  color: var(--muted);
+  margin-top: 0.5rem;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 1rem;
+  color: var(--text);
+  font-size: 1.25rem;
+}
+
+.form-grid { display: grid; gap: 12px; }
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+}
+.row .col { display: flex; flex-direction: column; }
+.label { color: var(--text); font-weight: 500; }
+.choices { display: inline-flex; gap: 8px; align-items: center; }
+.choice { display: inline-flex; gap: 6px; align-items: center; color: var(--text); cursor: pointer; }
+.actions { margin-top: 12px; display: flex; gap: 8px; align-items: center; }
+.hint { color: var(--muted); font-size: 13px; }
+
+/* Improve control visibility in dark mode */
+.row input[type="checkbox"],
+.row input[type="radio"] { accent-color: var(--accent); }
+
+/* Ensure soft-card content inherits readable color */
+.settings-page .soft-card { color: var(--text); }

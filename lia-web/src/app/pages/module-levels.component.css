@@ -1,17 +1,17 @@
-.levels-page { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+.levels-page { max-width: 960px; margin: 24px auto; padding: 0 16px; min-height: 100vh; }
 .header { display: flex; align-items: center; gap: 8px; }
 .header .spacer { flex: 1; }
 .module-head { margin: 12px 0 20px; }
-.module-head .title { margin: 0; font-size: 22px; }
+.module-head .title { margin: 0; font-size: 22px; color: var(--text); }
 .module-head .desc { margin: 6px 0 0; color: var(--muted, #9aa0a6); }
 
 .levels-grid { display: flex; flex-direction: column; gap: 10px; }
-.level-card { width: 100%; text-align: left; padding: 16px; border: 1px solid #e9d5ff; border-radius: 16px; background: white; cursor: pointer; display: grid; gap: 8px; box-shadow: 0 2px 8px rgba(124,58,237,0.06); }
-.level { font-weight: 500; margin-bottom: 6px; color: #1f2937; }
+.level-card { width: 100%; text-align: left; padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface-1); cursor: pointer; display: grid; gap: 8px; box-shadow: 0 2px 8px rgba(124,58,237,0.06); }
+.level { font-weight: 500; margin-bottom: 6px; color: var(--text); }
 .count { color: var(--muted, #9aa0a6); font-size: 13px; }
-.bar { height: 6px; background: #f3e8ff; border: 1px solid #e9d5ff; border-radius: 999px; overflow: hidden; }
+.bar { height: 6px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
 .fill { height: 100%; background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%); width: 0%; transition: width .2s ease; box-shadow: 0 0 8px rgba(251,191,36,0.35); }
 
-.btn { padding: 8px 12px; border-radius: 8px; border: 1px solid #e9d5ff; background: white; color: #7c3aed; cursor: pointer; box-shadow: 0 1px 3px rgba(124,58,237,0.08); }
+.btn { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface-1); color: var(--accent); cursor: pointer; box-shadow: 0 1px 3px rgba(124,58,237,0.08); }
 .btn.ghost { background: transparent; }
 .loading { max-width: 960px; margin: 32px auto; padding: 0 16px; color: var(--muted, #9aa0a6); }

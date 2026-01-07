@@ -9,13 +9,14 @@
       <div class="page-subtitle">{{ lesson()?.displayName }}</div>
     </div>
     <div class="spacer"></div>
+    <app-user-menu></app-user-menu>
   </div>
 
   <div class="layout">
     <div class="camera-panel soft-card soft-card--spacious">
       <div class="camera-box" [class.ready]="cameraReady()">
-        <video #videoEl class="video" autoplay playsinline muted></video>
-        <canvas #overlayEl class="overlay"></canvas>
+        <video #videoEl class="video" [class.unmirrored]="settings.unmirrorCamera()" autoplay playsinline muted></video>
+        <canvas #overlayEl class="overlay" [class.unmirrored]="settings.unmirrorCamera()"></canvas>
       </div>
       <div class="hands-missing" [class.is-hidden]="!handsMissingVisible()">
         <span class="label">Mãos não detectadas</span>

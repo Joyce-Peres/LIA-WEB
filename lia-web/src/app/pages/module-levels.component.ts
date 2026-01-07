@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { UserMenuComponent } from '../components/user-menu.component';
 import { Subject, switchMap, takeUntil } from 'rxjs';
 import { ContentService } from '../core/services/content.service';
 import type { Module } from '../core/models/database.types';
@@ -16,7 +17,7 @@ interface LevelInfo {
 @Component({
   standalone: true,
   selector: 'app-module-levels',
-  imports: [CommonModule],
+  imports: [CommonModule, UserMenuComponent],
   templateUrl: './module-levels.component.html',
   styleUrl: './module-levels.component.css'
 })
