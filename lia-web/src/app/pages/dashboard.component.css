@@ -3,6 +3,35 @@
   background: var(--surface-2);
 }
 
+/* Brand Banner */
+.brand-banner {
+  background: #7c3aed;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.15);
+}
+
+.brand-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.brand-title {
+  font-size: 2.75rem;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 0.25rem;
+  letter-spacing: 0.08em;
+}
+
+.brand-subtitle {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
 .loading {
   min-height: 100vh;
   display: flex;
