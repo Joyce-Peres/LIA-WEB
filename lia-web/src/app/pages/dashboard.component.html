@@ -1,0 +1,161 @@
+<div class="dashboard">
+  @if (isLoading()) {
+    <div class="loading">
+      <div class="loading-text">Carregando…</div>
+    </div>
+  } @else {
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <div class="header-title">
+          <div class="title-wrapper">
+            <h1>Minhas Lições</h1>
+            <span class="title-accent"></span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <div class="stat">
+            <span class="stat-label">Pontuação:</span>
+            <span class="stat-value">{{ profile()?.totalXp ?? 0 }}</span>
+          </div>
+          <div class="progress-section">
+            <span class="progress-label">Progresso Geral:</span>
+            <div class="progress-line" style="width: 8rem;">
+              <div class="fill" [style.width.%]="overallStats().progress * 100"></div>
+            </div>
+            <span class="progress-count">
+              {{ overallStats().completedLessons }}/{{ overallStats().totalLessons }}
+            </span>
+          </div>
+          <button type="button" class="avatar-btn" (click)="navigateToProfile()" title="Perfil">
+            {{ profile()?.avatarText?.slice(0, 2) ?? 'PR' }}
+          </button>
+          <button type="button" class="logout-btn" (click)="handleLogout()">
+            Sair
+          </button>
+        </div>
+      </div>
+
+      <!-- Progress Charts -->
+      <app-progress-charts></app-progress-charts>
+
+      <!-- Modules Grid -->
+      <div class="modules-grid">
+        @for (module of modules(); track module.id) {
+          <div class="module-card"
+            [class.locked]="isModuleLocked(module)"
+            [title]="isModuleLocked(module) ? getModuleLockReason(module) : 'Escolha uma lição para praticar'">
+            <div class="module-header">
+              <div class="module-icon-wrapper">
+                <div class="module-icon">
+                  <span class="icon-emoji lg">{{ getModuleIcon(module.id).emoji }}</span>
+                  @if (isModuleLocked(module)) {
+                    <span class="icon-emoji sm" aria-hidden="true" style="margin-left:-18px;">🔒</span>
+                  }
+                </div>
+              </div>
+              <div class="module-info">
+                <h2>{{ module.title }}</h2>
+                <p class="module-desc">{{ module.description }}</p>
+                <span class="levels-count">{{ getLessonsForModule(module.id).length }} lições</span>
+              </div>
+            </div>
+
+            <div class="module-progress">
+              <div class="progress-header">
+                <span>Progresso:</span>
+                <span>{{ getCompletedLessonsForModule(module.id) }}/{{ getTotalLessonsForModule(module.id) }}</span>
+              </div>
+              <div class="progress-line">
+                <div class="fill" [style.width.%]="getModuleProgressPercent(module.id)"></div>
+              </div>
+            </div>
+
+            @if (getModuleGroups(module.id).length > 1) {
+              <div class="alphabet-groups">
+                <div class="group-tabs">
+                  @for (group of getModuleGroups(module.id); let gi = $index; track group.label) {
+                    <button
+                      class="tab-pill"
+                      [class.active]="getActiveGroup(module.id) === gi"
+                      [disabled]="isModuleLocked(module) || !isGroupUnlocked(module.id, gi)"
+                      [title]="isModuleLocked(module) ? getModuleLockReason(module) : (!isGroupUnlocked(module.id, gi) ? getGroupLockReason(module.id, gi) : group.label)"
+                      (click)="$event.stopPropagation(); setActiveGroup(module.id, gi)"
+                    >{{ group.label }}</button>
+                  }
+                </div>
+                <div class="alphabet-group soft-card soft-card--compact fade-in">
+                  <div class="group-header">
+                    <span class="badge badge-neutral">{{ getModuleGroups(module.id)[getActiveGroup(module.id)].label }}</span>
+                    <div class="progress-line" style="width: 6rem;">
+                      <div class="fill" [style.width.%]="getGroupProgressPercent(module.id, getActiveGroup(module.id))"></div>
+                    </div>
+                  </div>
+                  <div class="levels-list">
+                    @for (lesson of getModuleGroups(module.id)[getActiveGroup(module.id)].lessons; track lesson.id; let j = $index) {
+                      <button
+                        type="button"
+                        class="level-btn"
+                        [class.unlocked]="!isModuleLocked(module) && isLessonUnlocked(module.id, getModuleGroupBaseIndex(module.id, getActiveGroup(module.id)) + j)"
+                        [class.locked]="isModuleLocked(module) || !isLessonUnlocked(module.id, getModuleGroupBaseIndex(module.id, getActiveGroup(module.id)) + j)"
+                        [disabled]="isModuleLocked(module) || !isLessonUnlocked(module.id, getModuleGroupBaseIndex(module.id, getActiveGroup(module.id)) + j)"
+                        (click)="$event.stopPropagation(); !isModuleLocked(module) && isLessonUnlocked(module.id, getModuleGroupBaseIndex(module.id, getActiveGroup(module.id)) + j) && handleLessonClick(module.id, lesson.id)"
+                        [title]="lesson.displayName">
+                        <span class="level-number">{{ getModuleGroupBaseIndex(module.id, getActiveGroup(module.id)) + j + 1 }}</span>
+                        @if (isModuleLocked(module) || !isLessonUnlocked(module.id, getModuleGroupBaseIndex(module.id, getActiveGroup(module.id)) + j)) {
+                          <span class="icon-emoji sm" aria-hidden="true">🔒</span>
+                        }
+                      </button>
+                    }
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <div class="levels-list">
+                @for (lesson of getLessonsForModule(module.id); track lesson.id; let i = $index) {
+                  <button
+                    type="button"
+                    class="level-btn"
+                    [class.unlocked]="!isModuleLocked(module) && getModuleProgress(module.id) >= i"
+                    [class.locked]="isModuleLocked(module) || getModuleProgress(module.id) < i"
+                    [disabled]="isModuleLocked(module) || getModuleProgress(module.id) < i"
+                    (click)="$event.stopPropagation(); !isModuleLocked(module) && getModuleProgress(module.id) >= i && handleLessonClick(module.id, lesson.id)"
+                    [title]="lesson.displayName">
+                    <span class="level-number">{{ i + 1 }}</span>
+                    @if (isModuleLocked(module) || getModuleProgress(module.id) < i) {
+                      <span class="icon-emoji sm" aria-hidden="true">🔒</span>
+                    }
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        @if (modules().length === 0) {
+          <div class="empty-state">
+            Nenhum conteúdo disponível ainda. Importe módulos ou crie lições para começar.
+          </div>
+        }
+      </div>
+
+      <!-- Tips Section -->
+      <div class="tips-card">
+        <div class="tips-header">
+          <div class="tips-title-wrapper">
+            <div class="tips-icon"></div>
+            <h3>Dicas para Começar</h3>
+          </div>
+          <button type="button" class="demo-btn" (click)="handleAddXp()">
+            +1 XP (Demo)
+          </button>
+        </div>
+        <ul class="tips-list">
+          <li>• Clique em uma <strong>lição</strong> para praticar diretamente</li>
+          <li>• Complete uma <strong>seção</strong> para desbloquear a próxima</li>
+          <li>• Pratique os gestos em frente à câmera para ganhar XP!</li>
+        </ul>
+      </div>
+    </div>
+  }
+</div>

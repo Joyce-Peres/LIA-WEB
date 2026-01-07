@@ -1,0 +1,35 @@
+<div class="level-page" *ngIf="!isLoading(); else loadingTpl">
+  <div class="header">
+    <button class="btn ghost" (click)="back()">← Voltar</button>
+    <div class="spacer"></div>
+  </div>
+
+  <div class="head">
+    <h1 class="title">{{ module()?.title }}</h1>
+    <p class="desc">Nível {{ level() }} • {{ lessons().length }} lições</p>
+  </div>
+
+  <div class="lessons-grid">
+    <div class="lesson-card soft-card soft-card--spacious" *ngFor="let l of lessons()" (click)="practice(l.id)">
+      <div class="row">
+        <div class="meta">
+          <div class="name">{{ l.displayName }}</div>
+          <div class="sub">Gesto {{ l.gestureName }} • XP {{ l.xpReward }}</div>
+        </div>
+        <div class="status" [class.done]="completedMap().get(l.id)">
+          <span class="badge" [class.badge-success]="completedMap().get(l.id)" [class.badge-neutral]="!completedMap().get(l.id)">
+            {{ completedMap().get(l.id) ? 'Concluída' : 'Pendente' }}
+          </span>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn ghost" (click)="$event.stopPropagation(); practice(l.id)">Abrir</button>
+        <button class="btn primary" (click)="$event.stopPropagation(); practice(l.id)">Praticar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading">Carregando…</div>
+</ng-template>
