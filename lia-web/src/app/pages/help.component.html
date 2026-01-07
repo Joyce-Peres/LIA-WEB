@@ -1,7 +1,7 @@
-<div class="help-page">
+﻿<div class="help-page">
   <div class="container">
     <div class="header">
-      <button class="btn btn-ghost" (click)="back()">← Voltar</button>
+      <button class="btn btn-ghost" (click)="back()"> Voltar</button>
       <div class="spacer"></div>
       <app-user-menu></app-user-menu>
     </div>
@@ -11,28 +11,56 @@
       <p class="desc">Perguntas frequentes e suporte</p>
     </div>
 
-  <div class="soft-card soft-card--spacious">
-    <h2 class="section-title"><span class="icon-emoji md">❓</span> FAQ</h2>
-    <div class="faq">
-      <div class="q">Como começo a praticar?</div>
-      <div class="a">Acesse o <a routerLink="/dashboard">Dashboard</a>, escolha uma lição e clique em “Praticar”. Permita o uso da câmera quando solicitado.</div>
+  <div class="faq-section">
+    <div class="section-header">
+      <div class="section-icon"></div>
+      <div>
+        <h2 class="section-title">FAQ</h2>
+        <p class="section-subtitle">Perguntas frequentes</p>
+      </div>
+    </div>
 
-      <div class="q">A confiança não sobe — o que posso fazer?</div>
-      <div class="a">Mantenha as mãos dentro da área visível, siga a postura do vídeo de referência e ajuste a iluminação. O sistema usa um buffer de 30 frames e suavização por votação.</div>
+    <div class="faq-grid">
+      <div class="faq-card">
+        <div class="faq-icon"></div>
+        <h3 class="faq-question">Como começo a praticar?</h3>
+        <p class="faq-answer">Acesse o <a routerLink="/dashboard">Dashboard</a>, escolha uma lição e clique em "Praticar". Permita o uso da câmera quando solicitado.</p>
+      </div>
 
-      <div class="q">Como desespelhar a câmera?</div>
-      <div class="a">Vá em <a routerLink="/settings">Configurações</a> e ative “Desespelhar câmera”. Isso inverte o vídeo e o overlay para facilitar a reprodução do gesto.</div>
+      <div class="faq-card">
+        <div class="faq-icon"></div>
+        <h3 class="faq-question">A confiança não sobe  o que posso fazer?</h3>
+        <p class="faq-answer">Mantenha as mãos dentro da área visível, siga a postura do vídeo de referência e ajuste a iluminação. O sistema usa um buffer de 30 frames e suavização por votação.</p>
+      </div>
 
-      <div class="q">Tema escuro está muito claro/escuro. Posso trocar?</div>
-      <div class="a">Sim. Habilite “Tema escuro” em <a routerLink="/settings">Configurações</a>. O layout ajusta superfícies, bordas e contrastes para melhor legibilidade.</div>
+      <div class="faq-card">
+        <div class="faq-icon"></div>
+        <h3 class="faq-question">Como desespelhar a câmera?</h3>
+        <p class="faq-answer">Vá em <a routerLink="/settings">Configurações</a> e ative "Desespelhar câmera". Isso inverte o vídeo e o overlay para facilitar a reprodução do gesto.</p>
+      </div>
 
-      <div class="q">Meus dados são enviados para algum servidor?</div>
-      <div class="a">Não. Sessão e preferências são armazenadas localmente (localStorage). O reconhecimento roda no seu navegador com TensorFlow.js.</div>
+      <div class="faq-card">
+        <div class="faq-icon"></div>
+        <h3 class="faq-question">Tema escuro está muito claro/escuro. Posso trocar?</h3>
+        <p class="faq-answer">Sim. Habilite "Tema escuro" em <a routerLink="/settings">Configurações</a>. O layout ajusta superfícies, bordas e contrastes para melhor legibilidade.</p>
+      </div>
+
+      <div class="faq-card">
+        <div class="faq-icon"></div>
+        <h3 class="faq-question">Meus dados são enviados para algum servidor?</h3>
+        <p class="faq-answer">Não. Sessão e preferências são armazenadas localmente (localStorage). O reconhecimento roda no seu navegador com TensorFlow.js.</p>
+      </div>
     </div>
   </div>
 
-  <div class="soft-card soft-card--spacious">
-    <h2 class="section-title"><span class="icon-emoji md">📧</span> Contato</h2>
-    <p>Contribua ou reporte problemas no <a href="https://github.com/Joyce-Peres/LIA-WEB" target="_blank" rel="noopener noreferrer">GitHub do projeto</a>.</p>
+  <div class="contact-section">
+    <div class="contact-card">
+      <div class="contact-icon"></div>
+      <div class="contact-content">
+        <h3 class="contact-title">Precisa de mais ajuda?</h3>
+        <p class="contact-text">Contribua ou reporte problemas no <a href="https://github.com/Joyce-Peres/LIA-WEB" target="_blank" rel="noopener noreferrer">GitHub do projeto</a>.</p>
+      </div>
     </div>
+  </div>
+  </div>
 </div>
