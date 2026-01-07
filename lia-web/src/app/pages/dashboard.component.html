@@ -1,4 +1,12 @@
 <div class="dashboard">
+  <!-- LIA Brand Banner -->
+  <div class="brand-banner">
+    <div class="brand-container">
+      <h1 class="brand-title">LIA</h1>
+      <p class="brand-subtitle">A sua assistente no aprendizado de Libras</p>
+    </div>
+  </div>
+
   @if (isLoading()) {
     <div class="loading">
       <div class="loading-text">Carregando…</div>
@@ -131,24 +139,6 @@
             Nenhum conteúdo disponível ainda. Importe módulos ou crie lições para começar.
           </div>
         }
-      </div>
-
-      <!-- Tips Section -->
-      <div class="tips-card">
-        <div class="tips-header">
-          <div class="tips-title-wrapper">
-            <div class="tips-icon"></div>
-            <h3>Dicas para Começar</h3>
-          </div>
-          <button type="button" class="demo-btn" (click)="handleAddXp()">
-            +1 XP (Demo)
-          </button>
-        </div>
-        <ul class="tips-list">
-          <li>• Clique em uma <strong>lição</strong> para praticar diretamente</li>
-          <li>• Complete uma <strong>seção</strong> para desbloquear a próxima</li>
-          <li>• Pratique os gestos em frente à câmera para ganhar XP!</li>
-        </ul>
       </div>
     </div>
   }

@@ -1,0 +1,64 @@
+{
+  "format": "layers-model",
+  "generatedBy": "Mock Generator (Story 2.1)",
+  "convertedBy": "Pending - requires Python 3.10 environment",
+  "weightsManifest": [
+    {
+      "paths": ["group1-shard1of1.bin"],
+      "weights": [
+        {"name": "lstm/kernel", "shape": [126, 512], "dtype": "float32"},
+        {"name": "lstm/bias", "shape": [512], "dtype": "float32"},
+        {"name": "dense/kernel", "shape": [64, 61], "dtype": "float32"},
+        {"name": "dense/bias", "shape": [61], "dtype": "float32"}
+      ]
+    }
+  ],
+  "modelTopology": {
+    "keras_version": "2.x",
+    "backend": "tensorflow",
+    "model_config": {
+      "class_name": "Sequential",
+      "config": {
+        "name": "gesture_lstm",
+        "layers": [
+          {
+            "class_name": "LSTM",
+            "config": {
+              "name": "lstm_1",
+              "units": 128,
+              "return_sequences": true,
+              "input_shape": [30, 126]
+            }
+          },
+          {
+            "class_name": "Dropout",
+            "config": {"name": "dropout_1", "rate": 0.3}
+          },
+          {
+            "class_name": "LSTM",
+            "config": {"name": "lstm_2", "units": 64}
+          },
+          {
+            "class_name": "Dense",
+            "config": {
+              "name": "dense_1",
+              "units": 64,
+              "activation": "relu"
+            }
+          },
+          {
+            "class_name": "Dense",
+            "config": {
+              "name": "dense_output",
+              "units": 61,
+              "activation": "softmax"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "__mock__": true,
+  "__note__": "This is a MOCK model structure. Real weights are not included. See docs/model-conversion.md for conversion instructions."
+}
+
