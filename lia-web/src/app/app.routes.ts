@@ -31,5 +31,23 @@ export const routes: Routes = [
     canActivate: [authGuard],
     data: { page: 'Profile' }
   },
+  {
+    path: 'settings',
+    loadComponent: () => import('./pages/settings.component').then((m) => m.SettingsComponent),
+    canActivate: [authGuard],
+    data: { page: 'Settings' }
+  },
+  {
+    path: 'about',
+    loadComponent: () => import('./pages/about.component').then((m) => m.AboutComponent),
+    canActivate: [authGuard],
+    data: { page: 'About' }
+  },
+  {
+    path: 'help',
+    loadComponent: () => import('./pages/help.component').then((m) => m.HelpComponent),
+    canActivate: [authGuard],
+    data: { page: 'Help' }
+  },
   { path: '**', redirectTo: 'dashboard' }
 ];

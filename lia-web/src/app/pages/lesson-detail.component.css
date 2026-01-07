@@ -1,11 +1,11 @@
-.lesson-page { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+.lesson-page { max-width: 960px; margin: 24px auto; padding: 0 16px; min-height: 100vh; }
 .header { display: flex; align-items: center; gap: 8px; }
 .header .spacer { flex: 1; }
 .head { margin: 12px 0 16px; }
-.title { margin: 0; font-size: 22px; }
+.title { margin: 0; font-size: 22px; color: var(--text); }
 .module-link { margin: 6px 0 0; color: var(--muted, #9aa0a6); }
 .meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
-.chip { padding: 6px 10px; border-radius: 999px; background: #f3e8ff; border: 1px solid #e9d5ff; font-size: 12px; color: #7c3aed; }
+.chip { padding: 6px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); font-size: 12px; color: var(--accent); }
 
 .video-section {
   margin: 24px 0;
@@ -21,8 +21,8 @@
 .instructions {
   margin: 24px 0;
   padding: 16px;
-  background: white;
-  border: 1px solid #e9d5ff;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(124,58,237,0.06);
 }

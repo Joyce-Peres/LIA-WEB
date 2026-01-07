@@ -1,0 +1,39 @@
+<div class="about-page">
+  <div class="container">
+    <div class="header">
+      <button class="btn btn-ghost" (click)="back()">← Voltar</button>
+      <div class="spacer"></div>
+      <app-user-menu></app-user-menu>
+    </div>
+
+    <div class="head">
+      <h1 class="title">Sobre</h1>
+      <p class="desc">Informações sobre o projeto</p>
+    </div>
+
+    <div class="soft-card soft-card--spacious">
+      <h2 class="section-title"><span class="icon-emoji md">📘</span> O que é o LIA</h2>
+      <p>O LIA-WEB é uma aplicação para aprender e praticar LIBRAS utilizando visão computacional (MediaPipe Hands) e modelos de IA (TensorFlow.js) diretamente no navegador.</p>
+      <ul class="list">
+        <li>Prática guiada com vídeo de referência e reconhecimento em tempo real.</li>
+        <li>Métricas de confiança, progresso por lição e XP por conclusão.</li>
+        <li>Preferências locais: tema escuro e desespelhamento da câmera.</li>
+      </ul>
+    </div>
+
+    <div class="soft-card soft-card--spacious">
+      <h2 class="section-title"><span class="icon-emoji md">👥</span> Equipe</h2>
+
+    </div>
+
+    <div class="soft-card soft-card--spacious">
+      <h2 class="section-title"><span class="icon-emoji md">🔗</span> Links</h2>
+      <ul class="list">
+        <li><a routerLink="/dashboard">Ir para o Dashboard</a></li>
+        <li><a routerLink="/settings">Configurações</a></li>
+        <li><a href="https://github.com/Joyce-Peres/LIA-WEB" target="_blank" rel="noopener noreferrer">Repositório no GitHub</a></li>
+        <li><a href="/" (click)="handleReload($event)">Recarregar aplicação</a></li>
+      </ul>
+    </div>
+  </div>
+</div>

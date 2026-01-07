@@ -1,0 +1,15 @@
+<div class="user-menu">
+  <button type="button" class="avatar-btn" (click)="toggleMenu()" title="Perfil">
+    {{ profile()?.avatarText?.slice(0, 2) ?? 'PR' }}
+  </button>
+  @if (isOpen()) {
+    <div class="menu-panel" role="menu">
+      <button class="menu-item" (click)="navigateToProfile()">Meu perfil</button>
+      <button class="menu-item" (click)="navigateToSettings()">Configurações</button>
+      <button class="menu-item" (click)="navigateToAbout()">Sobre</button>
+      <button class="menu-item" (click)="navigateToHelp()">Ajuda</button>
+      <div class="menu-sep"></div>
+      <button class="menu-item danger" (click)="handleLogout()">Sair</button>
+    </div>
+  }
+</div>

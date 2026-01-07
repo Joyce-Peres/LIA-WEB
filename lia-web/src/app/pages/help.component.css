@@ -1,0 +1,66 @@
+.help-page {
+  min-height: 100vh;
+  background: var(--surface-2);
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+.header .spacer { flex: 1; }
+
+.head {
+  margin-bottom: 2rem;
+}
+.title {
+  margin: 0;
+  font-size: 2.75rem;
+  font-weight: 500;
+  color: var(--text);
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+}
+.desc {
+  color: var(--muted);
+  margin-top: 0.5rem;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 1rem;
+  color: var(--text);
+  font-size: 1.25rem;
+}
+
+.faq {
+  display: grid;
+  gap: 16px;
+}
+.faq .q {
+  font-weight: 500;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.faq .a {
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.soft-card p {
+  color: var(--text);
+  line-height: 1.6;
+}

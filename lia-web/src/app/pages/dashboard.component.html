@@ -27,17 +27,11 @@
               {{ overallStats().completedLessons }}/{{ overallStats().totalLessons }}
             </span>
           </div>
-          <button type="button" class="avatar-btn" (click)="navigateToProfile()" title="Perfil">
-            {{ profile()?.avatarText?.slice(0, 2) ?? 'PR' }}
-          </button>
-          <button type="button" class="logout-btn" (click)="handleLogout()">
-            Sair
-          </button>
+          <app-user-menu></app-user-menu>
         </div>
       </div>
 
-      <!-- Progress Charts -->
-      <app-progress-charts></app-progress-charts>
+      <!-- Progress Charts removed per request -->
 
       <!-- Modules Grid -->
       <div class="modules-grid">
