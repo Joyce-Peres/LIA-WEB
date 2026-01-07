@@ -1,0 +1,48 @@
+<div class="lesson-page" *ngIf="!isLoading(); else loadingTpl">
+  <div class="header">
+    <button class="btn ghost" (click)="backToModule()">← Voltar</button>
+    <div class="spacer"></div>
+  </div>
+
+  <div class="head">
+    <h1 class="title">{{ lesson()?.displayName }}</h1>
+    <p class="module-link">Módulo: {{ lesson()?.module?.title }}</p>
+  </div>
+
+  <div class="meta">
+    <span class="badge badge-neutral">Gesto: {{ lesson()?.gestureName }}</span>
+    <span class="badge badge-neutral">Nível {{ lesson()?.level }}</span>
+    <span class="badge badge-success">XP {{ lesson()?.xpReward }}</span>
+  </div>
+
+  <div class="video-section soft-card soft-card--spacious">
+    <h2 class="section-title"><span class="icon-emoji md">📹</span> Demonstração</h2>
+    <app-gesture-video-player
+      [src]="lesson()?.videoRefUrl"
+      [gesture]="lesson()?.gestureName"
+      [loopVideo]="true"
+      [autoplayVideo]="false"
+    ></app-gesture-video-player>
+  </div>
+
+  <div class="instructions soft-card soft-card--spacious">
+    <h2 class="section-title"><span class="icon-emoji md">📝</span> Instruções</h2>
+    <p class="instruction-text">
+      1. Assista ao vídeo acima para aprender o gesto <em>{{ lesson()?.gestureName }}</em><br>
+      2. Clique em "Praticar agora" para usar sua câmera<br>
+      3. Reproduza o gesto até atingir {{ (lesson()?.minConfidenceThreshold ?? 0.7) * 100 }}% de confiança<br>
+      4. Complete 5 repetições corretas para concluir a lição
+    </p>
+  </div>
+
+  <div class="actions">
+    <button class="btn primary" (click)="practice()">Praticar agora</button>
+    @if (nextLesson()) {
+      <button class="btn" (click)="goToNextLesson()">Próxima lição: {{ nextLesson()?.displayName }}</button>
+    }
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading">Carregando…</div>
+</ng-template>

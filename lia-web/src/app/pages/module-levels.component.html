@@ -1,0 +1,25 @@
+<div class="levels-page" *ngIf="!isLoading(); else loadingTpl">
+  <div class="header">
+    <button class="btn ghost" (click)="back()">← Voltar</button>
+    <div class="spacer"></div>
+  </div>
+
+  <div class="module-head">
+    <h1 class="title">{{ module()?.title }}</h1>
+    <p class="desc">Selecione um nível para começar</p>
+  </div>
+
+  <div class="levels-grid">
+    <button class="level-card soft-card soft-card--compact" *ngFor="let item of levels()" (click)="openLevel(item.level)">
+      <div class="level">Nível {{ item.level }}</div>
+      <div class="badge badge-neutral">{{ item.completed }}/{{ item.count }} concluídas</div>
+      <div class="progress-line">
+        <div class="fill" [style.width.%]="item.count === 0 ? 0 : (item.completed / item.count) * 100"></div>
+      </div>
+    </button>
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading">Carregando…</div>
+  </ng-template>

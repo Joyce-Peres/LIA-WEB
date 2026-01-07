@@ -1,0 +1,41 @@
+<div class="progress-charts">
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-purple">
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ profile()?.totalXp ?? 0 }}</div>
+        <div class="stat-label">Total XP</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-yellow">
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ accuracyRate() | number:'1.0-0' }}%</div>
+        <div class="stat-label">Taxa de Acerto</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-purple">
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ formatTime(totalPracticeTime()) }}</div>
+        <div class="stat-label">Tempo de Prática</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-yellow">
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ completedLessonsCount() }}</div>
+        <div class="stat-label">Lições Completadas</div>
+      </div>
+    </div>
+  </div>
+
+</div>

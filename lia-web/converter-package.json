@@ -1,0 +1,12 @@
+{
+  "name": "model-converter",
+  "version": "1.0.0",
+  "description": "Convert Keras H5 model to TensorFlow.js",
+  "scripts": {
+    "convert": "tensorflowjs_converter --input_format=keras ../modelos/modelo_gestos.h5 src/assets/models/"
+  },
+  "devDependencies": {
+    "@tensorflow/tfjs-node": "^4.15.0",
+    "@tensorflowjs/tfjs-converter": "^2.0.1"
+  }
+}
