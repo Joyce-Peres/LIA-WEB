@@ -18,7 +18,7 @@ export class SettingsComponent {
   protected readonly settings = inject(SettingsService);
 
   // Local, editable copy to support an explicit Save action
-  pendingThemeMode: ThemeMode = 'system';
+  pendingThemeMode: ThemeMode = 'light';
   pendingUnmirror = true;
   savedMessage = '';
 

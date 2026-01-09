@@ -255,6 +255,13 @@
 
 /* Emoji styling now global via .icon-emoji */
 
+.module-icon-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  display: block;
+}
+
 .module-info {
   flex: 1;
   min-width: 0;

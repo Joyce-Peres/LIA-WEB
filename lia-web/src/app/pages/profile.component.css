@@ -58,12 +58,13 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
-  color: #fff;
+  background: var(--surface-1);
+  color: var(--text);
+  border: 2px solid var(--border);
   font-weight: 500;
   font-size: 2rem;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
   transition: transform 0.2s;
 }
 
@@ -105,7 +106,7 @@
 
 .icon-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 6px;
 }
 

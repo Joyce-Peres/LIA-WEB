@@ -54,18 +54,6 @@
   box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
 }
 
-.section-icon {
-  font-size: 3rem;
-  width: 72px;
-  height: 72px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
-}
-
 .section-title {
   margin: 0;
   font-size: 1.75rem;

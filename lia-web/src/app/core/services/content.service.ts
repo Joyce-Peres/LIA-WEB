@@ -125,10 +125,13 @@ export class ContentService {
   }
 
   getModulesWithStats(): Observable<ModuleWithStats[]> {
-    const modulesWithStats = mockModules.map(module => ({
-      ...module,
-      lessonCount: mockLessons.filter(l => l.moduleId === module.id).length
-    }));
+    const modulesWithStats = mockModules.map(module => {
+      const normalized = this.normalizeModule(module);
+      return {
+        ...normalized,
+        lessonCount: mockLessons.filter(l => l.moduleId === module.id).length
+      };
+    });
     return of(modulesWithStats);
   }
 
