@@ -26,18 +26,13 @@ import { AuthService } from '../core/services/auth.service';
             {{ error() }}
           </div>
         }
-
-        <div class="info-text">
-          Você escolheu <strong>evitar serviços externos</strong>. Este login cria
-          uma sessão local (armazenada no navegador) e não usa Google/Supabase.
-        </div>
       </div>
     </div>
   `,
   styles: [`
     .login-container {
       min-height: 100vh;
-      background: #f9fafb;
+      background: var(--surface-2);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -46,36 +41,42 @@ import { AuthService } from '../core/services/auth.service';
     .login-card {
       width: 100%;
       max-width: 28rem;
-      border-radius: 0.75rem;
-      background: white;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      border: 1px solid #e5e7eb;
-      padding: 1.5rem;
+      border-radius: 1.25rem;
+      background: var(--surface-1);
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.25);
+      border: 1px solid var(--border);
+      padding: 2.25rem 2.5rem;
+      text-align: center;
     }
     h1 {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #111827;
-      margin: 0 0 0.25rem;
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0 0 0.5rem;
     }
     .subtitle {
       font-size: 0.875rem;
-      color: #6b7280;
-      margin: 0 0 1.5rem;
+      color: var(--muted);
+      margin: 0 0 2rem;
     }
     .login-btn {
-      margin-top: 1.5rem;
+      margin-top: 0.5rem;
       width: 100%;
-      border-radius: 0.5rem;
-      background: #8b5cf6;
-      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      background: var(--accent);
+      padding: 0.75rem 1rem;
       color: white;
       font-weight: 600;
+      font-size: 0.95rem;
       border: none;
       cursor: pointer;
+      box-shadow: 0 10px 24px rgba(124, 58, 237, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease, opacity 0.15s ease;
     }
     .login-btn:hover:not(:disabled) {
-      opacity: 0.95;
+      filter: brightness(1.03);
+      transform: translateY(-1px);
+      box-shadow: 0 16px 32px rgba(124, 58, 237, 0.45);
     }
     .login-btn:disabled {
       opacity: 0.6;
@@ -84,16 +85,11 @@ import { AuthService } from '../core/services/auth.service';
     .error-msg {
       margin-top: 1rem;
       border-radius: 0.5rem;
-      border: 1px solid #fecaca;
-      background: #fef2f2;
+      border: 1px solid var(--color-error-light);
+      background: rgba(248, 113, 113, 0.12);
       padding: 0.75rem;
       font-size: 0.875rem;
       color: #b91c1c;
-    }
-    .info-text {
-      margin-top: 1rem;
-      font-size: 0.75rem;
-      color: #6b7280;
     }
   `]
 })

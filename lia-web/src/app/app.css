@@ -2,8 +2,8 @@
   display: block;
   min-height: 100vh;
   font-family: var(--font-sans);
-  background: var(--color-gray-50);
-  color: var(--color-gray-900);
+  background: var(--surface-2);
+  color: var(--text);
 }
 
 .app-shell {

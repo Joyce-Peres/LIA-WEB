@@ -39,7 +39,7 @@ export const mockModules: Module[] = [
     description: 'Aprenda as letras do alfabeto em Libras através de gestos manuais',
     difficultyLevel: 'iniciante',
     orderIndex: 1,
-    iconUrl: '/icons/alfabeto.svg',
+    iconUrl: '/icons/alfabeto.png',
     createdAt: '2025-01-01T00:00:00Z',
     updatedAt: '2025-01-01T00:00:00Z',
   },

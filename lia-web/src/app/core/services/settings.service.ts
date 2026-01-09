@@ -1,6 +1,6 @@
 import { Injectable, signal, effect } from '@angular/core';
 
-export type ThemeMode = 'light' | 'dark' | 'system';
+export type ThemeMode = 'light' | 'dark';
 
 export interface AppSettingsV2 {
   themeMode: ThemeMode;
@@ -17,27 +17,21 @@ const STORAGE_KEY_V1 = 'lia.settings.v1';
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
-  // Theme mode selection: 'system' follows OS preference
-  readonly themeMode = signal<ThemeMode>('system');
-  // Effective dark boolean derived from theme mode + system preference
+  // Theme mode selection: explicit light or dark
+  readonly themeMode = signal<ThemeMode>('light');
+  // Effective dark boolean derived from theme mode
   readonly darkMode = signal<boolean>(false);
   readonly unmirrorCamera = signal<boolean>(true);
 
-  private systemDarkQuery: MediaQueryList | null = null;
-
   constructor() {
-    // System preference listener (browser only)
-    if (typeof window !== 'undefined' && 'matchMedia' in window) {
-      this.systemDarkQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      this.systemDarkQuery.addEventListener?.('change', () => this.applyTheme());
-    }
-
     // Load from storage (prefer V2, fallback to V1)
     const rawV2 = localStorage.getItem(STORAGE_KEY_V2);
     if (rawV2) {
       try {
         const parsed = JSON.parse(rawV2) as Partial<AppSettingsV2>;
-        if (parsed.themeMode) this.themeMode.set(parsed.themeMode);
+        if (parsed.themeMode === 'light' || parsed.themeMode === 'dark') {
+          this.themeMode.set(parsed.themeMode);
+        }
         if (typeof parsed.unmirrorCamera === 'boolean') this.unmirrorCamera.set(parsed.unmirrorCamera);
       } catch { /* ignore */ }
     } else {
@@ -82,8 +76,7 @@ export class SettingsService {
 
   private applyTheme(): void {
     const mode = this.themeMode();
-    const systemDark = this.systemDarkQuery?.matches ?? false;
-    const isDark = mode === 'dark' || (mode === 'system' && systemDark);
+    const isDark = mode === 'dark';
     this.darkMode.set(isDark);
     if (typeof document !== 'undefined') {
       document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');

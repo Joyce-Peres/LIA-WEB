@@ -1,6 +1,6 @@
 <div class="lesson-page" *ngIf="!isLoading(); else loadingTpl">
   <div class="header">
-    <button class="btn ghost" (click)="backToModule()">← Voltar</button>
+    <button class="btn back-btn-primary" (click)="backToModule()">Voltar</button>
     <div class="spacer"></div>
     <app-user-menu></app-user-menu>
   </div>
@@ -17,7 +17,7 @@
   </div>
 
   <div class="video-section soft-card soft-card--spacious">
-    <h2 class="section-title"><span class="icon-emoji md">📹</span> Demonstração</h2>
+    <h2 class="section-title">Demonstração</h2>
     <app-gesture-video-player
       [src]="lesson()?.videoRefUrl"
       [gesture]="lesson()?.gestureName"
@@ -27,7 +27,7 @@
   </div>
 
   <div class="instructions soft-card soft-card--spacious">
-    <h2 class="section-title"><span class="icon-emoji md">📝</span> Instruções</h2>
+    <h2 class="section-title">Instruções</h2>
     <p class="instruction-text">
       1. Assista ao vídeo acima para aprender o gesto <em>{{ lesson()?.gestureName }}</em><br>
       2. Clique em "Praticar agora" para usar sua câmera<br>

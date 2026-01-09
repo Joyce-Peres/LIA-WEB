@@ -18,7 +18,6 @@
         <div class="header-title">
           <div class="title-wrapper">
             <h1>Minhas Lições</h1>
-            <span class="title-accent"></span>
           </div>
         </div>
         <div class="header-actions">
@@ -50,10 +49,7 @@
             <div class="module-header">
               <div class="module-icon-wrapper">
                 <div class="module-icon">
-                  <span class="icon-emoji lg">{{ getModuleIcon(module.id).emoji }}</span>
-                  @if (isModuleLocked(module)) {
-                    <span class="icon-emoji sm" aria-hidden="true" style="margin-left:-18px;">🔒</span>
-                  }
+                  <!-- Ícones desativados temporariamente -->
                 </div>
               </div>
               <div class="module-info">
@@ -103,10 +99,7 @@
                         [disabled]="isModuleLocked(module) || !isLessonUnlocked(module.id, getModuleGroupBaseIndex(module.id, getActiveGroup(module.id)) + j)"
                         (click)="$event.stopPropagation(); !isModuleLocked(module) && isLessonUnlocked(module.id, getModuleGroupBaseIndex(module.id, getActiveGroup(module.id)) + j) && handleLessonClick(module.id, lesson.id)"
                         [title]="lesson.displayName">
-                        <span class="level-number">{{ getModuleGroupBaseIndex(module.id, getActiveGroup(module.id)) + j + 1 }}</span>
-                        @if (isModuleLocked(module) || !isLessonUnlocked(module.id, getModuleGroupBaseIndex(module.id, getActiveGroup(module.id)) + j)) {
-                          <span class="icon-emoji sm" aria-hidden="true">🔒</span>
-                        }
+                            <span class="level-number">{{ getModuleGroupBaseIndex(module.id, getActiveGroup(module.id)) + j + 1 }}</span>
                       </button>
                     }
                   </div>
@@ -124,9 +117,6 @@
                     (click)="$event.stopPropagation(); !isModuleLocked(module) && getModuleProgress(module.id) >= i && handleLessonClick(module.id, lesson.id)"
                     [title]="lesson.displayName">
                     <span class="level-number">{{ i + 1 }}</span>
-                    @if (isModuleLocked(module) || getModuleProgress(module.id) < i) {
-                      <span class="icon-emoji sm" aria-hidden="true">🔒</span>
-                    }
                   </button>
                 }
               </div>

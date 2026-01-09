@@ -23,6 +23,7 @@ export class UserMenuComponent implements OnInit, OnDestroy {
   protected readonly profile = signal<UserProfile | null>(null);
 
   private sub?: Subscription;
+  private profileSub?: Subscription;
 
   ngOnInit(): void {
     this.sub = this.auth.session$.subscribe((sess) => {
@@ -34,10 +35,17 @@ export class UserMenuComponent implements OnInit, OnDestroy {
         this.profile.set(null);
       }
     });
+
+    this.profileSub = this.profileService.profile$.subscribe((p) => {
+      if (p) {
+        this.profile.set(p);
+      }
+    });
   }
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    this.profileSub?.unsubscribe();
   }
 
   toggleMenu(): void {

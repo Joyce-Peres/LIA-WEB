@@ -1,10 +1,14 @@
 import { Injectable } from '@angular/core';
 import type { UserProfile } from '../models/auth.types';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfileService {
+  private readonly profileSubject = new BehaviorSubject<UserProfile | null>(null);
+  readonly profile$ = this.profileSubject.asObservable();
+
   private storageKey(userId: string): string {
     return `lia.profile.v1.${userId}`;
   }
@@ -16,6 +20,7 @@ export class ProfileService {
   saveProfile(profile: UserProfile): void {
     try {
       localStorage.setItem(this.storageKey(profile.userId), JSON.stringify(profile));
+      this.profileSubject.next(profile);
     } catch {
       // Storage error - ignore
     }
@@ -39,7 +44,10 @@ export class ProfileService {
 
   ensureProfile(userId: string): UserProfile {
     const existing = this.getProfile(userId);
-    if (existing) return existing;
+    if (existing) {
+      this.profileSubject.next(existing);
+      return existing;
+    }
 
     const now = Date.now();
     const created: UserProfile = {

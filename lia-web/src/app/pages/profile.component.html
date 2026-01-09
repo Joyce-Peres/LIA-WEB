@@ -1,7 +1,7 @@
 <div class="profile-page">
   <div class="container">
     <div class="header">
-      <button class="btn btn-ghost" (click)="back()">← Voltar</button>
+      <button class="btn back-btn-primary" (click)="back()">Voltar</button>
       <div class="spacer"></div>
       <app-user-menu></app-user-menu>
     </div>
@@ -12,7 +12,7 @@
           <div class="avatar" (click)="toggleIconPicker()" style="cursor: pointer;">
             {{ avatarText || profile()?.avatarText || 'PR' }}
           </div>
-          <button class="change-icon-btn" (click)="toggleIconPicker()">📝 Trocar ícone</button>
+          <button class="change-icon-btn" (click)="toggleIconPicker()">Trocar ícone</button>
 
           <div class="icon-picker" *ngIf="showIconPicker">
             <div class="icon-grid">
