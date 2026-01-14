@@ -41,3 +41,16 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Python virtual environments
+ml_venv/
+venv_coleta/
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Large binary files
+*.dll
+*.pyd
