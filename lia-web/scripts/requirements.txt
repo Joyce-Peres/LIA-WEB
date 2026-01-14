@@ -1,0 +1,11 @@
+# Dependências para scripts de ML do LIA-WEB
+# Instale com: pip install -r requirements.txt
+
+opencv-python>=4.8.0
+mediapipe>=0.10.0
+pandas>=2.0.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+tensorflow>=2.15.0
+tensorflowjs>=4.20.0
+joblib>=1.3.0

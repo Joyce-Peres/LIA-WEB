@@ -11,6 +11,7 @@ import { takeUntil } from 'rxjs/operators';
 import { HandPoseService } from './handpose.service';
 import { GestureBufferService } from './gesture-buffer.service';
 import { ModelInferenceService, type InferenceResult } from './model-inference.service';
+import { gestureNamesMatch } from '../utils/gesture-name';
 
 export interface RecognitionState {
   /** Pipeline está ativo */
@@ -289,9 +290,7 @@ export class GestureRecognitionService implements OnDestroy {
    * Verifica se o gesto atual corresponde ao esperado
    */
   matchesGesture(expectedGesture: string): boolean {
-    const current = this._lastGesture();
-    if (!current) return false;
-    return current.toUpperCase() === expectedGesture.toUpperCase();
+    return gestureNamesMatch(this._lastGesture(), expectedGesture);
   }
 
   /**

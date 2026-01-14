@@ -15,6 +15,7 @@ import { GestureBufferService } from '../core/services/gesture-buffer.service';
 import { GestureVideoPlayerComponent } from '../components/gesture-video-player.component';
 import { UserMenuComponent } from '../components/user-menu.component';
 import { SettingsService } from '../core/services/settings.service';
+import { gestureNamesMatch } from '../core/utils/gesture-name';
 
 @Component({
   standalone: true,
@@ -260,8 +261,10 @@ export class PracticeComponent implements OnInit, OnDestroy {
       const conf = this.confidence();
       const minConf = (lesson.minConfidenceThreshold ?? 0.7) * 100;
 
+      const matches = gestureNamesMatch(recognized, expectedGesture);
+
       // Verificar se o gesto correto foi reconhecido com confiança suficiente
-      if (recognized && recognized.toUpperCase() === expectedGesture.toUpperCase() && conf >= minConf) {
+      if (recognized && matches && conf >= minConf) {
         this.correctGestureStreak++;
         this.practiceStatus.set(`Correto! ${this.correctGestureStreak}/${this.STREAK_TARGET}`);
 
@@ -274,12 +277,16 @@ export class PracticeComponent implements OnInit, OnDestroy {
           this.stopSession();
           this.handleCompletion();
         }
-      } else if (recognized && recognized.toUpperCase() !== expectedGesture.toUpperCase()) {
+      } else if (recognized && !matches) {
         // Gesto errado detectado - resetar streak parcialmente
         this.correctGestureStreak = Math.max(0, this.correctGestureStreak - 1);
         this.practiceStatus.set(`Tente o gesto "${expectedGesture}"`);
       }
     });
+  }
+
+  protected gesturesMatch(recognized: string | null | undefined, expected: string | null | undefined): boolean {
+    return gestureNamesMatch(recognized, expected);
   }
 
   stopSession(): void {

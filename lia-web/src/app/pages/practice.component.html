@@ -67,7 +67,7 @@
         @if (isSessionActive()) {
           <div class="recognition-row">
             <span class="label">Gesto detectado:</span>
-            <span class="value" [class.correct]="recognizedGesture()?.toUpperCase() === lesson()?.gestureName?.toUpperCase()">
+            <span class="value" [class.correct]="gesturesMatch(recognizedGesture(), lesson()?.gestureName)">
               {{ recognizedGesture() || '—' }}
             </span>
           </div>
