@@ -506,7 +506,12 @@ export class PracticeComponent implements OnInit, OnDestroy {
 
   goToNextLesson(): void {
     const id = this.nextLessonId();
-    if (!id) return;
+    if (!id) {
+      console.warn('No next lesson ID available');
+      // Fallback: try to go back to module/dashboard
+      this.backToModule();
+      return;
+    }
     this.router.navigate(['/practice', id]);
   }
 }

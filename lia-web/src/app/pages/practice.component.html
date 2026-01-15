@@ -111,16 +111,17 @@
       </div>
 
       @if (practiceProgress() === 100) {
-        <div class="completion-banner soft-card soft-card--spacious" role="status">
-          <div class="title">Concluído! +{{ lesson()?.xpReward }} XP</div>
-          <div class="desc">Excelente trabalho. Você pode continuar praticando ou voltar ao módulo.</div>
+        <div class="completion-banner soft-card soft-card--spacious" role="status" aria-live="polite">
+          <div class="title">✅ Concluído! +{{ lesson()?.xpReward }} XP</div>
+          <div class="desc">Excelente trabalho! Você acertou o gesto "{{ lesson()?.gestureName }}" 5 vezes seguidas.</div>
           <div class="actions">
-            <button class="btn ghost" (click)="backToLesson()">Voltar à lição</button>
             @if (nextLessonId()) {
-              <button class="btn primary" (click)="goToNextLesson()">Próxima lição</button>
+              <button class="btn primary" (click)="goToNextLesson()" autofocus>Próxima lição →</button>
+              <button class="btn ghost" (click)="backToLesson()">Repetir lição</button>
               <button class="btn ghost" (click)="backToModule()">Voltar ao módulo</button>
             } @else {
-              <button class="btn primary" (click)="backToModule()">Voltar ao módulo</button>
+              <button class="btn primary" (click)="backToModule()" autofocus>Voltar ao módulo</button>
+              <button class="btn ghost" (click)="backToLesson()">Repetir lição</button>
             }
           </div>
         </div>
