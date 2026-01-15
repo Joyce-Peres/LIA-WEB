@@ -498,15 +498,22 @@ export class PracticeComponent implements OnInit, OnDestroy {
 
     // Resolve next lesson within the same level
     this.isLoadingNextLesson.set(true);
+    const lesson = this.lesson();
+    if (!lesson) {
+      this.isLoadingNextLesson.set(false);
+      return;
+    }
     this.content
-      .getNextLessonInLevel(l.moduleId, l.level, l.orderIndex)
+      .getNextLessonInLevel(lesson.moduleId, lesson.level, lesson.orderIndex)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (next) => {
+          console.log('Next lesson resolved:', next);
           this.nextLessonId.set(next?.id ?? null);
           this.isLoadingNextLesson.set(false);
         },
-        error: () => {
+        error: (err) => {
+          console.error('Error resolving next lesson:', err);
           this.isLoadingNextLesson.set(false);
         }
       });
@@ -514,12 +521,14 @@ export class PracticeComponent implements OnInit, OnDestroy {
 
   goToNextLesson(): void {
     const id = this.nextLessonId();
+    console.log('goToNextLesson called, nextLessonId:', id);
     if (!id) {
       console.warn('No next lesson ID available');
       // Fallback: try to go back to module/dashboard
       this.backToModule();
       return;
     }
+    console.log('Navigating to lesson:', id);
     this.router.navigate(['/practice', id]);
   }
 }

@@ -19,7 +19,7 @@ export function canonicalizeGestureName(name: string | null | undefined): string
 
   // Aplicar aliases ANTES de remover diacríticos
   value = ALIASES[value] ?? value;
-  
+
   // Remover diacríticos SOMENTE após aliases (para evitar mismatch TERÇA vs TERCA, MÃE vs MAE etc.)
   // IMPORTANTE: Apenas letras que REALMENTE têm acentos são tratadas aqui
   // Exemplos: Á→A, É→E, Í→I, Ó→O, Ú→U, Ã→A, Õ→O, Ç→C

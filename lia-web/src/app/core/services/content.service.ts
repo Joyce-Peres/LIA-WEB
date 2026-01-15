@@ -93,7 +93,16 @@ export class ContentService {
     const list = mockLessons
       .filter(l => l.moduleId === moduleId && l.level === level)
       .sort((a, b) => a.orderIndex - b.orderIndex);
-    const next = list.find(l => l.orderIndex > currentOrderIndex) || null;
+    let next = list.find(l => l.orderIndex > currentOrderIndex) || null;
+
+    // Se não há próxima lição no mesmo nível, procura o primeiro do próximo nível
+    if (!next) {
+      const nextLevelList = mockLessons
+        .filter(l => l.moduleId === moduleId && l.level > level)
+        .sort((a, b) => a.level - b.level || a.orderIndex - b.orderIndex);
+      next = nextLevelList.length > 0 ? nextLevelList[0] : null;
+    }
+
     return of(next ? this.normalizeLesson(next) : null);
   }
 
