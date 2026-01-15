@@ -14,15 +14,18 @@ export function canonicalizeGestureName(name: string | null | undefined): string
   // Normalizar hífens diferentes
   value = value.replace(/[–—]/g, '-');
 
-  // Remover diacríticos para evitar mismatch TERÇA vs TERCA, MÃE vs MAE etc.
-  // (comparação sempre será feita com a versão canonizada de ambos os lados)
-  value = value.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-
   // Colapsar espaços
   value = value.replace(/\s+/g, ' ');
 
-  // Aplicar aliases após a canonização
-  return ALIASES[value] ?? value;
+  // Aplicar aliases ANTES de remover diacríticos
+  value = ALIASES[value] ?? value;
+  
+  // Remover diacríticos SOMENTE após aliases (para evitar mismatch TERÇA vs TERCA, MÃE vs MAE etc.)
+  // IMPORTANTE: Apenas letras que REALMENTE têm acentos são tratadas aqui
+  // Exemplos: Á→A, É→E, Í→I, Ó→O, Ú→U, Ã→A, Õ→O, Ç→C
+  value = value.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  return value;
 }
 
 export function gestureNamesMatch(a: string | null | undefined, b: string | null | undefined): boolean {

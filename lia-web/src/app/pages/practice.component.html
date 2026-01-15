@@ -115,7 +115,11 @@
           <div class="title">✅ Concluído! +{{ lesson()?.xpReward }} XP</div>
           <div class="desc">Excelente trabalho! Você acertou o gesto "{{ lesson()?.gestureName }}" 5 vezes seguidas.</div>
           <div class="actions">
-            @if (nextLessonId()) {
+            @if (isLoadingNextLesson()) {
+              <button class="btn primary" disabled>Carregando próxima lição…</button>
+              <button class="btn ghost" (click)="backToLesson()">Repetir lição</button>
+              <button class="btn ghost" (click)="backToModule()">Voltar ao módulo</button>
+            } @else if (nextLessonId()) {
               <button class="btn primary" (click)="goToNextLesson()" autofocus>Próxima lição →</button>
               <button class="btn ghost" (click)="backToLesson()">Repetir lição</button>
               <button class="btn ghost" (click)="backToModule()">Voltar ao módulo</button>

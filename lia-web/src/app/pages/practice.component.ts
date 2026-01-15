@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, ViewChild, ElementRef, signal, effect, in
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, Subscription, interval, switchMap, takeUntil } from 'rxjs';
+import { Subject, Subscription, interval, switchMap, takeUntil, firstValueFrom } from 'rxjs';
 import { ContentService } from '../core/services/content.service';
 import type { LessonWithModule } from '../core/models/database.types';
 import { CameraService } from '../core/services/camera.service';
@@ -37,6 +37,7 @@ export class PracticeComponent implements OnInit, OnDestroy {
   protected readonly practiceProgress = signal(0); // 0-100
   protected readonly practiceStatus = signal('Pronto para praticar');
   protected readonly nextLessonId = signal<string | null>(null);
+  protected readonly isLoadingNextLesson = signal(false);
   protected readonly recognizedGesture = signal<string | null>(null);
   protected readonly recognitionFps = signal(0);
   protected readonly bufferProgress = signal(0); // 0-30 frames
@@ -496,11 +497,18 @@ export class PracticeComponent implements OnInit, OnDestroy {
     }
 
     // Resolve next lesson within the same level
+    this.isLoadingNextLesson.set(true);
     this.content
       .getNextLessonInLevel(l.moduleId, l.level, l.orderIndex)
       .pipe(takeUntil(this.destroy$))
-      .subscribe(next => {
-        this.nextLessonId.set(next?.id ?? null);
+      .subscribe({
+        next: (next) => {
+          this.nextLessonId.set(next?.id ?? null);
+          this.isLoadingNextLesson.set(false);
+        },
+        error: () => {
+          this.isLoadingNextLesson.set(false);
+        }
       });
   }
 
