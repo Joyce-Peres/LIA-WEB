@@ -1,7 +1,7 @@
 {
   "modelVersion": "1.0.0",
   "status": "ready",
-  "note": "Model converted from libras_alfabeto_projeto",
+  "note": "Model trained on 6 Libras gestures (A, B, E, I, O, U)",
   "inputShape": [
     1,
     30,
@@ -9,27 +9,17 @@
   ],
   "outputShape": [
     1,
-    61
+    6
   ],
   "timesteps": 30,
   "features": 126,
   "featureDescription": "21 landmarks × 3 coords (x,y,z) × 2 hands",
   "classes": [
-    "1", "10", "2", "3", "4", "5", "6", "7", "8", "9",
-    "A", "ABAIXO", "ADOCANTE", "AGORA", "AMANHA", "ANO",
-    "B", "C", "D", "DESCULPA", "DOMINGO",
-    "E", "F", "G", "H", "HORAS",
-    "I", "J", "K", "L", "M", "MES", "MINUTOS",
-    "N", "O", "OBRIGADA", "ONDE", "ONTEM",
-    "P", "PAI", "POR FAVOR", "POR QUE",
-    "Q", "QUANDO", "QUARTA-FEIRA", "QUINTA-FEIRA",
-    "R", "S", "SABADO", "SEGUNDA-FEIRA", "SEXTA-FEIRA",
-    "T", "TCHAU", "TERÇA-FEIRA", "TUDO BEM",
-    "U", "V", "W", "X", "Y", "Z"
+    "A", "B", "E", "I", "O", "U"
   ],
-  "numClasses": 61,
-  "minConfidenceThreshold": 0.85,
+  "numClasses": 6,
+  "minConfidenceThreshold": 0.7,
   "bufferSize": 30,
   "resetThreshold": 10,
-  "conversionPending": true
+  "conversionPending": false
 }
