@@ -1,0 +1,83 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+.venv/
+.venv311/
+.venv312/
+venv/
+venv_web/
+venv_coleta/
+venv_conv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-workspace
+*.sublime-project
+
+# Node.js / Angular
+node_modules/
+dist/
+.angular/
+
+# Build artifacts
+*.dist-info/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ML models and data (large files)
+*.h5
+*.pkl
+*.joblib
+*.csv
+datos/
+dados/
+
+# Project specific
+lia-web/src/assets/models/*.bin
+lia-web/src/assets/models/*.json
+
+# Environment variables
+.env
+.env.local
+
+# OS
+Thumbs.db
+.DS_Store
+
+# IDE configs
+.vscode/launch.json
+.vscode/settings.json
