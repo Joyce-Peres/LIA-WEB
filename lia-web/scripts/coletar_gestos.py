@@ -76,6 +76,35 @@ def padronizar_frames(frames: np.ndarray) -> np.ndarray:
     return frames
 
 
+def validar_qualidade_frame(results, frame) -> tuple[bool, str]:
+    """
+    Valida se o frame tem qualidade suficiente para treinamento.
+
+    Returns:
+        (is_valid, mensagem_erro)
+    """
+    if not results.multi_hand_landmarks:
+        return False, "Nenhuma mão detectada"
+
+    for hand_landmarks in results.multi_hand_landmarks:
+        xs = [lm.x for lm in hand_landmarks.landmark]
+        ys = [lm.y for lm in hand_landmarks.landmark]
+
+        # Verificar tamanho da mão (não muito longe)
+        hand_width = max(xs) - min(xs)
+        hand_height = max(ys) - min(ys)
+        if hand_width < 0.15 or hand_height < 0.15:
+            return False, "Mão muito pequena - aproxime-se"
+
+        # Verificar se mão não está cortada nas bordas
+        if min(xs) < 0.05 or max(xs) > 0.95:
+            return False, "Mão cortada lateralmente"
+        if min(ys) < 0.05 or max(ys) > 0.95:
+            return False, "Mão cortada (cima/baixo)"
+
+    return True, "OK"
+
+
 def extrair_landmarks(results) -> list:
     """
     Extrai landmarks das mãos detectadas e padroniza para 2 mãos (126 valores).
@@ -143,7 +172,7 @@ def desenhar_landmarks(frame, results):
             )
 
 
-def desenhar_interface(frame, gravando: bool, buffer_len: int, gesto_nome: str):
+def desenhar_interface(frame, gravando: bool, buffer_len: int, gesto_nome: str, qualidade_msg: str = ""):
     """
     Desenha informações na tela (status, contador de frames, etc.)
     """
@@ -173,6 +202,11 @@ def desenhar_interface(frame, gravando: bool, buffer_len: int, gesto_nome: str):
     # Nome do gesto atual
     cv2.putText(frame, f"Gesto: {gesto_nome}", (w - 250, 30),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+
+    # Aviso de qualidade (se houver)
+    if qualidade_msg and qualidade_msg != "OK":
+        cv2.putText(frame, f"⚠️ {qualidade_msg}", (10, h - 40),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 165, 255), 2)
 
     # Instruções
     cv2.putText(frame, "ESPACO: Gravar | ESC: Cancelar", (10, h - 10),
@@ -264,18 +298,21 @@ def main():
                 frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 results = hands.process(frame_rgb)
 
+                # Validar qualidade do frame
+                is_valid, quality_msg = validar_qualidade_frame(results, frame)
+
                 # Extrair e armazenar landmarks se estiver gravando
                 if results.multi_hand_landmarks:
                     landmarks = extrair_landmarks(results)
 
-                    if gravando:
+                    if gravando and is_valid:
                         buffer.append(np.array(landmarks).flatten())
 
                     # Desenhar landmarks
                     desenhar_landmarks(frame, results)
 
                 # Desenhar interface
-                desenhar_interface(frame, gravando, len(buffer), gesto_nome)
+                desenhar_interface(frame, gravando, len(buffer), gesto_nome, quality_msg)
 
                 # Mostrar frame
                 cv2.imshow("LIA - Coletor de Gestos", frame)

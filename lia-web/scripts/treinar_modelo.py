@@ -45,7 +45,7 @@ FEATURES = 126         # 21 landmarks × 3 coords × 2 mãos
 # FUNÇÕES
 # ============================================================================
 
-def carregar_dados(min_amostras: int = 15):
+def carregar_dados(min_amostras: int = 30):
     """
     Carrega e prepara os dados do CSV para treinamento.
 
@@ -295,8 +295,8 @@ def main():
     parser.add_argument(
         '--min-amostras',
         type=int,
-        default=15,
-        help='Mínimo de amostras por gesto (padrão: 15)'
+        default=30,
+        help='Mínimo de amostras por gesto (padrão: 30, recomendado: 50+)'
     )
     parser.add_argument(
         '--test-size',

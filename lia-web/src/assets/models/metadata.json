@@ -1,25 +1,34 @@
 {
-  "modelVersion": "1.0.0",
-  "status": "ready",
-  "note": "Model trained on 6 Libras gestures (A, B, E, I, O, U)",
+  "modelVersion": "2026.01.15",
+  "status": "pending",
+  "note": "Modelo treinado localmente - conversão manual pendente",
+  "conversionDate": "2026-01-15T13:34:47.425165",
   "inputShape": [
-    1,
+    null,
     30,
     126
   ],
   "outputShape": [
-    1,
-    6
+    null,
+    7
   ],
   "timesteps": 30,
   "features": 126,
   "featureDescription": "21 landmarks × 3 coords (x,y,z) × 2 hands",
   "classes": [
-    "A", "B", "E", "I", "O", "U"
+    "A",
+    "B",
+    "E",
+    "I",
+    "N",
+    "O",
+    "U"
   ],
-  "numClasses": 6,
-  "minConfidenceThreshold": 0.7,
+  "numClasses": 7,
+  "minConfidenceThreshold": 0.85,
   "bufferSize": 30,
   "resetThreshold": 10,
-  "conversionPending": false
+  "conversionPending": true,
+  "savedModelPath": "C:\\LIA\\LIA-WEB\\lia-web\\modelos\\temp_saved_model",
+  "instructions": "Use: tensorflowjs_converter --input_format=tf_saved_model temp_saved_model/ src/assets/models/"
 }
