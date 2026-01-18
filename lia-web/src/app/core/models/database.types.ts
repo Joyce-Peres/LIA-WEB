@@ -25,6 +25,7 @@ export interface Lesson {
   gestureName: string;
   displayName: string;
   videoRefUrl: string | null;
+  thumbnailUrl?: string | null;
   minConfidenceThreshold: number; // 0.00 to 1.00
   xpReward: number;
   orderIndex: number;

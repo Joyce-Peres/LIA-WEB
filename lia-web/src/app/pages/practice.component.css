@@ -104,6 +104,35 @@
 }
 .module { margin: 6px 0 12px; color: var(--muted); }
 .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+
+.reference-video {
+  margin: 14px 0;
+  max-width: 520px;
+  position: relative;
+}
+
+.gesture-thumbnail-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+  padding: 0.5rem;
+  pointer-events: none;
+}
+
+.gesture-thumbnail-img {
+  max-width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+}
+
 .hint {
   color: var(--muted);
   margin-top: 0;

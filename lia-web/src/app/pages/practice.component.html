@@ -48,8 +48,13 @@
         <span class="badge badge-neutral">Confiança mínima {{ (lesson()?.minConfidenceThreshold ?? 0) * 100 | number:'1.0-0' }}%</span>
       </div>
 
-      <!-- Video de referência (compacto) -->
+      <!-- Video de referência com imagem do gesto -->
       <div class="reference-video">
+        @if (lesson()?.thumbnailUrl) {
+          <div class="gesture-thumbnail-overlay">
+            <img [src]="lesson()!.thumbnailUrl" [alt]="lesson()?.displayName" class="gesture-thumbnail-img">
+          </div>
+        }
         <app-gesture-video-player
           [src]="lesson()?.videoRefUrl"
           [gesture]="lesson()?.gestureName"

@@ -16,6 +16,15 @@
     <span class="badge badge-success">XP {{ lesson()?.xpReward }}</span>
   </div>
 
+  @if (lesson()?.thumbnailUrl) {
+    <div class="thumbnail-section soft-card soft-card--spacious">
+      <h2 class="section-title">Como fazer</h2>
+      <div class="thumbnail-wrapper">
+        <img [src]="lesson()!.thumbnailUrl" [alt]="lesson()?.displayName" class="gesture-thumbnail">
+      </div>
+    </div>
+  }
+
   <div class="video-section soft-card soft-card--spacious">
     <h2 class="section-title">Demonstração</h2>
     <app-gesture-video-player

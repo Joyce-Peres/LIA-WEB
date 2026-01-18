@@ -167,6 +167,7 @@ export const mockLessons: Lesson[] = [
     gestureName: 'A',
     displayName: 'Letra A',
     videoRefUrl: '/videos/gestures/A.mp4',
+    thumbnailUrl: '/images/gestures/A.png',
     minConfidenceThreshold: 0.75,
     xpReward: 10,
     orderIndex: 1,

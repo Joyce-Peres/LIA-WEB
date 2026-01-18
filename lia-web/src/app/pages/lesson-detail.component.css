@@ -7,6 +7,34 @@
 .meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
 .chip { padding: 6px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); font-size: 12px; color: var(--accent); }
 
+.thumbnail-section {
+  margin: 24px 0;
+}
+
+.thumbnail-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 16px rgba(251, 191, 36, 0.2);
+}
+
+.gesture-thumbnail {
+  max-width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.15));
+  animation: floatGesture 3s ease-in-out infinite;
+}
+
+@keyframes floatGesture {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
 .video-section {
   margin: 24px 0;
 }
