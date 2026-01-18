@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserMenuComponent } from '../components/user-menu.component';
 import { Subject, switchMap, takeUntil } from 'rxjs';
@@ -33,7 +33,8 @@ export class ModuleLevelsComponent implements OnInit, OnDestroy {
     private router: Router,
     private content: ContentService,
     private progress: UserProgressService,
-    private auth: AuthService
+    private auth: AuthService,
+    private location: Location
   ) {}
 
   ngOnInit(): void {
@@ -87,6 +88,6 @@ export class ModuleLevelsComponent implements OnInit, OnDestroy {
   }
 
   back(): void {
-    this.router.navigate(['/dashboard']);
+    this.location.back();
   }
 }

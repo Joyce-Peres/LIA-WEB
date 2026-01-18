@@ -1,7 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { UserMenuComponent } from '../components/user-menu.component';
 import { SettingsService, ThemeMode } from '../core/services/settings.service';
 
@@ -13,7 +12,7 @@ import { SettingsService, ThemeMode } from '../core/services/settings.service';
   styleUrl: './settings.component.css'
 })
 export class SettingsComponent {
-  constructor(private router: Router) {}
+  constructor(private location: Location) {}
 
   protected readonly settings = inject(SettingsService);
 
@@ -35,7 +34,7 @@ export class SettingsComponent {
   }
 
   back(): void {
-    this.router.navigate(['/dashboard']);
+    this.location.back();
   }
 
   setThemeModeLocal(value: ThemeMode): void { this.pendingThemeMode = value; this.savedMessage = ''; }

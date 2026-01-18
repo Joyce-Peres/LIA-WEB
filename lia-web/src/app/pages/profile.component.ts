@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserMenuComponent } from '../components/user-menu.component';
 import { Router } from '@angular/router';
@@ -27,7 +27,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   protected showIconPicker = false;
   protected showSuccessMessage = false;
 
-  // Ícones predefinidos da LIA
+  // Íconsss divonicos babadeiros para as lendas escolherem
   protected readonly availableIcons = [
     '🐨','🐼','🐰','🦢','🐚','🍥','☁️','🌼','🌸','💌','🍄','🍓','💟','🪻','💜','🦄','✨','🌙','🍋','⭐','🐝','🧸','🍯','🧺'
   ];
@@ -35,7 +35,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private profileService: ProfileService,
-    private router: Router
+    private router: Router,
+    private location: Location
   ) {}
 
   ngOnInit(): void {

@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { CommonModule, Location } from '@angular/common';
 import { UserMenuComponent } from '../components/user-menu.component';
 
 @Component({
@@ -11,9 +10,9 @@ import { UserMenuComponent } from '../components/user-menu.component';
   styleUrl: './about.component.css'
 })
 export class AboutComponent {
-  constructor(private router: Router) {}
+  constructor(private location: Location) {}
 
-  back(): void { this.router.navigate(['/dashboard']); }
+  back(): void { this.location.back(); }
 
   handleReload(event: Event): void {
     event.preventDefault();

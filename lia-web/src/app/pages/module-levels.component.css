@@ -1,9 +1,9 @@
 .levels-page { max-width: 960px; margin: 24px auto; padding: 0 16px; min-height: 100vh; }
 .header { display: flex; align-items: center; gap: 8px; }
 .header .spacer { flex: 1; }
-.module-head { margin: 12px 0 20px; }
-.module-head .title { margin: 0; font-size: 22px; color: var(--text); }
-.module-head .desc { margin: 6px 0 0; color: var(--muted, #9aa0a6); }
+.module-head { margin: 12px 0 20px; text-align: left; }
+.module-head .title { margin: 0; font-size: 22px; color: var(--text); text-align: left; }
+.module-head .desc { margin: 6px 0 0; color: var(--muted, #9aa0a6); text-align: left; }
 
 .levels-grid { display: flex; flex-direction: column; gap: 10px; }
 .level-card { width: 100%; text-align: left; padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface-1); cursor: pointer; display: grid; gap: 8px; box-shadow: 0 2px 8px rgba(124,58,237,0.06); }

@@ -44,20 +44,53 @@
   margin: 0 0 1rem;
   color: var(--text);
   font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.subsection-title {
+  margin: 1.5rem 0 0.75rem;
+  color: var(--text);
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .list {
   margin: 8px 0 0;
   padding-left: 18px;
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 .list li {
   color: var(--text);
-  line-height: 1.6;
+  line-height: 1.7;
+}
+
+.list li strong {
+  color: var(--primary);
 }
 
 .soft-card p {
   color: var(--text);
-  line-height: 1.6;
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.soft-card p:last-child {
+  margin-bottom: 0;
+}
+
+.soft-card strong {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.soft-card a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.soft-card a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
 }

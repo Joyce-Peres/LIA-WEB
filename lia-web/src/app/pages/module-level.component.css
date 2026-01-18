@@ -1,9 +1,9 @@
 .level-page { max-width: 960px; margin: 24px auto; padding: 0 16px; min-height: 100vh; }
 .header { display: flex; align-items: center; gap: 8px; }
 .header .spacer { flex: 1; }
-.head { margin: 12px 0 16px; }
-.title { margin: 0; font-size: 22px; color: var(--text); }
-.desc { margin: 6px 0 0; color: var(--muted, #9aa0a6); }
+.head { margin: 12px 0 16px; text-align: left; }
+.title { margin: 0; font-size: 22px; color: var(--text); text-align: left; }
+.desc { margin: 6px 0 0; color: var(--muted, #9aa0a6); text-align: left; }
 
 .lessons-grid { display: grid; gap: 10px; }
 .lesson-card { border: 1px solid var(--border); border-radius: 16px; padding: 16px; background: var(--surface-1); box-shadow: 0 2px 8px rgba(124,58,237,0.06); cursor: pointer; transition: transform .15s ease, box-shadow .15s ease; }

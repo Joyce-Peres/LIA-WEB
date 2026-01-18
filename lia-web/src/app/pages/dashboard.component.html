@@ -2,37 +2,76 @@
   <!-- LIA Brand Banner -->
   <div class="brand-banner">
     <div class="brand-container">
+      <div class="brand-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white" opacity="0.9"/>
+          <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+          <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+        </svg>
+      </div>
       <h1 class="brand-title">LIA</h1>
-      <p class="brand-subtitle">A sua assistente no aprendizado de Libras</p>
+      <p class="brand-subtitle">✨ A sua assistente no aprendizado de Libras ✨</p>
     </div>
   </div>
 
   @if (isLoading()) {
     <div class="loading">
-      <div class="loading-text">Carregando…</div>
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Carregando sua jornada...</div>
     </div>
   } @else {
     <div class="container">
       <!-- Header -->
       <div class="header">
         <div class="header-title">
+          <div class="title-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V5C21 3.89543 20.1046 3 19 3Z" stroke="url(#grad1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M9 7H15" stroke="url(#grad1)" stroke-width="2" stroke-linecap="round"/>
+              <path d="M9 12H15" stroke="url(#grad1)" stroke-width="2" stroke-linecap="round"/>
+              <path d="M9 17H13" stroke="url(#grad1)" stroke-width="2" stroke-linecap="round"/>
+              <defs>
+                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
           <div class="title-wrapper">
             <h1>Minhas Lições</h1>
           </div>
         </div>
         <div class="header-actions">
-          <div class="stat">
-            <span class="stat-label">Pontuação:</span>
-            <span class="stat-value">{{ profile()?.totalXp ?? 0 }}</span>
-          </div>
-          <div class="progress-section">
-            <span class="progress-label">Progresso Geral:</span>
-            <div class="progress-line" style="width: 8rem;">
-              <div class="fill" [style.width.%]="overallStats().progress * 100"></div>
+          <div class="stat stat-xp">
+            <div class="stat-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#fbbf24"/>
+              </svg>
             </div>
-            <span class="progress-count">
-              {{ overallStats().completedLessons }}/{{ overallStats().totalLessons }}
-            </span>
+            <div class="stat-content">
+              <span class="stat-label">Pontuação</span>
+              <span class="stat-value">{{ profile()?.totalXp ?? 0 }} XP</span>
+            </div>
+          </div>
+          <div class="stat stat-progress">
+            <div class="stat-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="#7c3aed" stroke-width="2" fill="none" opacity="0.3"/>
+                <path d="M12 2C17.5228 2 22 6.47715 22 12" stroke="#7c3aed" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-label">Progresso Geral</span>
+              <div class="progress-wrapper">
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="overallStats().progress * 100"></div>
+                </div>
+                <span class="progress-text">
+                  {{ overallStats().completedLessons }}/{{ overallStats().totalLessons }}
+                </span>
+              </div>
+            </div>
           </div>
           <app-user-menu></app-user-menu>
         </div>

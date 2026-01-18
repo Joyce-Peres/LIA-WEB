@@ -42,30 +42,121 @@
   margin-bottom: 2rem;
 }
 
-.section-header {
+/* Accordion Sections */
+.accordion-section {
+  margin-bottom: 1rem;
+}
+
+.accordion-header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 2rem;
+  justify-content: space-between;
   padding: 1.5rem;
   background: var(--surface-1);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
 }
 
-.section-title {
+.accordion-header:hover {
+  background: var(--surface-2);
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);
+}
+
+.accordion-header.active {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-color: var(--accent);
+}
+
+.accordion-header-content {
+  flex: 1;
+}
+
+.accordion-title {
   margin: 0;
-  font-size: 1.75rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: var(--text);
-  letter-spacing: -0.01em;
 }
 
-.section-subtitle {
+.accordion-subtitle {
   margin: 4px 0 0;
   color: var(--muted);
   font-size: 0.875rem;
+}
+
+.accordion-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  transition: transform 0.3s ease;
+}
+
+.accordion-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.accordion-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  transition: max-height 0.4s ease, padding 0.4s ease;
+}
+
+.accordion-content.expanded {
+  max-height: 5000px;
+  padding: 1.5rem;
+  border-color: var(--accent);
+}
+
+.content-block {
+  margin: 0;
+}
+
+.content-text {
+  color: var(--text);
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.content-subtitle {
+  margin: 1.5rem 0 0.75rem;
+  color: var(--text);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.content-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.content-list li {
+  color: var(--text);
+  line-height: 1.7;
+}
+
+.content-list li strong {
+  color: var(--accent);
+  font-weight: 600;
 }
 
 /* FAQ Grid */
@@ -90,12 +181,6 @@
   border-color: var(--accent);
 }
 
-.faq-icon {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  display: inline-block;
-}
-
 .faq-question {
   margin: 0 0 0.75rem;
   font-size: 1.125rem;
@@ -107,7 +192,7 @@
 .faq-answer {
   margin: 0;
   color: var(--muted);
-  line-height: 1.6;
+  line-height: 1.7;
   font-size: 0.9375rem;
 }
 
@@ -123,6 +208,145 @@
   text-decoration: underline;
 }
 
+/* Steps Container (usado no accordion) */
+.steps-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 0;
+}
+
+.step-card {
+  padding: 2rem 1.5rem;
+  background: var(--surface-1);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.step-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(124, 58, 237, 0.15);
+  border-color: var(--accent);
+}
+
+.step-number {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  color: white;
+  border-radius: 50%;
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+}
+
+.step-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.step-description {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+  font-size: 0.9375rem;
+}
+
+.step-description a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.step-description a:hover {
+  text-decoration: underline;
+}
+
+/* Tips Grid (usado no accordion) */
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 0;
+}
+
+.tip-card {
+  padding: 1.5rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  transition: all 0.3s;
+}
+
+.tip-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.15);
+}
+
+.tip-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.tip-description {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+  font-size: 0.9375rem;
+}
+
+/* Requirements Content (usado no accordion) */
+.requirements-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-top: 0;
+}
+
+.requirement-group {
+  padding: 2rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.requirement-title {
+  margin: 0 0 1.25rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--border);
+}
+
+.requirement-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.requirement-list li {
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 0.9375rem;
+}
+
+.requirement-list li strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 /* Contact Section */
 .contact-section {
   margin-top: 2rem;
@@ -136,18 +360,6 @@
   background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
   border-radius: 16px;
   box-shadow: 0 8px 24px rgba(124, 58, 237, 0.25);
-}
-
-.contact-icon {
-  font-size: 3rem;
-  width: 72px;
-  height: 72px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
 }
 
 .contact-content {
@@ -185,13 +397,29 @@
     grid-template-columns: 1fr;
   }
 
+  .steps-container {
+    grid-template-columns: 1fr;
+  }
+
+  .tips-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .requirements-content {
+    grid-template-columns: 1fr;
+  }
+
   .contact-card {
     flex-direction: column;
     text-align: center;
   }
 
-  .section-header {
+  .accordion-header {
     flex-direction: column;
-    text-align: center;
+    gap: 1rem;
+  }
+
+  .accordion-icon {
+    align-self: flex-end;
   }
 }

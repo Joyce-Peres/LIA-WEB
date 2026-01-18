@@ -8,58 +8,354 @@
 
     <div class="head">
       <h1 class="title">Ajuda</h1>
-      <p class="desc">Perguntas frequentes e suporte</p>
+      <p class="desc">Guia completo para aproveitar ao máximo a LIA</p>
     </div>
 
-  <div class="faq-section">
-    <div class="section-header">
-      <div>
-        <h2 class="section-title">FAQ</h2>
-        <p class="section-subtitle">Perguntas frequentes</p>
+    <!-- Guia de Início Rápido -->
+    <div class="accordion-section">
+      <div class="accordion-header" (click)="toggleSection('quickStart')" [class.active]="isSectionExpanded('quickStart')">
+        <div class="accordion-header-content">
+          <h2 class="accordion-title">Guia de Início Rápido</h2>
+          <p class="accordion-subtitle">Comece a aprender LIBRAS em 3 passos simples</p>
+        </div>
+        <div class="accordion-icon" [class.expanded]="isSectionExpanded('quickStart')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      <div class="accordion-content" [class.expanded]="isSectionExpanded('quickStart')">
+        <div class="steps-container">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <h3 class="step-title">Configure sua conta</h3>
+            <p class="step-description">
+              Acesse o <a [routerLink]="['/profile']">Perfil</a> e personalize suas informações.
+              Ajuste suas preferências em <a [routerLink]="['/settings']">Configurações</a> (tema escuro, espelhamento de câmera, etc).
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <h3 class="step-title">Escolha um módulo</h3>
+            <p class="step-description">
+              No <a [routerLink]="['/dashboard']">Dashboard</a>, navegue pelos módulos disponíveis.
+              Recomendamos começar pelo módulo "Alfabeto" para familiarizar-se com os sinais básicos.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <h3 class="step-title">Pratique e aprenda</h3>
+            <p class="step-description">
+              Clique em "Praticar", permita o acesso à câmera e siga o vídeo de referência.
+              A LIA reconhecerá seus gestos em tempo real e fornecerá feedback instantâneo!
+            </p>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="faq-grid">
-      <div class="faq-card">
-        <div class="faq-icon"></div>
-        <h3 class="faq-question">Como começo a praticar?</h3>
-        <p class="faq-answer">Acesse o <a routerLink="/dashboard">Dashboard</a>, escolha uma lição e clique em "Praticar". Permita o uso da câmera quando solicitado.</p>
+    <!-- Prática com Reconhecimento -->
+    <div class="accordion-section">
+      <div class="accordion-header" (click)="toggleSection('recognition')" [class.active]="isSectionExpanded('recognition')">
+        <div class="accordion-header-content">
+          <h2 class="accordion-title">Prática com Reconhecimento em Tempo Real</h2>
+          <p class="accordion-subtitle">Como funciona o sistema de reconhecimento</p>
+        </div>
+        <div class="accordion-icon" [class.expanded]="isSectionExpanded('recognition')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
       </div>
 
-      <div class="faq-card">
-        <div class="faq-icon"></div>
-        <h3 class="faq-question">A confiança não sobe  o que posso fazer?</h3>
-        <p class="faq-answer">Mantenha as mãos dentro da área visível, siga a postura do vídeo de referência e ajuste a iluminação. O sistema usa um buffer de 30 frames e suavização por votação.</p>
-      </div>
-
-      <div class="faq-card">
-        <div class="faq-icon"></div>
-        <h3 class="faq-question">Como desespelhar a câmera?</h3>
-        <p class="faq-answer">Vá em <a routerLink="/settings">Configurações</a> e ative "Desespelhar câmera". Isso inverte o vídeo e o overlay para facilitar a reprodução do gesto.</p>
-      </div>
-
-      <div class="faq-card">
-        <div class="faq-icon"></div>
-        <h3 class="faq-question">Tema escuro está muito claro/escuro. Posso trocar?</h3>
-        <p class="faq-answer">Sim. Habilite "Tema escuro" em <a routerLink="/settings">Configurações</a>. O layout ajusta superfícies, bordas e contrastes para melhor legibilidade.</p>
-      </div>
-
-      <div class="faq-card">
-        <div class="faq-icon"></div>
-        <h3 class="faq-question">Meus dados são enviados para algum servidor?</h3>
-        <p class="faq-answer">Não. Sessão e preferências são armazenadas localmente (localStorage). O reconhecimento roda no seu navegador com TensorFlow.js.</p>
+      <div class="accordion-content" [class.expanded]="isSectionExpanded('recognition')">
+        <div class="content-block">
+          <p class="content-text">
+            Durante a prática, a LIA captura os movimentos das suas mãos através da câmera e compara com o sinal correto.
+            Você verá um indicador de confiança que mostra o quão próximo seu gesto está do esperado.
+          </p>
+          <h3 class="content-subtitle">Indicadores de Feedback</h3>
+          <ul class="content-list">
+            <li><strong>Verde:</strong> Gesto reconhecido corretamente (confiança acima de 85%)</li>
+            <li><strong>Amarelo:</strong> Processando ou gesto parcialmente correto</li>
+            <li><strong>Vermelho:</strong> Gesto não reconhecido ou incorreto</li>
+          </ul>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="contact-section">
-    <div class="contact-card">
-      <div class="contact-icon"></div>
-      <div class="contact-content">
-        <h3 class="contact-title">Precisa de mais ajuda?</h3>
-        <p class="contact-text">Contribua ou reporte problemas no <a href="https://github.com/Joyce-Peres/LIA-WEB" target="_blank" rel="noopener noreferrer">GitHub do projeto</a>.</p>
+    <!-- Vídeo de Referência -->
+    <div class="accordion-section">
+      <div class="accordion-header" (click)="toggleSection('video')" [class.active]="isSectionExpanded('video')">
+        <div class="accordion-header-content">
+          <h2 class="accordion-title">Vídeo de Referência</h2>
+          <p class="accordion-subtitle">Como interpretar os vídeos demonstrativos</p>
+        </div>
+        <div class="accordion-icon" [class.expanded]="isSectionExpanded('video')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      <div class="accordion-content" [class.expanded]="isSectionExpanded('video')">
+        <div class="content-block">
+          <p class="content-text">
+            Cada lição possui um vídeo demonstrativo do sinal correto. Assista com atenção aos detalhes:
+          </p>
+          <ul class="content-list">
+            <li>Posição e formato da mão</li>
+            <li>Localização do sinal (em frente ao peito, rosto, etc)</li>
+            <li>Movimento ou orientação da mão</li>
+            <li>Expressão facial (quando relevante)</li>
+          </ul>
+        </div>
       </div>
     </div>
-  </div>
+
+    <!-- Sistema de Progressão -->
+    <div class="accordion-section">
+      <div class="accordion-header" (click)="toggleSection('progression')" [class.active]="isSectionExpanded('progression')">
+        <div class="accordion-header-content">
+          <h2 class="accordion-title">Sistema de Progressão</h2>
+          <p class="accordion-subtitle">XP, conquistas e acompanhamento de progresso</p>
+        </div>
+        <div class="accordion-icon" [class.expanded]="isSectionExpanded('progression')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      <div class="accordion-content" [class.expanded]="isSectionExpanded('progression')">
+        <div class="content-block">
+          <p class="content-text">
+            Acompanhe seu desenvolvimento e mantenha-se motivado:
+          </p>
+          <ul class="content-list">
+            <li><strong>XP (Experiência):</strong> Ganhe pontos ao concluir lições e módulos</li>
+            <li><strong>Conquistas:</strong> Desbloqueie insígnias especiais por marcos alcançados</li>
+            <li><strong>Sequência (Streak):</strong> Pratique consecutivamente para manter sua sequência</li>
+            <li><strong>Progresso por Módulo:</strong> Visualize quantas lições completou em cada módulo</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Configurações -->
+    <div class="accordion-section">
+      <div class="accordion-header" (click)="toggleSection('settings')" [class.active]="isSectionExpanded('settings')">
+        <div class="accordion-header-content">
+          <h2 class="accordion-title">Configurações Personalizáveis</h2>
+          <p class="accordion-subtitle">Personalize sua experiência de aprendizado</p>
+        </div>
+        <div class="accordion-icon" [class.expanded]="isSectionExpanded('settings')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      <div class="accordion-content" [class.expanded]="isSectionExpanded('settings')">
+        <div class="content-block">
+          <p class="content-text">
+            Ajuste a plataforma às suas necessidades em <a [routerLink]="['/settings']">Configurações</a>:
+          </p>
+          <ul class="content-list">
+            <li><strong>Tema Escuro:</strong> Reduza o cansaço visual em ambientes com pouca luz</li>
+            <li><strong>Desespelhamento:</strong> Inverte o vídeo para facilitar a imitação dos gestos</li>
+            <li><strong>Preferências de Notificação:</strong> Controle lembretes e alertas (em breve)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="accordion-section">
+      <div class="accordion-header" (click)="toggleSection('faq')" [class.active]="isSectionExpanded('faq')">
+        <div class="accordion-header-content">
+          <h2 class="accordion-title">Perguntas Frequentes (FAQ)</h2>
+          <p class="accordion-subtitle">Respostas para as dúvidas mais comuns</p>
+        </div>
+        <div class="accordion-icon" [class.expanded]="isSectionExpanded('faq')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      <div class="accordion-content" [class.expanded]="isSectionExpanded('faq')">
+        <div class="faq-grid">
+          <div class="faq-card">
+            <h3 class="faq-question">Como começo a praticar?</h3>
+            <p class="faq-answer">Acesse o <a [routerLink]="['/dashboard']">Dashboard</a>, escolha uma lição e clique em "Praticar". Permita o uso da câmera quando solicitado. A LIA começará automaticamente a reconhecer seus gestos.</p>
+          </div>
+
+          <div class="faq-card">
+            <h3 class="faq-question">A confiança não sobe, o que posso fazer?</h3>
+            <p class="faq-answer">
+              Verifique se suas mãos estão completamente visíveis na câmera, com boa iluminação.
+              Siga exatamente a postura do vídeo de referência. O sistema usa um buffer de 30 frames
+              (1 segundo) para garantir estabilidade, então mantenha o gesto por pelo menos 1-2 segundos.
+            </p>
+          </div>
+
+          <div class="faq-card">
+            <h3 class="faq-question">Como desespelhar a câmera?</h3>
+            <p class="faq-answer">Vá em <a [routerLink]="['/settings']">Configurações</a> e ative "Desespelhar câmera". Isso inverte o vídeo horizontalmente para facilitar a reprodução dos gestos, como se você estivesse olhando no espelho.</p>
+          </div>
+
+          <div class="faq-card">
+            <h3 class="faq-question">Posso usar o tema escuro?</h3>
+            <p class="faq-answer">Sim! Habilite "Tema escuro" em <a [routerLink]="['/settings']">Configurações</a>. O layout ajusta automaticamente cores, superfícies e contrastes para melhor legibilidade em ambientes com pouca luz.</p>
+          </div>
+
+          <div class="faq-card">
+            <h3 class="faq-question">Meus dados são enviados para algum servidor?</h3>
+            <p class="faq-answer">
+              Não! Toda a análise de vídeo acontece localmente no seu navegador usando TensorFlow.js.
+              Seus vídeos nunca saem do seu dispositivo. Apenas preferências e progresso são salvos no localStorage.
+            </p>
+          </div>
+
+          <div class="faq-card">
+            <h3 class="faq-question">Preciso de internet para usar a LIA?</h3>
+            <p class="faq-answer">
+              Após o carregamento inicial dos modelos de IA, a LIA funciona offline.
+              No entanto, é necessária conexão inicial para carregar os arquivos do modelo TensorFlow.js.
+            </p>
+          </div>
+
+          <div class="faq-card">
+            <h3 class="faq-question">Qual navegador devo usar?</h3>
+            <p class="faq-answer">
+              Recomendamos Google Chrome ou Microsoft Edge (versões recentes) para melhor performance.
+              O Firefox também funciona bem. Safari pode ter limitações com algumas funcionalidades de câmera.
+            </p>
+          </div>
+
+          <div class="faq-card">
+            <h3 class="faq-question">A câmera não está funcionando. O que fazer?</h3>
+            <p class="faq-answer">
+              Verifique se você permitiu acesso à câmera nas configurações do navegador.
+              Tente recarregar a página. Se o problema persistir, verifique se nenhum outro aplicativo está usando a câmera.
+            </p>
+          </div>
+
+          <div class="faq-card">
+            <h3 class="faq-question">Como funciona o sistema de XP?</h3>
+            <p class="faq-answer">
+              Você ganha XP ao completar lições. Quanto melhor sua performance (maior confiança, menos tentativas),
+              mais XP você recebe. Bônus especiais são concedidos ao completar módulos inteiros.
+            </p>
+          </div>
+
+          <div class="faq-card">
+            <h3 class="faq-question">Posso treinar sinais que não estão nas lições?</h3>
+            <p class="faq-answer">
+              Atualmente, a LIA reconhece apenas os sinais incluídos nos módulos de aprendizado.
+              Estamos trabalhando para adicionar mais sinais e funcionalidades no futuro!
+            </p>
+          </div>
+
+          <div class="faq-card">
+            <h3 class="faq-question">O reconhecimento está lento. Como melhorar?</h3>
+            <p class="faq-answer">
+              Certifique-se de usar um computador com hardware adequado (mínimo 8GB RAM).
+              Feche outras abas e aplicativos que possam estar consumindo recursos.
+              Reduza a resolução da câmera se necessário.
+            </p>
+          </div>
+
+          <div class="faq-card">
+            <h3 class="faq-question">Meu progresso foi perdido. Posso recuperar?</h3>
+            <p class="faq-answer">
+              O progresso é salvo no localStorage do navegador. Se você limpou o cache ou usou modo anônimo,
+              os dados não podem ser recuperados. Recomendamos usar sempre o mesmo navegador e perfil.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dicas -->
+    <div class="accordion-section">
+      <div class="accordion-header" (click)="toggleSection('tips')" [class.active]="isSectionExpanded('tips')">
+        <div class="accordion-header-content">
+          <h2 class="accordion-title">Dicas para Melhorar seu Aprendizado</h2>
+          <p class="accordion-subtitle">Práticas recomendadas para resultados melhores</p>
+        </div>
+        <div class="accordion-icon" [class.expanded]="isSectionExpanded('tips')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      <div class="accordion-content" [class.expanded]="isSectionExpanded('tips')">
+        <div class="tips-grid">
+          <div class="tip-card">
+            <h3 class="tip-title">Iluminação Adequada</h3>
+            <p class="tip-description">
+              Use iluminação frontal para que suas mãos fiquem bem visíveis.
+              Evite luz de fundo forte que pode criar sombras ou silhuetas.
+            </p>
+          </div>
+
+          <div class="tip-card">
+            <h3 class="tip-title">Posicionamento Correto</h3>
+            <p class="tip-description">
+              Mantenha suas mãos dentro da área de visão da câmera.
+              Posicione-se a aproximadamente 50-80cm da câmera para melhor detecção.
+            </p>
+          </div>
+
+          <div class="tip-card">
+            <h3 class="tip-title">Pratique Regularmente</h3>
+            <p class="tip-description">
+              15-20 minutos por dia são mais eficazes que sessões longas esporádicas.
+              Mantenha sua sequência (streak) para criar um hábito de aprendizado.
+            </p>
+          </div>
+
+          <div class="tip-card">
+            <h3 class="tip-title">Revise Lições Antigas</h3>
+            <p class="tip-description">
+              Volte periodicamente às lições já concluídas para reforçar a memória muscular
+              e garantir que não está esquecendo os sinais aprendidos.
+            </p>
+          </div>
+
+          <div class="tip-card">
+            <h3 class="tip-title">Pratique com Outras Pessoas</h3>
+            <p class="tip-description">
+              Sempre que possível, pratique LIBRAS com surdos ou outros aprendizes.
+              A interação real é fundamental para desenvolver fluência.
+            </p>
+          </div>
+
+          <div class="tip-card">
+            <h3 class="tip-title">Complemente seus Estudos</h3>
+            <p class="tip-description">
+              Use a LIA como ferramenta complementar. Assista vídeos, participe de cursos presenciais
+              e consuma conteúdo em LIBRAS para expandir seu vocabulário.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contato -->
+    <div class="contact-section">
+      <div class="contact-card">
+        <div class="contact-content">
+          <h3 class="contact-title">Precisa de mais ajuda?</h3>
+          <p class="contact-text">Contribua ou reporte problemas no <a href="https://github.com/Joyce-Peres/LIA-WEB" target="_blank" rel="noopener noreferrer">GitHub do projeto</a>.</p>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
