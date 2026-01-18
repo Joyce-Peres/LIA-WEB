@@ -41,23 +41,40 @@ import { AuthService } from '../core/services/auth.service';
     .login-card {
       width: 100%;
       max-width: 28rem;
-      border-radius: 1.25rem;
+      border-radius: 1rem;
       background: var(--surface-1);
-      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.25);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.2);
       border: 1px solid var(--border);
-      padding: 2.25rem 2.5rem;
+      padding: 1.75rem 1.5rem;
       text-align: center;
     }
+    @media (min-width: 768px) {
+      .login-card {
+        border-radius: 1.25rem;
+        padding: 2.25rem 2.5rem;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.25);
+      }
+    }
     h1 {
-      font-size: 2rem;
+      font-size: 1.75rem;
       font-weight: 600;
       color: var(--text);
       margin: 0 0 0.5rem;
     }
+    @media (min-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+    }
     .subtitle {
       font-size: 0.875rem;
       color: var(--muted);
-      margin: 0 0 2rem;
+      margin: 0 0 1.5rem;
+    }
+    @media (min-width: 768px) {
+      .subtitle {
+        margin: 0 0 2rem;
+      }
     }
     .login-btn {
       margin-top: 0.5rem;
