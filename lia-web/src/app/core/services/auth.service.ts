@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import type { AuthSession } from '../models/auth.types';
 
@@ -9,6 +10,7 @@ const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 dias
   providedIn: 'root'
 })
 export class AuthService {
+  private readonly router = inject(Router);
   private sessionSubject = new BehaviorSubject<AuthSession | null>(null);
   public session$ = this.sessionSubject.asObservable();
 
@@ -60,6 +62,7 @@ export class AuthService {
 
   async signOut(): Promise<void> {
     this.setSession(null);
+    this.router.navigate(['/login']);
   }
 
   private setSession(session: AuthSession | null): void {
