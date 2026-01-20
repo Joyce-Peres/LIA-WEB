@@ -639,28 +639,12 @@
   align-items: center;
   gap: 1.5rem;
   padding: 2.5rem;
-  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #ec4899 100%);
+  background: #7c3aed;
   border-radius: 24px;
   box-shadow: 0 12px 40px rgba(124, 58, 237, 0.3);
   position: relative;
   overflow: hidden;
   transition: all 0.4s ease;
-}
-
-.contact-card::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-  animation: shimmer 3s infinite;
-}
-
-@keyframes shimmer {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(-30px, -30px); }
 }
 
 .contact-card:hover {

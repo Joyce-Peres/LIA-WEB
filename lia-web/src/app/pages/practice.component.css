@@ -145,6 +145,7 @@
 
 .select-label { font-size: var(--font-size-sm); color: var(--muted); white-space: nowrap; }
 
+.info-panel {
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 16px;
