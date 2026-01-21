@@ -1,8 +1,6 @@
-# Conversão do modelo (ponteiro)
+# Conversão do modelo (fonte da verdade)
 
-Este arquivo existe apenas para **evitar duplicação**.
+Este arquivo existe apenas para evitar duplicação dentro de `lia-web/`.
 
-- Guia canônico: `../docs/model-conversion.md`
-- Scripts (fonte operacional): `./scripts/README.md`
-
-Se você precisar atualizar instruções de conversão, **atualize `docs/model-conversion.md`** e mantenha este arquivo como ponteiro.
+- **Guia oficial (fonte da verdade)**: `../docs/model-conversion.md`
+- **Setup do ambiente Python/ML (Windows)**: `SETUP-AMBIENTE.md`

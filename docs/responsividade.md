@@ -22,7 +22,7 @@ xl: 1280px (desktop grande)
 
 ## 🔧 Alterações Implementadas
 
-### 1. Estilos Globais (`src/styles.css`)
+### 1. Estilos Globais (`lia-web/src/styles.css`)
 
 #### Utilitários Responsivos Adicionados:
 - `.sm\:grid-cols-2` - Grid de 2 colunas em 640px+
@@ -32,7 +32,7 @@ xl: 1280px (desktop grande)
 - `.md\:text-xl/2xl/3xl` - Tamanhos de texto responsivos
 - `.md\:block/flex/inline-flex` - Display responsivo
 
-### 2. Dashboard (`dashboard.component.css`)
+### 2. Dashboard (`lia-web/src/app/pages/dashboard.component.css`)
 
 #### Mobile (< 768px):
 - Brand title: `1.75rem` → `2.5rem` (tablet+)
@@ -51,7 +51,7 @@ xl: 1280px (desktop grande)
 - Container padding completo: `2rem 1rem`
 - Todos os espaçamentos maximizados
 
-### 3. Login (`login.component.ts`)
+### 3. Login (`lia-web/src/app/pages/login.component.ts`)
 
 #### Mobile:
 - Card padding: `1.75rem 1.5rem`
@@ -64,7 +64,7 @@ xl: 1280px (desktop grande)
 - Título: `2rem`
 - Shadow aumentada
 
-### 4. Perfil (`profile.component.css`)
+### 4. Perfil (`lia-web/src/app/pages/profile.component.css`)
 
 #### Mobile:
 - Container padding: `1rem 0.75rem`
@@ -80,7 +80,7 @@ xl: 1280px (desktop grande)
 - Título: `1.75rem`
 - Padding aumentado
 
-### 5. Prática (`practice.component.css`)
+### 5. Prática (`lia-web/src/app/pages/practice.component.css`)
 
 #### Mobile:
 - Layout: 1 coluna (câmera + info empilhados)
@@ -97,7 +97,7 @@ xl: 1280px (desktop grande)
 - Title: `1.75rem`
 - Camera actions: grid de 4 colunas
 
-### 6. Settings (`settings.component.css`)
+### 6. Settings (`lia-web/src/app/pages/settings.component.css`)
 
 #### Mobile:
 - Row: flex column (labels acima dos controles)
@@ -110,7 +110,7 @@ xl: 1280px (desktop grande)
 #### Desktop (768px+):
 - Título: `2.5rem` → `2.75rem` (1024px+)
 
-### 7. User Menu (`user-menu.component.css`)
+### 7. User Menu (`lia-web/src/app/components/user-menu.component.css`)
 
 #### Mobile:
 - Avatar button: `40px`
@@ -124,7 +124,7 @@ xl: 1280px (desktop grande)
 - Menu width: `180px`
 - Menu items font: `14px`
 
-### 8. Lesson Detail (`lesson-detail.component.css`)
+### 8. Lesson Detail (`lia-web/src/app/pages/lesson-detail.component.css`)
 
 #### Mobile:
 - Page margin: `1rem`

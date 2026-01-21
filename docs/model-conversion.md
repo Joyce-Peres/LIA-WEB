@@ -1,67 +1,75 @@
-# Conversão do modelo Keras (.h5) para TensorFlow.js (LIA Web)
+---
+title: Conversão do modelo Keras (.h5) para TensorFlow.js (Angular)
+description: Fonte da verdade para converter o modelo LSTM treinado em Python para ser usado no LIA Web (Angular) via TF.js.
+author: Joyce
+date: 2026-01-21
+---
 
-Este documento descreve como converter o modelo treinado em Keras (`.h5`) para o formato TensorFlow.js, para execução 100% no navegador.
+# Conversão do modelo Keras (.h5) para TensorFlow.js
 
-> **Fonte da verdade**: este guia + os scripts em `lia-web/scripts/`.  
-> Se existir outro arquivo semelhante, ele deve apontar para este para evitar duplicação.
+Este guia descreve como converter o modelo LSTM treinado (`lia-web/modelos/modelo_gestos.h5`) para o formato TensorFlow.js usado pela aplicação Angular.
 
-## Pré-requisitos
+## Onde ficam os arquivos (fonte da verdade)
 
-- Modelo treinado em `lia-web/modelos/modelo_gestos.h5`
-- Rotulador em `lia-web/modelos/rotulador_gestos.pkl` (classes)
-- Python **3.10 ou 3.11** (recomendado). Observação: TensorFlow costuma **não suportar Python 3.12+** em releases estáveis.
+- **Modelo Keras (entrada)**: `lia-web/modelos/modelo_gestos.h5`
+- **Rotulador de classes (entrada)**: `lia-web/modelos/rotulador_gestos.pkl`
+- **Assets gerados para o app (saída)**: `lia-web/src/assets/models/`
+  - `model.json`
+  - `group1-shard*.bin`
+  - `metadata.json`
+- **Labels TypeScript (saída)**: `lia-web/src/app/core/data/gesture-labels.ts`
 
-## Opção recomendada (mantém o app atualizado)
+## Requisitos (Python)
 
-Use `lia-web/scripts/converter_para_web.py`. Ele:
+- Python **3.8–3.11** (TensorFlow tende a não suportar versões mais novas)
+- Dependências: `tensorflow`, `tensorflowjs`, `joblib` (e `pandas` se você usar o script com CSV)
 
-- converte o `.h5` para `lia-web/src/assets/models/`
-- atualiza `lia-web/src/assets/models/metadata.json`
-- atualiza `lia-web/src/app/core/data/gesture-labels.ts` com as classes do rotulador
+> Se você estiver com conflitos de dependências no Windows, use o guia de ambiente em `lia-web/SETUP-AMBIENTE.md`.
 
-### Passo a passo (Windows / PowerShell)
+## Opção recomendada: usar o script do projeto (gera assets + labels)
+
+O script `lia-web/scripts/converter_para_web.py`:
+- converte o `.h5` para TF.js dentro de `lia-web/src/assets/models/`
+- gera/atualiza `metadata.json`
+- atualiza `lia-web/src/app/core/data/gesture-labels.ts`
+
+No PowerShell:
+
+```powershell
+cd lia-web
+
+# Ative o seu ambiente Python (exemplo: venv versionado no repositório)
+.\scripts\ml_venv\Scripts\Activate.ps1
+
+# Rode a conversão
+python .\scripts\converter_para_web.py
+```
+
+## Opção alternativa: conversão genérica via script com parâmetros
+
+Se você quiser controlar input/output/labels manualmente, use:
 
 ```powershell
 cd lia-web
 
-# (opcional, recomendado) criar ambiente virtual dedicado
-python -m venv .venv-conversao
-.\.venv-conversao\Scripts\Activate.ps1
+.\scripts\ml_venv\Scripts\Activate.ps1
 
-# instalar dependências dos scripts
-pip install -r scripts/requirements.txt
-
-# converter o modelo e atualizar os arquivos do app
-python scripts\converter_para_web.py
+python .\scripts\convert-model.py `
+  --input .\modelos\modelo_gestos.h5 `
+  --output .\src\assets\models\ `
+  --labels .\dados\gestos_libras.csv
 ```
 
-### Saída gerada
+## Verificação pós-conversão
 
-- `lia-web/src/assets/models/model.json`
-- `lia-web/src/assets/models/group1-shard*.bin`
-- `lia-web/src/assets/models/metadata.json`
-- `lia-web/src/app/core/data/gesture-labels.ts`
-
-## Opção alternativa (conversão “genérica”)
-
-Se você quiser converter com argumentos explícitos (sem atualizar automaticamente os labels TypeScript), use `lia-web/scripts/convert-model.py`:
+Confira se existem arquivos em `lia-web/src/assets/models/`:
 
 ```powershell
-cd lia-web
-python scripts\convert-model.py `
-  --input modelos\modelo_gestos.h5 `
-  --output src\assets\models `
-  --labels dados\gestos_libras.csv
+dir .\lia-web\src\assets\models\
 ```
-
-## Solução de problemas
-
-- **Erro de import / módulos não encontrados**: confirme que você ativou o venv e rodou `pip install -r scripts/requirements.txt`.
-- **Erro de versão do Python**: use Python 3.10/3.11 para os scripts de conversão.
-- **Arquivos de modelo/labels não encontrados**: rode o treino primeiro (ver `lia-web/scripts/README.md`).
 
 ## Referências
 
 - [TensorFlow.js Converter](https://www.tensorflow.org/js/tutorials/conversion/import_keras)
-- [Keras to TF.js](https://www.tensorflow.org/js/guide/conversion)
-- Artefato: `_bmad-output/implementation-artifacts/2-1-conversao-do-modelo-lstm-para-tensorflow-js.md`
+- Artefato histórico: `_bmad-output/implementation-artifacts/2-1-conversao-do-modelo-lstm-para-tensorflow-js.md`
+

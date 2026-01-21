@@ -92,7 +92,7 @@ tensorflowjs_converter --input_format=keras ^
     .\lia-web\src\assets\models\
 
 # Opção B: Script Python
-python c:\LIA\LIA-WEB\lia-web\scripts\converter_simples.py
+python c:\LIA\LIA-WEB\lia-web\scripts\converter_para_web.py
 ```
 
 ## Estado Atual do Projeto
