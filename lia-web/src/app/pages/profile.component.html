@@ -36,11 +36,13 @@
       <div class="profile-info">
         <div class="field-row">
           <label for="email">Email</label>
-          <input id="email" type="email" [(ngModel)]="email" />
+          <input id="email" type="email" [(ngModel)]="email" readonly />
+          <div class="field-hint">No modo local, o e-mail é usado apenas para identificar sua sessão e não é editável aqui.</div>
         </div>
         <div class="field-row">
           <label for="displayName">Nome de exibição</label>
-          <input id="displayName" type="text" [(ngModel)]="displayName" />
+          <input id="displayName" type="text" [(ngModel)]="displayName" (ngModelChange)="savedMessage=''" />
+          <div class="field-hint">Esse nome aparece no topo do app e no seu perfil.</div>
         </div>
       </div>
 
@@ -56,9 +58,11 @@
       </div>
 
       <div class="actions">
-        <button class="btn btn-primary" [disabled]="isSaving" (click)="saveProfile()">
+        <button class="btn btn-primary" [disabled]="isSaving || !isDirty" (click)="saveProfile()">
           {{ isSaving ? 'Salvando...' : 'Salvar alterações' }}
         </button>
+        <span class="inline-status" *ngIf="savedMessage" role="status" aria-live="polite">{{ savedMessage }}</span>
+        <span class="inline-status" *ngIf="!savedMessage && !isDirty">Sem alterações</span>
       </div>
 
       <div class="success-message" *ngIf="showSuccessMessage">

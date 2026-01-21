@@ -1,11 +1,14 @@
 ---
 title: (Opcional/Futuro) Setup do Supabase (Auth Google + Schema)
-description: Referência opcional para integrar Supabase no futuro. O MVP atual funciona 100% em modo local, sem serviços externos.
+description: (Arquivado) Referência opcional para integração futura. O projeto atual não usa Supabase.
 author: Joyce
 date: 2025-12-21
 ---
 
 # Setup do Supabase (Auth Google + Schema)
+
+> Status atual do projeto: **NÃO usamos Supabase**.  
+> Este arquivo existe apenas como **referência futura** e pode ficar desatualizado conforme o app evolui em modo local.
 
 Este guia cobre a configuração **manual** do Supabase para a Story 1.2:
 
@@ -66,8 +69,8 @@ No Supabase, configure também (quando aplicável):
 
 - **Authentication → URL Configuration → Site URL**: use a URL principal do seu app (produção)
 - **Additional Redirect URLs**: inclua o ambiente local:
-  - `http://localhost:5173`
-  - `http://localhost:5173/auth/callback`
+  - `http://localhost:4200`
+  - `http://localhost:4200/auth/callback`
 
 > Observação: o app redireciona para `/auth/callback` durante o fluxo OAuth. Se essa URL não estiver permitida, o Supabase pode bloquear o retorno do login.
 
@@ -86,11 +89,13 @@ O script cria:
 
 ## 4. Configurar variáveis de ambiente no projeto
 
-Crie um arquivo `.env` (ou `.env.local`) na raiz do projeto, baseado no `.env.example`, e defina:
+> Nota: o app atual é **Angular** e não usa Vite. Angular não lê `VITE_*`.
+
+Quando/Se a integração com Supabase for adicionada, defina as credenciais em **configuração de ambiente do Angular** (ex.: arquivos de environment) ou via **build-time replacements** do Angular CLI, evitando commitar chaves no repositório.
 
 ```env
-VITE_SUPABASE_URL=https://<seu-projeto>.supabase.co
-VITE_SUPABASE_ANON_KEY=<sua-anon-public-key>
+SUPABASE_URL=https://<seu-projeto>.supabase.co
+SUPABASE_ANON_KEY=<sua-anon-public-key>
 ```
 
 ## 5. Verificação local
@@ -98,15 +103,18 @@ VITE_SUPABASE_ANON_KEY=<sua-anon-public-key>
 1. Instale dependências:
 
 ```bash
+cd lia-web
 npm install
 ```
 
 2. Rode a aplicação:
 
 ```bash
-npm run dev
+npm start
 ```
 
-Se `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` estiverem ausentes, o app falha rápido com uma mensagem clara (ver `src/lib/env.ts`).
+O app estará disponível em `http://localhost:4200`.
+
+> Observação: este projeto (MVP) não depende de Supabase. Esta checagem só faz sentido quando a integração remota for implementada.
 
 

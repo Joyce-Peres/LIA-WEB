@@ -81,9 +81,9 @@ CA3: **MVP sem dependência de serviços externos**: autenticação e persistên
 ## 5. Stack Tecnológica e Decisões de Arquitetura
 Decisões Concretas (Sem Ambiguidades):
 
-Frontend: React 18 + TypeScript + Vite + Tailwind CSS.
+Frontend: Angular 21 + TypeScript (Angular CLI / `@angular/build`, com SSR habilitado via `@angular/ssr`).
 
-Machine Learning no Cliente: TensorFlow.js (@tensorflow/tfjs) + MediaPipe Hands (@mediapipe/hands).
+Machine Learning no Cliente: MediaPipe Hands (`@mediapipe/hands`) + TensorFlow.js (carregado em runtime via CDN para reduzir acoplamento/bundling).
 
 Backend & Database (MVP): Sem backend (armazenamento local no navegador).  
 Backend & Database (futuro/opcional): Supabase (PostgreSQL com RLS, Auth, Storage) ou alternativa equivalente.
@@ -94,15 +94,18 @@ Estrutura de Diretórios Prescritiva:
 
 ```text
 /lia-web
-  /public/models          # Modelo TF.js convertido (.json, .bin)
+  /public                # Assets públicos (copiados para build)
   /src
-    /components/ui        # Botões, Cards, Inputs reutilizáveis
-    /components/game      # CameraFrame, GestureOverlay, ScoreBoard
-    /hooks                # useCamera, useHandPose, useAuth
-    /services/ai          # Lógica pura de IA: normalização, buffer, inferência
-    /lib/auth.ts          # Autenticação local (sessão no navegador)
-    /types/index.ts       # Tipos TypeScript (User, Landmark, Prediction)
-    /pages/               # Login, Dashboard, LessonRoom, Profile
+    /app
+      /core
+        /services         # Core do app (auth, câmera, IA, progresso, settings)
+        /models           # Tipos/DTOs
+        /guards           # Guards de rota (auth)
+        /data             # Dados estáticos e mocks (conteúdo)
+        /utils            # Funções utilitárias
+      /pages              # Rotas/páginas (login, dashboard, practice, profile, etc.)
+      /components         # Componentes reutilizáveis
+    /assets/models        # Modelo TF.js convertido (model.json, .bin, metadata.json)
 ```
 
 ## 6. Especificações do Pipeline de IA (Crítico)
@@ -135,15 +138,13 @@ Threshold de confiança: Considerar válido apenas se confidence > 0.85.
 Debounce: Exigir que a mesma predição se repita por pelo menos 5 frames consecutivos antes de atualizar a UI e conceder pontos. Isso evita oscilações.
 
 ## 7. Próximos Passos para o Agente (Action Plan)
-Instrução para o Cursor/BMAD: "Use este PRD como fonte única da verdade. Ao gerar código, priorize a estrutura de arquivos da Seção 5 e a lógica de IA da Seção 6. Não crie backend Node.js customizado. No MVP, não use serviços externos; use autenticação/persistência local no navegador."
-
-Setup do Projeto: Inicializar projeto React/TypeScript com a estrutura de diretórios acima.
+Instrução para o agente (independente de IDE/ferramenta): "Use este PRD como fonte única da verdade. Ao gerar código, priorize a estrutura de arquivos da Seção 5 e a lógica de IA da Seção 6. Não crie backend customizado. No MVP, não use serviços externos; use autenticação/persistência local no navegador."
 
 Backend (opcional, futuro): Se for adotado um BaaS, documentar setup e integrar somente após o MVP local estar estável.
 
 Conversão do Modelo: Criar script Python para converter modelo_gestos.h5 para formato TensorFlow.js.
 
-Componente Core: Implementar o hook useHandPose que integra MediaPipe, gerencia o buffer e chama o modelo TF.js.
+Componente Core: Implementar/expandir os serviços Angular que integram MediaPipe, gerenciam o buffer e chamam o modelo TF.js.
 
 Interface Básica: Construir a página LessonRoom com os componentes CameraFrame, GestureOverlay e ScoreBoard.
 

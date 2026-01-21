@@ -1,6 +1,6 @@
 import { Injectable, signal, effect } from '@angular/core';
 
-export type ThemeMode = 'light' | 'dark';
+export type ThemeMode = 'light' | 'dark' | 'system';
 
 export interface AppSettingsV2 {
   themeMode: ThemeMode;
@@ -23,13 +23,15 @@ export class SettingsService {
   readonly darkMode = signal<boolean>(false);
   readonly unmirrorCamera = signal<boolean>(true);
 
+  private prefersDarkMql: MediaQueryList | null = null;
+
   constructor() {
     // Load from storage (prefer V2, fallback to V1)
     const rawV2 = localStorage.getItem(STORAGE_KEY_V2);
     if (rawV2) {
       try {
         const parsed = JSON.parse(rawV2) as Partial<AppSettingsV2>;
-        if (parsed.themeMode === 'light' || parsed.themeMode === 'dark') {
+        if (parsed.themeMode === 'light' || parsed.themeMode === 'dark' || parsed.themeMode === 'system') {
           this.themeMode.set(parsed.themeMode);
         }
         if (typeof parsed.unmirrorCamera === 'boolean') this.unmirrorCamera.set(parsed.unmirrorCamera);
@@ -60,6 +62,9 @@ export class SettingsService {
 
     // Initial apply
     this.applyTheme();
+
+    // Keep system theme reactive while app is running
+    this.setupSystemThemeListener();
   }
 
   setDarkMode(value: boolean): void {
@@ -76,10 +81,33 @@ export class SettingsService {
 
   private applyTheme(): void {
     const mode = this.themeMode();
-    const isDark = mode === 'dark';
+    const isDark = mode === 'dark' ? true : mode === 'light' ? false : this.getSystemPrefersDark();
     this.darkMode.set(isDark);
     if (typeof document !== 'undefined') {
       document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    }
+  }
+
+  private getSystemPrefersDark(): boolean {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+
+  private setupSystemThemeListener(): void {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    this.prefersDarkMql = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const handler = () => {
+      if (this.themeMode() === 'system') this.applyTheme();
+    };
+
+    // Safari < 14 uses addListener/removeListener
+    try {
+      this.prefersDarkMql.addEventListener('change', handler);
+    } catch {
+      try {
+        (this.prefersDarkMql as any).addListener(handler);
+      } catch { /* ignore */ }
     }
   }
 

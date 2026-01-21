@@ -26,6 +26,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   protected email = '';
   protected showIconPicker = false;
   protected showSuccessMessage = false;
+  protected savedMessage = '';
 
   // Íconsss divonicos babadeiros para as lendas escolherem
   protected readonly availableIcons = [
@@ -53,6 +54,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.displayName = p.displayName;
         this.avatarText = p.avatarText;
         this.email = session.user.email;
+        this.savedMessage = '';
       });
   }
 
@@ -72,10 +74,17 @@ export class ProfileComponent implements OnInit, OnDestroy {
   selectIcon(icon: string): void {
     this.avatarText = icon;
     this.showIconPicker = false;
+    this.savedMessage = '';
   }
 
   async handleLogout(): Promise<void> {
     await this.authService.signOut();
+  }
+
+  get isDirty(): boolean {
+    const p = this.profile();
+    if (!p) return false;
+    return this.displayName.trim() !== p.displayName || (this.avatarText.trim() || p.avatarText) !== p.avatarText;
   }
 
   saveProfile(): void {
@@ -83,8 +92,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     if (!sess) return;
     const name = this.displayName.trim();
     const avatar = this.avatarText.trim() || this.profile()?.avatarText || 'PR';
-    const newEmail = this.email.trim();
-    if (!name || !newEmail) return;
+    if (!name) return;
+    if (!this.isDirty || this.isSaving) return;
     this.isSaving = true;
     const updated = this.profileService.updateProfile(sess.user.id, (current) => ({
       ...current,
@@ -92,14 +101,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
       avatarText: avatar
     }));
     this.profile.set(updated);
-    // Atualizar email na sessão (simulação local)
-    this.email = newEmail;
     this.isSaving = false;
 
     // Mostrar mensagem de sucesso
     this.showSuccessMessage = true;
+    this.savedMessage = 'Alterações salvas.';
     setTimeout(() => {
       this.showSuccessMessage = false;
+      if (!this.isDirty) this.savedMessage = '';
     }, 3000);
   }
 }

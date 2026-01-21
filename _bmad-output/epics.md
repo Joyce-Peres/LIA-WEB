@@ -6,6 +6,8 @@ workflow_complete: true
 
 # LIA Web - Epic Breakdown
 
+> **Atualização (Jan/2026):** este projeto está sendo desenvolvido em **Angular** (`lia-web/`) e em **modo local** (**sem Supabase**).
+
 ## Overview
 
 This document provides the complete epic and story breakdown for LIA Web, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories.
@@ -67,31 +69,26 @@ This document provides the complete epic and story breakdown for LIA Web, decomp
 **Requisitos Técnicos da Arquitetura:**
 
 **Stack Tecnológica:**
-- Frontend: React 18 + TypeScript + Vite + Tailwind CSS
+- Frontend: Angular 21 + TypeScript (Angular CLI / `@angular/build`, com SSR opcional via `@angular/ssr`)
 - Machine Learning: TensorFlow.js (@tensorflow/tfjs) + MediaPipe Hands (@mediapipe/hands)
 - Backend (MVP): Sem backend (armazenamento local no navegador)
-- Backend (futuro/opcional): BaaS (ex.: Supabase) ou alternativa equivalente, somente se necessário
+- Backend (futuro/opcional): **fora do escopo atual**. Se existir necessidade futura de sincronização, avaliar um BaaS (ex.: Supabase) ou alternativa equivalente.
 - Hospedagem (opcional): qualquer host de arquivos estáticos (ou apenas uso local durante o MVP)
 
 **Estrutura de Diretórios:**
-- /public/models - Modelo TF.js convertido (.json, .bin)
-- /src/components/ui - Botões, Cards, Inputs reutilizáveis
-- /src/components/game - CameraFrame, GestureOverlay, ScoreBoard
-- /src/hooks - useCamera, useHandPose, useAuth
-- /src/services/ai - Lógica pura de IA: normalização, buffer, inferência
-- /src/lib/auth.ts - Autenticação local (sessão no navegador)
-- /src/types/index.ts - Tipos TypeScript
-- /src/pages - Login, Dashboard, LessonRoom, Profile
+- /lia-web/src/app/pages - páginas/rotas (login, dashboard, practice, profile, etc.)
+- /lia-web/src/app/core/services - serviços (auth local, câmera, IA, progresso, settings)
+- /lia-web/src/app/core/data - conteúdo/mocks (módulos/lições)
+- /lia-web/src/assets/models - modelo TF.js convertido (model.json, .bin, metadata.json)
 
 **Padrões de Design:**
-- Estado: Context API + useReducer para estado global
-- Hooks Customizados: useCamera, useHandPose para lógica complexa
-- Camada de persistência local: utilitários em `/src/lib/*` para sessão/armazenamento sem acoplar a UI ao storage
-- Eventos Customizados: Comunicação desacoplada entre UI e pipeline de IA
-- Pipeline Funcional: Transformações puras (normalize → buffer → predict → debounce)
+- Estado: Angular Signals + RxJS (streams para MediaPipe/IA; `signal/computed` para estado derivado)
+- Services pattern: lógica de domínio em serviços (`AuthService`, `GestureRecognitionService`, `ModelInferenceService`, etc.)
+- Persistência local: `localStorage` (MVP) encapsulado em serviços (auth/profile/progress)
+- Pipeline: HandPose → Buffer → Normalização → Inferência → Pós-processamento
 
 **Configuração de Backend (Opcional/Futuro):**
-- Se adotado, documentar e integrar um BaaS (ex.: Supabase) apenas após o MVP local estar estável
+- **Não usar backend/Supabase no momento.** Se futuramente houver sincronização, documentar e integrar depois do MVP local estar estável.
 
 **Especificações do Pipeline de IA:**
 - Formato de entrada: [1, 30, 126] (batch, timesteps, features)
@@ -102,9 +99,9 @@ This document provides the complete epic and story breakdown for LIA Web, decomp
 - Debounce: Mesma predição por 5 frames consecutivos
 
 **Deploy e DevOps:**
-- Ambiente dev: localhost:5173 (Vite) — modo local, sem backend
+- Ambiente dev: localhost:4200 (Angular) — modo local, sem backend
 - Ambiente prod (opcional): deploy estático (ex.: GitHub Pages/Netlify/Vercel), sem dependência obrigatória
-- Variáveis de ambiente: VITE_APP_VERSION
+- Variáveis de ambiente: preferir `environments/*` do Angular (evitar `.env` no MVP)
 
 **Decisões Arquiteturais:**
 - MVP sem dependência de serviços externos (offline possível para auth/persistência local)
@@ -182,16 +179,16 @@ Usuários podem criar conta e fazer login para acessar a plataforma, com perfil 
 ### Story 1.1: Configuração Inicial do Projeto React
 
 As a developer,
-I want to set up a React + TypeScript + Vite project with the prescribed directory structure,
+I want to set up an Angular + TypeScript project with the prescribed directory structure,
 So that I have a solid foundation for building the LIA Web application.
 
 **Acceptance Criteria:**
 
 **Given** I am starting a new project
-**When** I initialize the project with Vite
-**Then** The project should have React 18, TypeScript 5.0, and Tailwind CSS configured
-**And** The directory structure should match: /public/models, /src/components/ui, /src/components/game, /src/hooks, /src/services/ai, /src/lib, /src/types, /src/pages
-**And** Basic Vite configuration should be in place
+**When** I initialize the project with Angular CLI
+**Then** The project should have Angular 21 and TypeScript configured
+**And** The directory structure should match the current repo: /lia-web/src/app/pages, /lia-web/src/app/core/services, /lia-web/src/app/core/data, /lia-web/src/assets/models
+**And** Basic Angular configuration (`angular.json`, `tsconfig*`) should be in place
 **And** TypeScript configuration should be properly set up
 
 ### Story 1.2: Autenticação local (sem serviços externos)
@@ -378,37 +375,36 @@ So that I get stable, accurate gesture recognition without oscillations.
 
 Usuários podem navegar e visualizar módulos e lições disponíveis de forma organizada, com indicação clara de progresso (concluído/desbloqueado/bloqueado).
 
-### Story 3.1: Criação das Tabelas de Módulos e Lições no Supabase
+### Story 3.1: Conteúdo local (módulos e lições) sem backend
 
 As a developer,
-I want to create database tables for modules and lessons,
-So that content can be stored and retrieved from Supabase.
+I want to provide modules and lessons as local data (mock/seed),
+So that the MVP works fully offline and without Supabase.
 
 **Acceptance Criteria:**
 
-**Given** I have access to Supabase database
-**When** I execute the SQL schema
-**Then** The modules table should be created with: id, slug, title, description, difficulty_level, order_index, icon_url
-**And** The lessons table should be created with: id, module_id (FK), gesture_name, display_name, video_ref_url, min_confidence_threshold, xp_reward
-**And** Initial data should be inserted: Alfabeto (iniciante, order 1), Números (iniciante, order 2), Saudações (intermediario, order 3)
-**And** Foreign key constraints should be properly set up
-**And** RLS policies should allow all users to read modules and lessons
+**Given** the app runs in local-only mode
+**When** the content layer is loaded
+**Then** modules and lessons should be available from local data (mock/seed)
+**And** content should be typed and validated (TypeScript)
+**And** modules should be ordered by `order_index`
+**And** lessons should be queryable by `moduleId` and `level`
+**And** asset URLs for icons/videos should resolve under `/assets/*`
 
-### Story 3.2: Serviço de Repositório para Módulos e Lições
+### Story 3.2: ContentService (repositório local)
 
 As a developer,
-I want to create repository functions for fetching modules and lessons,
-So that components can easily access content data.
+I want a repository-style service for fetching modules and lessons from local data,
+So that pages/components can access content without knowing storage details.
 
 **Acceptance Criteria:**
 
-**Given** I have Supabase client configured
-**When** I call the repository functions
-**Then** getModules() should return all modules ordered by order_index
-**And** getLessonsByModule(moduleId) should return all lessons for a module
-**And** getLessonById(lessonId) should return a specific lesson with module info
-**And** All functions should handle errors and return null on failure
-**And** Functions should be typed with TypeScript interfaces
+**Given** local content is available
+**When** I call the content service methods
+**Then** `getModules()` returns modules ordered by `orderIndex`
+**And** `getLessonsByModule(moduleId)` returns lessons for a module
+**And** `getLessonById(lessonId)` returns a lesson with its module
+**And** functions are typed and safe to consume in UI
 
 ### Story 3.3: Página de Catálogo de Módulos
 
@@ -597,7 +593,7 @@ So that I can see my overall progress.
 **Then** I should earn XP based on the lesson's xp_reward value
 **And** My total_xp in the profile should be updated
 **And** The XP gain should be displayed with animation
-**And** XP should be saved to Supabase immediately
+**And** XP should be saved locally (browser storage) immediately
 **And** The XP calculation should account for lesson difficulty
 
 ### Story 5.4: Sistema de Insígnias (Badges)
@@ -613,7 +609,7 @@ So that I feel accomplished and motivated.
 **Then** I should receive a badge notification
 **And** The badge should be visible on my profile page
 **And** Badges should have names like "Primeiro Sinal", "Módulo Completo"
-**And** Badge data should be stored in Supabase (new badges table or user_progress)
+**And** Badge data should be stored locally (browser storage)
 **And** Badges should be displayed with icons/visuals
 
 ### Story 5.5: Registro Automático de Progresso
@@ -626,7 +622,7 @@ So that I don't lose my achievements.
 
 **Given** I complete a lesson or achieve a milestone
 **When** The action is completed
-**Then** The progress should be saved to user_progress table in Supabase
+**Then** The progress should be persisted locally (browser storage)
 **And** is_completed should be set to true when lesson is mastered
 **And** best_score should be updated if current score is higher
 **And** attempts_count should be incremented
@@ -649,21 +645,20 @@ So that I can track my improvement.
 **And** When I beat a personal record, it should be highlighted/celebrated
 **And** The data should be loaded from user_progress table
 
-### Story 5.7: Sincronização Contínua com Supabase
+### Story 5.7: (Futuro) Sincronização entre dispositivos (fora do escopo atual)
 
 As a developer,
-I want progress data to sync continuously with Supabase,
-So that data is never lost and works across devices.
+I want progress data to sync across devices,
+So that users can continue on another device (future feature, not in MVP).
 
 **Acceptance Criteria:**
 
-**Given** I have progress updates to save
-**When** Progress changes occur
-**Then** Updates should be queued and sent to Supabase
-**And** Failed updates should be retried automatically
-**And** Updates should be debounced to avoid excessive API calls
-**And** The sync status should be indicated to the user (optional loading indicator)
-**And** Data should sync on page unload/close
+**Given** a remote sync provider exists (future)
+**When** progress changes occur
+**Then** updates should be queued and synced in background
+**And** failed updates should be retried automatically
+**And** sync should be debounced to avoid excessive calls
+**And** sync status should be visible to the user (optional)
 
 ---
 

@@ -125,7 +125,7 @@ python scripts/converter_simples.py
 ### Planejadas 📋
 - Modo PWA (Progressive Web App)
 - Suporte offline completo
-- Sincronização opcional em nuvem (Supabase)
+- Sincronização opcional em nuvem (futuro)
 - Análise de progresso e estatísticas
 - Suporte a múltiplos idiomas
 

@@ -12,10 +12,10 @@
 **Scope:** System-level testability review for LIA Web architecture before implementation-readiness gate check.
 
 **Architecture Overview:**
-- **Type:** Progressive Web App (PWA) with Backend-as-a-Service (BaaS)
+- **Type:** Aplicação Web (PWA opcional) em **modo local** (sem backend)
 - **AI Processing:** 100% edge computing (browser-based)
 - **Backend:** None (MVP local-only; browser storage)
-- **Frontend:** React 18 + TypeScript + Vite
+- **Frontend:** Angular 21 + TypeScript (Jest para testes)
 - **ML Stack:** TensorFlow.js + MediaPipe Hands
 
 **Testability Assessment Summary:**
@@ -38,10 +38,8 @@
 **Assessment:** System state can be controlled for most components, but AI pipeline presents challenges.
 
 **Strengths:**
-- ✅ **Camada local encapsulada:** Sessão/persistência em utilitários em `/src/lib/*` → facilmente mockável
-- ✅ **Functional Pipeline:** AI pipeline uses pure functions (normalize → buffer → predict) → testable in isolation
-- ✅ **Custom Hooks:** `useCamera`, `useHandPose` isolated → can be tested with dependency injection
-- ✅ **Event-Driven:** Custom events (`gestureRecognized`) enable decoupled testing
+- ✅ **Camada local encapsulada:** Serviços Angular para sessão/perfil/progresso → facilmente mockável
+- ✅ **Pipeline testável:** normalização/buffer/inferência separados em serviços
 
 **Concerns:**
 - ⚠️ **MediaPipe Hands:** Requires real webcam/camera hardware → cannot be mocked without significant effort
@@ -55,10 +53,10 @@
   - **Recommendation:** tratar integração remota como opcional e isolada do core
 
 **Recommendations:**
-1. Create test fixtures: Pre-recorded video frames for MediaPipe testing
-2. Implement dependency injection for `useHandPose` (accept MediaPipe/TF.js instances)
+1. Criar fixtures determinísticas (landmarks ou frames) para testes do pipeline
+2. Manter dependências do MediaPipe/TF.js encapsuladas em serviços para mocking
 3. Padronizar helpers para reset de storage (localStorage/IndexedDB) em testes
-4. Mock `getUserMedia` API in Playwright tests
+4. Mockar `getUserMedia` em testes E2E (Playwright) quando aplicável
 
 ### Observability: ✅ PASS
 
@@ -71,22 +69,21 @@
 - ✅ **InferenceLog Interface:** Architecture defines logging structure for performance metrics
 
 **Validation Capabilities:**
-- ✅ **State Inspection:** React DevTools for component state, Redux DevTools for global state
+- ✅ **State Inspection:** Angular DevTools (quando disponível) + logs/sinais/observables no DevTools
 - ✅ **Network Monitoring:** Playwright pode validar ausência de chamadas externas indesejadas
 - ✅ **Performance Metrics:** Browser Performance API for inference timing
 - ✅ **Error Tracking:** Console errors, network failures, model loading errors
 
 **Recommendations:**
-1. Implement structured logging (InferenceLog interface) for production debugging
-2. Add telemetry headers for Supabase API calls (trace IDs)
-3. Use Playwright's network monitoring for E2E tests
+1. Implementar logging estruturado (ex.: InferenceLog) para debug em produção
+2. Usar Playwright para monitorar rede e garantir ausência de chamadas externas no MVP
 
 ### Reliability: ⚠️ CONCERNS
 
 **Assessment:** Tests can be isolated and parallelized, but ML pipeline introduces non-determinism.
 
 **Strengths:**
-- ✅ **Stateless Components:** React components are stateless by design → parallel-safe
+- ✅ **Componentes previsíveis:** componentes Angular podem ser testados de forma isolada; regras de DI e serviços facilitam mocking
 - ✅ **Persistência controlável:** Storage local pode ser resetado por teste → parallel-safe
 - ✅ **Functional Pipeline:** Pure functions are deterministic (given same input, same output)
 - ✅ **Test Isolation:** Cada teste pode usar storage isolado (contexto/limpeza)
@@ -187,7 +184,7 @@ ASRs are quality requirements that drive architecture decisions and pose testabi
 **Architecture Impact:**
 - Edge computing architecture (no server-side inference)
 - Only landmarks (anonymized) may be sent for analytics
-- Supabase used only for user data, not video processing
+- Sem backend no MVP: sessão/perfil/progresso são locais; não há dados de usuário remotos
 
 **Testability Challenges:**
 - ✅ Easy to validate (no network calls for video frames)
@@ -214,9 +211,9 @@ ASRs are quality requirements that drive architecture decisions and pose testabi
 **Requirement:** Interface responsive and accessible (WCAG 2.1 AA), works on desktop and mobile
 
 **Architecture Impact:**
-- Tailwind CSS for responsive design
-- React components for accessibility (ARIA labels)
-- PWA architecture for mobile support
+- CSS/Componentes Angular para responsividade
+- Templates Angular com acessibilidade (ARIA/teclado)
+- PWA opcional para suporte mobile
 
 **Testability Challenges:**
 - ✅ Playwright supports viewport testing (desktop/mobile)
@@ -245,34 +242,33 @@ ASRs are quality requirements that drive architecture decisions and pose testabi
 
 ## Test Levels Strategy
 
-Based on architecture (PWA with edge computing, React frontend, Supabase backend):
+Based on architecture (modo local com edge computing, Angular frontend, sem backend):
 
 ### Recommended Test Distribution
 
-**Unit: 50%** - Business logic, pure functions, normalization, buffer management
-**Integration: 30%** - Supabase API calls, repository pattern, model inference
-**E2E: 20%** - Critical user journeys, camera → feedback flow, authentication
+**Unit: 55%** - Lógica de domínio, normalização, buffer, pós-processamento (serviços puros)
+**Integration: 25%** - Integração entre serviços (HandPose → Buffer → Inferência) e rotas principais
+**E2E: 20%** - Jornadas críticas (login local → prática → progresso), com foco em estabilidade
 
 **Rationale:**
-- **High Unit Coverage:** Functional pipeline (normalize, buffer, predict) is pure → easily unit testable
-- **Moderate Integration:** Supabase calls and model inference require integration testing
-- **Focused E2E:** Critical paths only (login, practice flow, progress saving) due to ML flakiness
+- **Alta cobertura unit:** pipeline funcional (normalização/buffer/pós-processamento) é determinístico
+- **Integração moderada:** inferência/MediaPipe exigem estratégia (mock/fixtures) para evitar flakiness
+- **E2E focado:** caminhos críticos apenas, por depender de câmera/ML
 
 ### Test Level Breakdown
 
 #### Unit Tests (50%)
 
 **Scope:**
-- Normalization functions (`normalizeLandmarks`)
-- Buffer management (circular buffer, 30-frame FIFO)
-- Debounce logic (5-frame threshold)
+- Normalização (serviço `LandmarkNormalizerService`)
+- Buffer (serviço `GestureBufferService`)
+- Pós-processamento (threshold/suavização) no `GestureRecognitionService`
 - Confidence threshold filtering
 - XP calculation, scoring algorithms
-- State management (Context API, useReducer)
+- Persistência local (auth/profile/progresso)
 
 **Tools:**
-- Vitest (Vite-native, fast)
-- React Testing Library (component unit tests)
+- Jest + `jest-preset-angular`
 
 **Example:**
 ```typescript
@@ -290,26 +286,20 @@ describe('normalizeLandmarks', () => {
 #### Integration Tests (30%)
 
 **Scope:**
-- Supabase repository functions (`progressService.saveLessonProgress`)
+- Persistência local (progresso/perfil/sessão) via `localStorage`/serviços
 - Model inference (TF.js model loading and prediction)
 - MediaPipe Hands integration (landmark extraction)
-- Authentication flow (Supabase Auth)
+- Authentication flow (login local)
 
 **Tools:**
 - Playwright API testing (`request` context)
-- Supabase Local Dev or test project
 - Test fixtures (pre-recorded video, known landmarks)
 
 **Example:**
 ```typescript
-// tests/integration/supabase-progress.spec.ts
-test('should save lesson progress to Supabase', async ({ request }) => {
-  const progress = await progressService.saveLessonProgress(
-    'user-id',
-    'lesson-id',
-    95
-  );
-  expect(progress.best_score).toBe(95);
+// tests/integration/progress.spec.ts
+test('should persist lesson progress locally', async () => {
+  // Exercitar o serviço de progresso (local) e validar o estado persistido.
 });
 ```
 
@@ -343,13 +333,11 @@ test('user can practice gesture and see feedback', async ({ page }) => {
 ### Test Environment Needs
 
 **Local Development:**
-- Vite dev server (localhost:5173)
-- Supabase Local Dev or test project
+- Angular dev server (localhost:4200)
 - Test fixtures (video files, model files)
 
 **CI/CD:**
 - Headless Chrome for E2E tests
-- Supabase test project (or mocking)
 - Test fixtures included in repo
 
 **Performance Testing:**
@@ -366,18 +354,18 @@ test('user can practice gesture and see feedback', async ({ page }) => {
 **Approach:**
 - **Playwright E2E Tests:** Intercept network requests, verify no video frames sent
 - **Security Audit:** OWASP Top 10 validation (XSS, SQL injection)
-- **Auth/Authorization:** Test Supabase RLS policies
+- **Auth/Authorization:** Testar guards/rotas e estados da sessão local
 
 **Tools:**
 - Playwright network interception
 - OWASP ZAP (optional, for security audit)
-- Supabase RLS policy testing
+- Testes de guards/rotas (Angular Router) e reset/isolamento de storage
 
 **Test Scenarios:**
 1. Verify no video frames sent to servers (network interception)
 2. Validate analytics only sends landmarks (not raw video)
-3. Test authentication (Google OAuth, session persistence)
-4. Test authorization (RLS policies: users can only edit own profile)
+3. Test authentication (login local, restauração de sessão)
+4. Test authorization (rotas protegidas/guards)
 
 **Criteria:**
 - ✅ PASS: No video frames in network requests, analytics payload validated, auth/authz tests green
@@ -409,22 +397,22 @@ test('user can practice gesture and see feedback', async ({ page }) => {
 
 **Approach:**
 - **Playwright E2E Tests:** Test error handling and resilience to network disruptions
-- **API Tests:** Test Supabase error handling (network failures, rate limits)
+- **API Tests:** (MVP) garantir ausência de chamadas externas e resiliência a falhas de recursos (modelo/asset)
 
 **Tools:**
 - Playwright (E2E error scenarios)
-- Playwright API testing (Supabase error handling)
+- Playwright para interceptação de rede e validações do fluxo end-to-end
 
 **Test Scenarios:**
 1. Test graceful degradation when camera unavailable
 2. Test network disruptions (temporary loss of connection) and graceful recovery
-3. Test Supabase error handling (network failures, rate limits)
-4. Test model loading errors (fallback UI)
+3. Test model loading errors (fallback UI)
+4. Test storage errors (localStorage indisponível/quota) e UX de fallback
 
 **Criteria:**
-- ✅ PASS: Error handling graceful, network disruptions handled, Supabase errors handled
+- ✅ PASS: erros tratados (câmera/modelo/storage), UX clara, sem dependências externas no MVP
 - ⚠️ CONCERNS: Partial error coverage, missing network disruption scenarios
-- ❌ FAIL: Errors crash app, no resilience to network disruptions, Supabase errors not handled
+- ❌ FAIL: erros derrubam app, UX confusa, dependências externas inesperadas
 
 ### Maintainability (Code Quality, Test Coverage)
 
@@ -456,8 +444,7 @@ test('user can practice gesture and see feedback', async ({ page }) => {
 ### Infrastructure Needs
 
 **Local Development:**
-- Vite dev server (localhost:5173)
-- Supabase Local Dev or test project
+- Angular dev server (localhost:4200)
 - Test fixtures directory (`/tests/fixtures`):
   - Pre-recorded video files (for MediaPipe testing)
   - Known landmark data (for normalization testing)
@@ -465,7 +452,6 @@ test('user can practice gesture and see feedback', async ({ page }) => {
 
 **CI/CD:**
 - Headless Chrome (Playwright)
-- Supabase test project (environment variables)
 - Test fixtures included in repo (Git LFS for large files)
 
 **Performance Testing:**
@@ -478,7 +464,7 @@ test('user can practice gesture and see feedback', async ({ page }) => {
 **Fixtures:**
 - Pre-recorded video files (known gestures: "Letra A", "Letra B", etc.)
 - Known landmark data (for normalization validation)
-- Test user accounts (Supabase test project)
+- Test user accounts (modo local)
 - Test modules/lessons (seed data)
 
 **Factories:**
@@ -530,13 +516,12 @@ test('user can practice gesture and see feedback', async ({ page }) => {
    - Test model files (lightweight version for unit tests)
 
 2. **Implement Dependency Injection**
-   - Make `useHandPose` accept MediaPipe/TF.js instances (for mocking)
-   - Create interfaces for repository pattern (Supabase mocking)
+   - Encapsular MediaPipe/TF.js em serviços Angular (para mocking)
+   - Manter interfaces/abstrações para persistência local (e futura remota, se existir)
 
 3. **Set Up Test Environment**
-   - Supabase Local Dev or test project
    - Test fixtures directory structure
-   - CI/CD test configuration (Playwright, Vitest)
+   - CI/CD test configuration (Playwright, Jest)
 
 4. **Define Test Baselines**
    - Browser-specific performance baselines (Chrome: <50ms, Safari: <70ms)
@@ -545,27 +530,13 @@ test('user can practice gesture and see feedback', async ({ page }) => {
 
 5. **Implement Test Utilities**
    - Mock `getUserMedia` API for Playwright tests
-   - Network interception utilities for Supabase API testing
+   - Network interception utilities para garantir ausência de chamadas externas no MVP
    - Performance profiling utilities (Browser Performance API)
 
 ### Test Framework Configuration
 
-**Vitest (Unit Tests):**
-```typescript
-// vitest.config.ts
-export default defineConfig({
-  test: {
-    environment: 'jsdom',
-    coverage: {
-      threshold: {
-        lines: 80,
-        functions: 80,
-        branches: 80,
-      },
-    },
-  },
-});
-```
+**Jest (Unit/Integration Tests):**
+Ver configuração em `lia-web/jest.config.cjs`.
 
 **Playwright (E2E/Integration Tests):**
 ```typescript
@@ -573,7 +544,7 @@ export default defineConfig({
 export default defineConfig({
   testDir: './tests',
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://localhost:4200',
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },

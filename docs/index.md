@@ -41,3 +41,8 @@ O `README.md` deve ficar focado em:
 - **Não marcar funcionalidades como “✅ concluídas”** se estiverem em épicos futuros.
 - Quando uma decisão mudar (ex.: “offline”), **corrija PRD + Arquitetura** e apenas cite o impacto nos artefatos gerados.
 
+## Nota importante (stack atual)
+O projeto está sendo desenvolvido em **Angular** (`lia-web/`) e em **modo local** (**sem Supabase**).
+
+Alguns artefatos antigos do `_bmad-output/` podem ter sido gerados quando o projeto ainda estava descrito como React/Vite; trate `docs/prd.md` + `docs/architeture.md` como fonte da verdade.
+

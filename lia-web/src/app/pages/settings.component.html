@@ -17,22 +17,107 @@
         <div class="row">
           <div class="col">
             <div class="label">Tema da interface</div>
-            <div class="hint">Escolha entre tema claro ou escuro</div>
+            <div class="hint">Use o tema do sistema ou escolha manualmente</div>
           </div>
           <div class="choices">
+            <label class="choice"><input type="radio" name="theme" [checked]="pendingThemeMode==='system'" (change)="setThemeModeLocal('system')"/> Sistema</label>
             <label class="choice"><input type="radio" name="theme" [checked]="pendingThemeMode==='light'" (change)="setThemeModeLocal('light')"/> Claro</label>
             <label class="choice"><input type="radio" name="theme" [checked]="pendingThemeMode==='dark'" (change)="setThemeModeLocal('dark')"/> Escuro</label>
           </div>
         </div>
-        <label class="row">
-          <span>Desespelhar câmera</span>
-          <input type="checkbox" [checked]="pendingUnmirror" (change)="setUnmirrorLocal($event.target.checked)" />
-        </label>
+        <div class="row">
+          <div class="col">
+            <div class="label">Espelhar imagem</div>
+            <div class="hint">Deixe o vídeo como um espelho para facilitar a reprodução dos gestos</div>
+          </div>
+          <div class="choices">
+            <label class="choice" for="mirrorToggle">
+              <input id="mirrorToggle" type="checkbox" [checked]="pendingUnmirror" (change)="setUnmirrorLocal($event.target.checked)" />
+              Ativado
+            </label>
+          </div>
+        </div>
       </div>
       <div class="actions">
-        <button class="btn btn-primary" [disabled]="!isDirty" (click)="save()">Salvar</button>
-        <span class="hint" *ngIf="savedMessage">{{ savedMessage }}</span>
+        <button class="btn btn-primary" [disabled]="!isDirty || isSaving" (click)="save()">
+          {{ isSaving ? 'Salvando...' : 'Salvar' }}
+        </button>
+        <span class="hint" *ngIf="savedMessage" role="status" aria-live="polite">{{ savedMessage }}</span>
         <span class="hint" *ngIf="!savedMessage && !isDirty">Sem alterações</span>
+      </div>
+    </div>
+
+    <div class="soft-card soft-card--spacious">
+      <h2 class="section-title">Diagnóstico de câmera</h2>
+
+      <div class="camera-diagnostic">
+        <div class="camera-preview" [class.is-ready]="cameraReady()">
+          <video
+            #diagnosticVideo
+            class="diagnostic-video"
+            [class.unmirrored]="pendingUnmirror"
+            autoplay
+            playsinline
+            muted
+          ></video>
+          <div class="camera-placeholder" *ngIf="!cameraReady()">
+            Clique em “Iniciar câmera” para testar.
+          </div>
+        </div>
+
+        <div class="camera-meta">
+          <div class="camera-status" role="status" aria-live="polite">
+            <span class="dot" [class.ok]="cameraStatus==='ready'" [class.warn]="cameraStatus==='blocked'" [class.err]="cameraStatus==='error'"></span>
+            <span class="text">
+              @if (cameraStatusMessage) { {{ cameraStatusMessage }} }
+              @else if (cameraStatus==='idle') { Câmera não iniciada. }
+              @else if (cameraStatus==='starting') { Iniciando… }
+              @else if (cameraStatus==='ready') { Câmera pronta. }
+              @else if (cameraStatus==='blocked') { Permissão bloqueada. }
+              @else { Erro ao iniciar. }
+            </span>
+          </div>
+
+          <div class="diag-grid" *ngIf="cameraStatus !== 'starting'">
+            @for (item of diagnosticItems(); track item.key) {
+              <div class="diag-item">
+                <span class="k">{{ item.label }}</span>
+                <span class="v">
+                  <span class="pill" [class.ok]="item.status==='ok'" [class.warn]="item.status==='warn'" [class.err]="item.status==='err'" [class.muted]="item.status==='muted'">
+                    {{ item.value }}
+                  </span>
+                </span>
+              </div>
+            }
+          </div>
+
+          <div class="camera-actions">
+            <label class="select-label">Câmera:</label>
+            <select class="select" [(ngModel)]="cameraSelectValue" (change)="onCameraSelectionChange()">
+              <option value="facing:user">Frontal</option>
+              <option value="facing:environment">Traseira</option>
+              <optgroup label="Dispositivos" *ngIf="availableCameras.length">
+                <option *ngFor="let d of availableCameras" [value]="'device:' + d.deviceId">
+                  {{ d.label || 'Câmera ' + d.deviceId.slice(0, 6) }}
+                </option>
+              </optgroup>
+            </select>
+
+            <button class="btn btn-primary" (click)="cameraReady() ? stopCameraDiagnostic() : startCameraDiagnostic()">
+              {{ cameraReady() ? 'Parar câmera' : 'Iniciar câmera' }}
+            </button>
+            <button class="btn" (click)="refreshCameras()" [disabled]="cameraStatus==='starting'">Atualizar lista</button>
+          </div>
+
+          <div class="camera-tips">
+            <div class="hint-title">Dicas para melhor reconhecimento</div>
+            <ul class="tips-list">
+              <li>Use <strong>boa iluminação frontal</strong> (evite luz atrás de você).</li>
+              <li>Mantenha as <strong>mãos totalmente visíveis</strong> e dentro do enquadramento.</li>
+              <li>Fique a ~<strong>50–80cm</strong> da câmera.</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   </div>

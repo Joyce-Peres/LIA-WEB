@@ -286,6 +286,15 @@
   font-size: 15px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+.field-row input[readonly] {
+  opacity: 0.85;
+  cursor: not-allowed;
+}
+.field-hint {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
 .field-row input:focus {
   outline: none;
   border-color: var(--accent);
@@ -354,12 +363,14 @@
   font-size: 28px;
   font-weight: 700;
   color: #7c3aed;
-  .stat-value {
-    font-size: 32px;
-  }
 }
 
-.actions { display: flex; gap: 16px; margin-top: 32px; }
+.actions { display: flex; gap: 16px; margin-top: 32px; align-items: center; flex-wrap: wrap; }
+.inline-status {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+}
 .btn {
   padding: 14px 28px;
   border-radius: 12px;
