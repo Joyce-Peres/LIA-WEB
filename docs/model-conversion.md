@@ -1,122 +1,67 @@
-# Conversão de Modelo LSTM para TensorFlow.js
+# Conversão do modelo Keras (.h5) para TensorFlow.js (LIA Web)
 
-## Contexto
-Este documento descreve o processo de conversão do modelo LSTM treinado em Keras (`modelo_gestos.h5`) para o formato TensorFlow.js, permitindo execução 100% no browser.
+Este documento descreve como converter o modelo treinado em Keras (`.h5`) para o formato TensorFlow.js, para execução 100% no navegador.
 
-## Problema de Compatibilidade (Python 3.14)
-A versão atual do Python (3.14) é muito nova e incompatível com `tensorflowjs` devido a conflitos com `numpy<1.19` que não compila no Python 3.14+.
+> **Fonte da verdade**: este guia + os scripts em `lia-web/scripts/`.  
+> Se existir outro arquivo semelhante, ele deve apontar para este para evitar duplicação.
 
-## Solução Recomendada
+## Pré-requisitos
 
-### Opção 1: Ambiente Python 3.9-3.11 (Recomendado)
-Se você possui Python 3.9, 3.10 ou 3.11 instalado:
+- Modelo treinado em `lia-web/modelos/modelo_gestos.h5`
+- Rotulador em `lia-web/modelos/rotulador_gestos.pkl` (classes)
+- Python **3.10 ou 3.11** (recomendado). Observação: TensorFlow costuma **não suportar Python 3.12+** em releases estáveis.
 
-```bash
-# Criar ambiente virtual
-python3.10 -m venv venv-conversion
-source venv-conversion/bin/activate  # Windows: venv-conversion\Scripts\activate
+## Opção recomendada (mantém o app atualizado)
 
-# Instalar dependências
-pip install tensorflowjs tensorflow joblib
+Use `lia-web/scripts/converter_para_web.py`. Ele:
 
-# Executar conversão
-python scripts/convert_model.py
+- converte o `.h5` para `lia-web/src/assets/models/`
+- atualiza `lia-web/src/assets/models/metadata.json`
+- atualiza `lia-web/src/app/core/data/gesture-labels.ts` com as classes do rotulador
+
+### Passo a passo (Windows / PowerShell)
+
+```powershell
+cd lia-web
+
+# (opcional, recomendado) criar ambiente virtual dedicado
+python -m venv .venv-conversao
+.\.venv-conversao\Scripts\Activate.ps1
+
+# instalar dependências dos scripts
+pip install -r scripts/requirements.txt
+
+# converter o modelo e atualizar os arquivos do app
+python scripts\converter_para_web.py
 ```
 
-### Opção 2: Conversão Manual (Linha de Comando)
-```bash
-tensorflowjs_converter \
-  --input_format=keras \
-  modelos/modelo_gestos.h5 \
-  public/models
+### Saída gerada
+
+- `lia-web/src/assets/models/model.json`
+- `lia-web/src/assets/models/group1-shard*.bin`
+- `lia-web/src/assets/models/metadata.json`
+- `lia-web/src/app/core/data/gesture-labels.ts`
+
+## Opção alternativa (conversão “genérica”)
+
+Se você quiser converter com argumentos explícitos (sem atualizar automaticamente os labels TypeScript), use `lia-web/scripts/convert-model.py`:
+
+```powershell
+cd lia-web
+python scripts\convert-model.py `
+  --input modelos\modelo_gestos.h5 `
+  --output src\assets\models `
+  --labels dados\gestos_libras.csv
 ```
 
-### Opção 3: Usar Modelo Mock (Desenvolvimento Inicial)
-Para continuar o desenvolvimento sem bloquear nas stories 2.2-2.7, podemos criar um modelo mock que simula a estrutura esperada.
+## Solução de problemas
 
-## Estrutura Esperada do Modelo Convertido
-
-```
-public/models/
-├── model.json          # Arquitetura do modelo + manifest de pesos
-├── group1-shard1of1.bin # Tensores de pesos (binário)
-└── metadata.json       # Classes de gestos, input shape, etc.
-```
-
-### model.json (simplificado)
-```json
-{
-  "format": "layers-model",
-  "generatedBy": "TensorFlow.js tfjs-layers v4.x",
-  "convertedBy": "TensorFlow.js Converter v4.x",
-  "weightsManifest": [...],
-  "modelTopology": {
-    "keras_version": "2.x",
-    "backend": "tensorflow",
-    "model_config": {
-      "class_name": "Sequential",
-      "config": {
-        "layers": [
-          {
-            "class_name": "LSTM",
-            "config": {"units": 128, "return_sequences": true}
-          },
-          ...
-        ]
-      }
-    }
-  }
-}
-```
-
-### metadata.json (custom)
-```json
-{
-  "modelVersion": "1.0.0",
-  "inputShape": [1, 30, 126],
-  "timesteps": 30,
-  "features": 126,
-  "classes": ["Letra_A", "Letra_B", ...],
-  "numClasses": 30,
-  "minConfidenceThreshold": 0.7,
-  "bufferSize": 30
-}
-```
-
-## Próximos Passos para Story 2.1
-
-### Para desenvolvimento local-only (sem modelo real agora)
-1. Criar arquivos mock em `public/models` (metadata.json + estrutura básica)
-2. Continuar para Stories 2.2-2.7 (useCamera, MediaPipe, buffer, etc.)
-3. Integrar modelo real quando ambiente Python compatível estiver disponível
-
-### Para conversão real
-1. Instalar Python 3.10 ou usar Docker:
-   ```dockerfile
-   FROM python:3.10-slim
-   RUN pip install tensorflowjs tensorflow joblib
-   COPY modelos/ /app/modelos/
-   WORKDIR /app
-   RUN tensorflowjs_converter --input_format=keras modelos/modelo_gestos.h5 public/models
-   ```
-2. Executar `scripts/convert_model.py`
-3. Verificar arquivos gerados em `public/models`
-
-## Comandos de Verificação
-
-```bash
-# Verificar arquivos gerados
-ls -lh public/models/
-
-# Verificar tamanho do modelo
-du -sh public/models/
-
-# Ver estrutura do model.json
-cat public/models/model.json | jq .modelTopology.config.layers
-```
+- **Erro de import / módulos não encontrados**: confirme que você ativou o venv e rodou `pip install -r scripts/requirements.txt`.
+- **Erro de versão do Python**: use Python 3.10/3.11 para os scripts de conversão.
+- **Arquivos de modelo/labels não encontrados**: rode o treino primeiro (ver `lia-web/scripts/README.md`).
 
 ## Referências
-- [TensorFlow.js Converter](https://www.tensorflow.org/js/tutorials/conversion/import_keras)
-- [Keras to TF.js Guide](https://www.tensorflow.org/js/guide/conversion)
-- Story: `_bmad-output/implementation-artifacts/2-1-conversao-do-modelo-lstm-para-tensorflow-js.md`
 
+- [TensorFlow.js Converter](https://www.tensorflow.org/js/tutorials/conversion/import_keras)
+- [Keras to TF.js](https://www.tensorflow.org/js/guide/conversion)
+- Artefato: `_bmad-output/implementation-artifacts/2-1-conversao-do-modelo-lstm-para-tensorflow-js.md`
