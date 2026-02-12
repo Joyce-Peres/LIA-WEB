@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { UserMenuComponent } from '../components/user-menu.component';
 import { Subject, switchMap, takeUntil, firstValueFrom } from 'rxjs';
 import { ContentService } from '../core/services/content.service';
 import type { Lesson, Module } from '../core/models/database.types';
@@ -11,7 +10,7 @@ import { AuthService } from '../core/services/auth.service';
 @Component({
   standalone: true,
   selector: 'app-module-level',
-  imports: [CommonModule, UserMenuComponent],
+  imports: [CommonModule],
   templateUrl: './module-level.component.html',
   styleUrl: './module-level.component.css'
 })
@@ -64,7 +63,7 @@ export class ModuleLevelComponent implements OnInit, OnDestroy {
           mod = await firstValueFrom(this.content.getModuleBySlug(slug));
         }
         if (!mod) {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/aprendizado']);
           return;
         }
         this.module.set(mod);

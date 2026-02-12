@@ -3,111 +3,34 @@
   background: var(--surface-2);
 }
 
-/* Brand Banner */
-.brand-banner {
-  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #7c3aed 100%);
-  background-size: 200% 200%;
-  animation: gradientShift 8s ease infinite;
-  padding: 0.75rem 1rem;
-  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
-  position: relative;
-  overflow: hidden;
-}
-
-@media (min-width: 768px) {
-  .brand-banner {
-    padding: 1rem 1rem;
-  }
-}
-
-.brand-banner::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  animation: shimmer 3s infinite;
-}
-
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-@keyframes shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-.brand-container {
+/* Brand text (sem faixa roxa) */
+.brand-text {
   max-width: 1280px;
   margin: 0 auto;
+  padding: 0.75rem 0.75rem 0;
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  position: relative;
-  z-index: 1;
 }
 
-.brand-icon {
-  animation: float 3s ease-in-out infinite;
+.brand-text .brand-title {
+  font-size: 1.4rem;
+  letter-spacing: 0.18em;
+  font-weight: 500;
+  color: var(--accent);
 }
 
-.brand-icon svg {
-  width: 28px;
-  height: 28px;
+.brand-text .brand-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--accent);
+  opacity: 0.85;
 }
 
 @media (min-width: 768px) {
-  .brand-icon svg {
-    width: 36px;
-    height: 36px;
+  .brand-text {
+    padding: 1rem 1rem 0;
   }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-}
-
-.brand-title {
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: white;
-  margin: 0;
-  letter-spacing: 0.15em;
-  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  animation: titlePulse 2s ease-in-out infinite;
-}
-
-@media (min-width: 768px) {
-  .brand-title {
-    font-size: 2.5rem;
-  }
-}
-
-@keyframes titlePulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
-}
-
-.brand-subtitle {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.95);
-  margin: 0;
-  font-weight: 400;
-  letter-spacing: 0.05em;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-@media (min-width: 768px) {
-  .brand-subtitle {
-    font-size: 0.8rem;
+  .brand-text .brand-title {
+    font-size: 1.75rem;
   }
 }
 
@@ -461,27 +384,7 @@
   }
 }
 
-.module-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #7c3aed 0%, #fbbf24 100%);
-  transform: scaleX(0);
-  transition: transform 0.3s;
-}
-
-.module-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(124, 58, 237, 0.15);
-  border-color: var(--accent);
-}
-
-.module-card:hover::before {
-  transform: scaleX(1);
-}
+/* Efeitos de hover removidos */
 
 .module-header {
   display: flex;

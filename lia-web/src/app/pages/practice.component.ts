@@ -96,7 +96,7 @@ export class PracticeComponent implements OnInit, OnDestroy {
       )
       .subscribe(lesson => {
         if (!lesson) {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/aprendizado']);
           return;
         }
         this.lesson.set(lesson);
@@ -123,13 +123,13 @@ export class PracticeComponent implements OnInit, OnDestroy {
     const l = this.lesson();
     if (!l) return;
     // Tela de níveis obsoleta: voltar ao dashboard
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/aprendizado']);
   }
 
   backToModule(): void {
     const l = this.lesson();
     if (!l) return;
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/aprendizado']);
   }
 
   // Placeholder hook for camera initialization

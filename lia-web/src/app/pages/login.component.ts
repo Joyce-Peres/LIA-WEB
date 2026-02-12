@@ -119,7 +119,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.authService.isAuthenticated) {
-      this.router.navigate(['/dashboard'], { replaceUrl: true });
+      this.router.navigate(['/aprendizado'], { replaceUrl: true });
     }
   }
 
@@ -129,7 +129,7 @@ export class LoginComponent implements OnInit {
 
     try {
       await this.authService.signInLocal();
-      await this.router.navigate(['/dashboard'], { replaceUrl: true });
+      await this.router.navigate(['/aprendizado'], { replaceUrl: true });
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Erro inesperado';
       this.error.set(message);

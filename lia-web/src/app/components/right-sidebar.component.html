@@ -1,0 +1,52 @@
+<button class="mobile-toggle" type="button" (click)="toggleMobile()" aria-label="Abrir menu">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <line x1="4" y1="6" x2="20" y2="6"></line>
+    <line x1="4" y1="12" x2="20" y2="12"></line>
+    <line x1="4" y1="18" x2="20" y2="18"></line>
+  </svg>
+</button>
+
+@if (mobileOpen()) {
+  <div class="backdrop" (click)="closeMobile()" aria-hidden="true"></div>
+}
+
+<aside class="sidebar" [class.mobile-open]="mobileOpen()">
+  <div class="sidebar-inner">
+    <div class="brand">
+      <div class="brand-mark">LIA</div>
+      <div class="brand-sub">Aprendizado de Libras</div>
+    </div>
+
+    <nav class="nav" aria-label="Navegação">
+      <a class="nav-item" routerLink="/aprendizado" routerLinkActive="active" (click)="closeMobile()">
+        <span class="nav-label">Aprendizado</span>
+      </a>
+
+      <a class="nav-item" routerLink="/missoes" routerLinkActive="active" (click)="closeMobile()">
+        <span class="nav-label">Missões</span>
+      </a>
+
+      <a class="nav-item" routerLink="/profile" routerLinkActive="active" (click)="closeMobile()">
+        <span class="nav-label">Meu Perfil</span>
+      </a>
+
+      <a class="nav-item" routerLink="/settings" routerLinkActive="active" (click)="closeMobile()">
+        <span class="nav-label">Configurações</span>
+      </a>
+
+      <a class="nav-item" routerLink="/about" routerLinkActive="active" (click)="closeMobile()">
+        <span class="nav-label">Sobre</span>
+      </a>
+
+      <a class="nav-item" routerLink="/help" routerLinkActive="active" (click)="closeMobile()">
+        <span class="nav-label">Ajuda</span>
+      </a>
+
+      <button class="nav-item" type="button" (click)="handleLogout()">
+        <span class="nav-label">Sair</span>
+      </button>
+    </nav>
+  </div>
+</aside>
+
+

@@ -5,12 +5,11 @@ import { Subject, switchMap, takeUntil } from 'rxjs';
 import { ContentService } from '../core/services/content.service';
 import type { Lesson, LessonWithModule } from '../core/models/database.types';
 import { GestureVideoPlayerComponent } from '../components/gesture-video-player.component';
-import { UserMenuComponent } from '../components/user-menu.component';
 
 @Component({
   standalone: true,
   selector: 'app-lesson-detail',
-  imports: [CommonModule, GestureVideoPlayerComponent, UserMenuComponent],
+  imports: [CommonModule, GestureVideoPlayerComponent],
   templateUrl: './lesson-detail.component.html',
   styleUrl: './lesson-detail.component.css'
 })
@@ -41,7 +40,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       )
       .subscribe(lesson => {
         if (!lesson) {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/aprendizado']);
           return;
         }
         this.lesson.set(lesson);

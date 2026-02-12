@@ -1,14 +1,13 @@
 import { Component, ElementRef, inject, ViewChild } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UserMenuComponent } from '../components/user-menu.component';
 import { SettingsService, ThemeMode } from '../core/services/settings.service';
 import { CameraService } from '../core/services/camera.service';
 
 @Component({
   standalone: true,
   selector: 'app-settings',
-  imports: [CommonModule, FormsModule, UserMenuComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css'
 })

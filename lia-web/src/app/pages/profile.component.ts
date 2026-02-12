@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UserMenuComponent } from '../components/user-menu.component';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../core/services/auth.service';
@@ -11,7 +10,7 @@ import type { AuthSession, UserProfile } from '../core/models/auth.types';
 @Component({
   standalone: true,
   selector: 'app-profile',
-  imports: [CommonModule, FormsModule, UserMenuComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
@@ -64,7 +63,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   back(): void {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/aprendizado']);
   }
 
   toggleIconPicker(): void {

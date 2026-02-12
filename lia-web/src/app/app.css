@@ -9,3 +9,43 @@
 .app-shell {
   min-height: 100vh;
 }
+
+.app-topbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  background: var(--surface-2);
+  padding: 18px 12px 10px;
+  text-align: center;
+}
+
+.app-topbar-title {
+  font-size: 1.6rem;
+  letter-spacing: 0.18em;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.app-topbar-sub {
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+  color: var(--accent);
+  opacity: 0.9;
+}
+
+.app-layout {
+  min-height: 100vh;
+}
+
+.app-main {
+  min-height: 100vh;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .app-layout {
+    display: grid;
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 1rem;
+  }
+}

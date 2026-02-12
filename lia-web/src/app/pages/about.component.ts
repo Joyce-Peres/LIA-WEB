@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { UserMenuComponent } from '../components/user-menu.component';
 
 @Component({
   standalone: true,
   selector: 'app-about',
-  imports: [CommonModule, UserMenuComponent],
+  imports: [CommonModule],
   templateUrl: './about.component.html',
   styleUrl: './about.component.css'
 })

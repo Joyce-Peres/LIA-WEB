@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { UserMenuComponent } from '../components/user-menu.component';
 
 @Component({
   standalone: true,
   selector: 'app-help',
-  imports: [CommonModule, UserMenuComponent, RouterModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './help.component.html',
   styleUrl: './help.component.css'
 })

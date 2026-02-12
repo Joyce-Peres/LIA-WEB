@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+  { path: '', pathMatch: 'full', redirectTo: 'aprendizado' },
   {
     path: 'login',
     loadComponent: () => import('./pages/login.component').then((m) => m.LoginComponent)
@@ -13,10 +13,19 @@ export const routes: Routes = [
     data: { page: 'Auth Callback' }
   },
   {
-    path: 'dashboard',
+    path: 'aprendizado',
     loadComponent: () => import('./pages/dashboard.component').then((m) => m.DashboardComponent),
     canActivate: [authGuard]
   },
+  {
+    path: 'missoes',
+    loadComponent: () => import('./pages/missions.component').then((m) => m.MissionsComponent),
+    canActivate: [authGuard],
+    data: { page: 'Missões' }
+  },
+
+  // Retro-compat: rota antiga
+  { path: 'dashboard', pathMatch: 'full', redirectTo: 'aprendizado' },
 
   // Rota de níveis descontinuada do fluxo principal
   {
@@ -49,5 +58,5 @@ export const routes: Routes = [
     canActivate: [authGuard],
     data: { page: 'Help' }
   },
-  { path: '**', redirectTo: 'dashboard' }
+  { path: '**', redirectTo: 'aprendizado' }
 ];

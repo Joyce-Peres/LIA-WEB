@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { UserMenuComponent } from '../components/user-menu.component';
 import { Subject, switchMap, takeUntil } from 'rxjs';
 import { ContentService } from '../core/services/content.service';
 import type { Module } from '../core/models/database.types';
@@ -17,7 +16,7 @@ interface LevelInfo {
 @Component({
   standalone: true,
   selector: 'app-module-levels',
-  imports: [CommonModule, UserMenuComponent],
+  imports: [CommonModule],
   templateUrl: './module-levels.component.html',
   styleUrl: './module-levels.component.css'
 })
@@ -49,7 +48,7 @@ export class ModuleLevelsComponent implements OnInit, OnDestroy {
       )
       .subscribe(async (mod) => {
         if (!mod) {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/aprendizado']);
           return;
         }
         this.module.set(mod);
