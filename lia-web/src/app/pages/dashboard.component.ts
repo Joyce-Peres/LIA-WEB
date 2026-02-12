@@ -8,11 +8,12 @@ import { ContentService, type ModuleWithStats } from '../core/services/content.s
 import type { AuthSession, UserProfile } from '../core/models/auth.types';
 import { sectionIcons, mockLessons } from '../core/data/mock-content';
 import type { Lesson } from '../core/models/database.types';
+import { UserMenuComponent } from '../components/user-menu.component';
 
 @Component({
   standalone: true,
   selector: 'app-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, UserMenuComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
